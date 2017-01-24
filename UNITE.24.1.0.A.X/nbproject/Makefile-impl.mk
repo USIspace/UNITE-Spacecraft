@@ -24,7 +24,11 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
+<<<<<<< Updated upstream:UNITE.24.1.0.A.X/nbproject/Makefile-impl.mk
 PROJECTNAME=UNITE.24.1.0.A.X
+=======
+PROJECTNAME=UNITE.17.18.0.A
+>>>>>>> Stashed changes:UNITE.17.18.0.A/nbproject/Makefile-impl.mk
 
 # Active Configuration
 DEFAULTCONF=XC16_24FJ256GA110
