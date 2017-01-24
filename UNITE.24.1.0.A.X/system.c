@@ -10,7 +10,7 @@
     	#include <p24Exxxx.h>
     #elif defined (__PIC24F__)||defined (__PIC24FK__)
 	#include <p24Fxxxx.h>
-    #elif defined(__PIC24H__)
+    #elif defined(__PIC24H__) 
 	#include <p24Hxxxx.h>
     #endif
 #endif
