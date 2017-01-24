@@ -10,9 +10,9 @@ CND_CONF=XC16_24FJ256GA110
 CND_DISTDIR=dist
 TMPDIR=build/${CND_CONF}/${IMAGE_TYPE}/tmp-packaging
 TMPDIRNAME=tmp-packaging
-OUTPUT_PATH=dist/${CND_CONF}/${IMAGE_TYPE}/Initial_UART_Temp_RXTX.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
-OUTPUT_BASENAME=Initial_UART_Temp_RXTX.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
-PACKAGE_TOP_DIR=initialuarttemprxtx/
+OUTPUT_PATH=dist/${CND_CONF}/${IMAGE_TYPE}/UNITE.24.1.0.A.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
+OUTPUT_BASENAME=UNITE.24.1.0.A.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
+PACKAGE_TOP_DIR=unite.24.1.0.a.x/
 
 # Functions
 function checkReturnCode
@@ -57,15 +57,15 @@ mkdir -p ${TMPDIR}
 
 # Copy files and create directories and links
 cd "${TOP}"
-makeDirectory ${TMPDIR}/initialuarttemprxtx/bin
+makeDirectory ${TMPDIR}/unite.24.1.0.a.x/bin
 copyFileToTmpDir "${OUTPUT_PATH}" "${TMPDIR}/${PACKAGE_TOP_DIR}bin/${OUTPUT_BASENAME}" 0755
 
 
 # Generate tar file
 cd "${TOP}"
-rm -f ${CND_DISTDIR}/${CND_CONF}/package/initialuarttemprxtx.tar
+rm -f ${CND_DISTDIR}/${CND_CONF}/package/unite.24.1.0.a.x.tar
 cd ${TMPDIR}
-tar -vcf ../../../../${CND_DISTDIR}/${CND_CONF}/package/initialuarttemprxtx.tar *
+tar -vcf ../../../../${CND_DISTDIR}/${CND_CONF}/package/unite.24.1.0.a.x.tar *
 checkReturnCode
 
 # Cleanup
