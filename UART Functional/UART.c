@@ -25,7 +25,7 @@ int SerialSend(TxByte)
 {
     
     U1TXREG = TxByte;
-    
+    return 0;
 }
 
 /* Serial Available allows for the user to check if there is data in the register 
@@ -56,7 +56,7 @@ int SerialAvailable()
         return 1;
     }
        
-    
+    return 9; //This needs to be changed but is fine for right now - colin
 }
 int SerialRead()
 {

@@ -66,7 +66,7 @@ int16_t main(void)
     RPINR18bits.U1CTSR = 23; // clear to send
     
     /* Remmapable pins*/
-    RPOR8bits.RP16R = 3;    // assign U1TX to Pin RP16 (33)
+    RPOR13bits.RP27R = 0x0003;   //RG9->UART1:U1TX;
     //RPOR15bits.RP30R = 4;   // assign U1RTS to Pin RP30 (34)
     RPINR18bits.U1RXR = 2;  // assign RX pin to Pin RP2
     
@@ -95,14 +95,10 @@ int16_t main(void)
     while(1)
     { 
         
-        if (SerialAvailable() == 1){ //This checks to see if the data is good and available
-        count = SerialRead(); //This will receive data
         SerialSend(count); //This will send data
-        } else {
-            continue;
         }
         
         
         
-    }        
+         
 }
