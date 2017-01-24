@@ -20,6 +20,7 @@
 
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp              */
+#include <uart1.h>
 
 #define LED_ON = 0;
 #define LED_OFF = 1;
