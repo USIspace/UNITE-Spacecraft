@@ -1,4 +1,8 @@
 #include <stdio.h>
+//This is practice code, please do not edit.
+//Author: Colin Runnion
+
+//Version 1
 
 
 int main(void){
