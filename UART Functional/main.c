@@ -87,15 +87,28 @@ int16_t main(void)
     U1STAbits.UTXISEL1 = 1; // Transmission interrupt mode
 
        
- 
-    int count = 5; 
+    int i=0;
+    int count = 0; 
     SerialSend(count);
 
 
     while(1)
     { 
-        
-        SerialSend(count); //This will send data
+        count=0;
+        wait_ms(2000);
+        /*Send Preamble*/
+        SerialSend(5); //This will send data
+        wait_ms(5);
+        SerialSend(5); //This will send data
+        wait_ms(5);
+        SerialSend(5); //This will send data
+        wait_ms(5);
+        /*Send Payload*/
+        for (i=0; i<36; i++){
+        SerialSend(count);
+        wait_ms(5);
+        count++;
+        }
         }
         
         
