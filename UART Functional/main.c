@@ -55,7 +55,7 @@ int16_t main(void)
 
     U1MODEbits.PDSEL = 0;   // 8-bit data, no parity
     U1MODEbits.STSEL = 0;   // One stop bit
-    U1BRG = 25;             // sets baud rate (9600) for 8Mhz Fosc (25))
+    U1BRG = 103;             // sets baud rate (9600) for 8Mhz Fosc (25))
     
     /*Step 2 from datasheet*/
     U1MODEbits.UARTEN = 1;  // enables UART
