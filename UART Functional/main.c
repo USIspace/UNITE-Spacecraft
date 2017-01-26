@@ -45,6 +45,11 @@ int16_t main(void)
     
     
     /* Set pins as input or output  */
+    _TRISE5=1;              //set pin as input
+    _TRISE0=0;              //set pin as output
+    _TRISF0=0;              //set pin as output
+    _TRISF1=0;              //set pin as output
+    _TRISE3=0;
     TRISDbits.TRISD1 = 0;   // set pin as output
     TRISBbits.TRISB14 = 1;   // set pin as input
     TRISBbits.TRISB13 = 1;   // set pin as input
@@ -91,11 +96,23 @@ int16_t main(void)
     int count = 0; 
     SerialSend(count);
 
-
+    int GO=1;
     while(1)
     { 
+        
+        _LATF0=1;
+        _LATE3=_RE5;
+        _LATF1=0;
         count=0;
-        wait_ms(2000);
+        wait_ms(50);
+        while (GO==1){     //Reads simplex BUSY line
+            _LATF1=1;       //blinks while waiting for Simplex BUSY line to go low
+            wait_ms(50);
+            _LATF1=0;
+            wait_ms(50);
+            GO=_RE5;
+            _LATE3=_RE5;
+                       }
         /*Send Preamble*/
         SerialSend(5); //This will send data
         wait_ms(5);

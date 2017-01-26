@@ -9,47 +9,31 @@ This program is setup to receive 39 byte packets via UART. Each packet should be
 
 */
 
-int byte_count=0;   //counter to count the size of the incoming packet (packet should be 39 bytes; 3 preamble bytes + 36 payload)
 int simplex_BUSY=2; //BUSY line for the simplex is pin 2 (HIGH = busy, LOW = ready to receive)
-int PIC_RTS=3;      //PIC controlled line indicating the PIC is ready to receive a transmission (ACK or NAK)
-int CTX=1;          //Arduino clear to transmit (written high when reading PIC_CRX = 1); cleared to TX when CTX=1
 
 void setup() {
   // initialize serial port:
   Serial.begin(9600);
   pinMode(simplex_BUSY, OUTPUT);  //sets BUSY line of simplex as an output
-  pinMode(PIC_RTS, INPUT);        //sets the line reading the PIC’s clear to receive line as an input
   pinMode(13, OUTPUT); 
 }
 
 void loop() {
-int preamble[3]={0};    //array to hold preamble
-int packet[36]={0};   //array to hold values of payload bytes
+int byte_count=0;   //counter to count the size of the incoming packet (packet should be 39 bytes; 3 preamble bytes + 36 payload)
+int packet[39]={0};   //array to hold values of payload bytes
+
 digitalWrite(simplex_BUSY,HIGH); //simplex NOT ready to receive 
 digitalWrite(13,HIGH);
+
 /* Part 1 - Arduino waits to receive 39-byte packet */
-
-while (PIC_RTS==1);{
-delay(100);
+delay(2000);
 digitalWrite(simplex_BUSY,LOW); //simplex ready to receive 
-digitalWrite(LED,LOW);
+digitalWrite(13,LOW);
 
-int i=0;
-while (i<3){
-if (Serial.available()) {
-  preamble[i]=Serial.read(); 
-  if (preamble[i]==5){
-    i++;
-  }
-  else i=4;
-  }
-}
 
-if (i==3){
-/* Part 2 - Arduino receives 36-byte payload */
+/* Arduino receives 39-byte payload */
    //sets counter of bytes in the packet to 0
-byte_count=0;
-while (byte_count<36) {     //For loop stops reading UART after receiving 39 bytes
+while (byte_count<39) {     //For loop stops reading UART after receiving 39 bytes
   // read from port
   if (Serial.available()) {
     packet[byte_count]=Serial.read(); 
@@ -57,14 +41,14 @@ while (byte_count<36) {     //For loop stops reading UART after receiving 39 byt
   }
 }
 
-/* Part 3 - Arduino received 39-byte packet and is now processing it */
+/* Arduino received 39-byte packet and is now processing it */
 digitalWrite(simplex_BUSY,HIGH);  //simplex not ready to receive; stopped while checking that packet preamble is ok and during serial printing
-digitalWrite(LED,HIGH);
+digitalWrite(13,HIGH);
 
 int count9=0; //count9 allows for payload to be broken into 4 9-byte lines
 byte_count=0;
 Serial.println("Packet:");
-while (byte_count<36){ //For loop serial prints packet as 4 9-byte lines
+while (byte_count<39){ //For loop serial prints packet as 4 9-byte lines
   if (count9<8) {
     
     Serial.print(packet[byte_count]); //prints byte with a comma after 
@@ -77,9 +61,7 @@ while (byte_count<36){ //For loop serial prints packet as 4 9-byte lines
     Serial.println(",");
     count9=0;
     byte_count++;
-  
-  }
-}
+//}
 }
 }
 }
