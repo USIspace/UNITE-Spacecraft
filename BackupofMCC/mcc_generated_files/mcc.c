@@ -84,7 +84,7 @@ void SYSTEM_Initialize(void)
     TMR2_Initialize();
     UART2_Initialize();
     UART4_Initialize();
-    ADC1_Initialize();
+    //ADC1_Initialize(); //Using custom class, don't reinitialize
     TMR3_Initialize();
     TMR5_Initialize();
     TMR1_Initialize();

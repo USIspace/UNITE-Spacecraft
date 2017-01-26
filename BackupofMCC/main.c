@@ -22,7 +22,7 @@
 #include "mcc_generated_files/uart1.h"
 #include "mcc_generated_files/mcc.h"
 #include "mcc_generated_files/pin_manager.h"
-#include "mcc_generated_files/adc1.h"
+#include "adc1.h"
 #include "mcc_generated_files/interrupt_manager.h"
 
 /******************************************************************************/
@@ -34,25 +34,7 @@
 /******************************************************************************/
 /* Main Program                                                               */
 /******************************************************************************/
-
-    /*AD1CON1 Register*/
-    AD1CON1bits.ADON = 1;   // enables ADC
-    AD1CON1bits.FORM = 0;   // Data Output as integer form
-    AD1CON1bits.SSRC = 7;   // Auto-convert set
-    AD1CON1bits.ASAM = 1;   // Auto sampling enabled
-    
-    /*AD1CON2 Register*/
-    AD1CON2bits.VCFG = 0;   // VR+ = VDD, VR- = VSS
-    AD1CON2bits.SMPI = 0;   // Interrupt after every sample
-    AD1CON2bits.BUFM = 0;   // One 16-word buffer
-    AD1CON2bits.ALTS = 0;   // Always use MUX A input
-    
-    /*AD1CON3 Register*/
-    AD1CON3bits.ADRC = 0;   // ADC clock uses system clock
-    AD1CON3bits.SAMC = 31;  // Sample time = 31 Tad
-    AD1CON3bits.ADCS = 5;   // Tad = 5Tc
-
-    
+ 
 int16_t main(void)
 {
     /* Configure the oscillator for the device */
@@ -63,18 +45,17 @@ int16_t main(void)
    
     //int count=10;
     
-    int count;
-     
+    uint16_t channel;
     
     while(1)
     {
-        uint16_t tempValue[8] = {0};
+        
+        uint16_t ADCValue = 0;
         
         
-        ADC1_ConversionResultBufferGet(tempValue);
-        
-        for (count = 0; count < 8; count++) {
-            UART1_Write(tempValue[count] / 4);
+        for (channel = 8; channel < 16; channel++) {
+            ADCValue = ADC1_ResultGetFromChannel(channel);
+            UART1_Write(ADCValue);
             wait_ms(1);
         }
         

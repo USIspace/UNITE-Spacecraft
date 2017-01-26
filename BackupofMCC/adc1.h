@@ -22,3 +22,5 @@ extern "C" {
 #endif	/* ADC1_H */
 
 void InitializeADC1(void);
+
+uint16_t ADC1_ResultGetFromChannel(uint16_t channel);
