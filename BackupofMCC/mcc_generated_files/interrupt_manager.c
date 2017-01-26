@@ -53,6 +53,9 @@
 */
 void INTERRUPT_Initialize (void)
 {
+    //    ADI: ADC1 - A/D Converter 1
+    //    Priority: 1
+        IPC3bits.AD1IP = 1;
     //    UERI: U1E - UART1 Error
     //    Priority: 1
         IPC16bits.U1ERIP = 1;
@@ -62,9 +65,6 @@ void INTERRUPT_Initialize (void)
     //    URXI: U1RX - UART1 Receiver
     //    Priority: 1
         IPC2bits.U1RXIP = 1;
-    //    ADI: ADC1 - A/D Converter 1
-    //    Priority: 1
-        IPC3bits.AD1IP = 1;
     //    TI: T5 - Timer5
     //    Priority: 1
         IPC7bits.T5IP = 1;

@@ -81,17 +81,17 @@ static ADC_OBJECT adc1_obj;
 
 void ADC1_Initialize (void)
 {
-    // ASAM enabled; ADSIDL disabled; DONE disabled; FORM Absolute decimal result, unsigned, right-justified; SAMP disabled; SSRC Clearing sample bit ends sampling and starts conversion; ADON enabled; 
+    // ASAM enabled; ADSIDL disabled; DONE disabled; FORM Absolute decimal result, unsigned, right-justified; SAMP disabled; SSRC TMR3; ADON enabled; 
 
-   AD1CON1 = 0x8004;
+   AD1CON1 = 0x8044;
 
     // CSCNA enabled; VCFG0 AVDD; VCFG1 AVSS; ALTS disabled; BUFM disabled; SMPI 8; OFFCAL disabled; 
 
    AD1CON2 = 0x041C;
 
-    // SAMC 1; ADRC FOSC/2; ADCS 0; 
+    // SAMC 31; ADRC FOSC/2; ADCS 1; 
 
-   AD1CON3 = 0x0100;
+   AD1CON3 = 0x1F01;
 
     // CH0SA AN0; CH0SB AN0; CH0NB AVSS; CH0NA AVSS; 
 
@@ -127,6 +127,12 @@ uint16_t ADC1_ConversionResultBufferGet(uint16_t *buffer)
 
     ADC16Ptr = (uint16_t *)&(ADC1BUF0);
 
+    IFS0bits.AD1IF = 0;
+    AD1CON1bits.ASAM = 1;
+    
+    while (!IFS0bits.AD1IF) {}
+    AD1CON1bits.ASAM = 0;
+    
     for(count=0;count<=adc1_obj.intSample;count++)
     {
         buffer[count] = (uint16_t)*ADC16Ptr;

@@ -61,11 +61,22 @@ int16_t main(void)
     InitApp();
     /* TODO <INSERT USER APPLICATION CODE HERE> */
    
-    int count=0;
+    //int count=10;
+    
+    int count;
+     
+    
     while(1)
     {
-        ADC1_ChannelSelect(15);
+        uint16_t tempValue[8] = {0};
         
+        
+        ADC1_ConversionResultBufferGet(tempValue);
+        
+        for (count = 0; count < 8; count++) {
+            UART1_Write(tempValue[count] / 4);
+            wait_ms(1);
+        }
         
         UART1_Write(5);
         wait_ms(1);
@@ -73,9 +84,7 @@ int16_t main(void)
         wait_ms(1);
         UART1_Write(5);
         wait_ms(2);
-        UART1_Write(count);
-        count++;
-        wait_ms(1000);
+        wait_ms(5000);
         
     }
 }
