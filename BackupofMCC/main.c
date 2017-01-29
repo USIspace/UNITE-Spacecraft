@@ -45,26 +45,47 @@ int16_t main(void)
    
     //int count=10;
     
-    uint16_t channel;
-    
+    uint16_t count, channel;
+        
     while(1)
     {
         
-        uint16_t ADCValue = 0;
+        uint16_t ADCValue[8] = { 0 };
         
-        
-        for (channel = 8; channel < 16; channel++) {
-            ADCValue = ADC1_ResultGetFromChannel(channel);
-            UART1_Write(ADCValue);
+        // Iterates over each active ADC Channel from 8-15 and outputs results
+        for (count = 0; count < 8; count++) {
+            channel = count + 8;                                    // Increment ADC channel
+            ADCValue[count] = ADC1_ResultGetFromChannel(channel);   // Get ADC Conversion Result for 'channel'
+            UART1_Write(ADCValue[count] / 4);                       // Output the shortened result to Arduino
             wait_ms(1);
         }
         
-        UART1_Write(5);
+        
+        /* PIC24 documentation sample code */
+        /* 
+        int i, conversion;
+        //ADC1_Initialize();
+        ADC1_ChannelSelect(8);
+        ADC1_Start();
+        //Provide Delay
+        for(i=0;i <1000;i++)
+        {
+        }
+        ADC1_Stop();
+        while(!ADC1_IsConversionComplete())
+        {
+            //ADC1_Tasks();   
+        }
+        conversion = ADC1_ConversionResultGet() / 4;
+        */
+        
+        /* Simulate Idle line */
+        UART1_Write(0);
         wait_ms(1);
-        UART1_Write(5);
+        UART1_Write(0);
         wait_ms(1);
-        UART1_Write(5);
-        wait_ms(2);
+        UART1_Write(0);
+
         wait_ms(5000);
         
     }

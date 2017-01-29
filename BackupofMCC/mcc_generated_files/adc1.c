@@ -126,12 +126,6 @@ uint16_t ADC1_ConversionResultBufferGet(uint16_t *buffer)
     uint16_t *ADC16Ptr;
 
     ADC16Ptr = (uint16_t *)&(ADC1BUF0);
-
-    IFS0bits.AD1IF = 0;
-    AD1CON1bits.ASAM = 1;
-    
-    while (!IFS0bits.AD1IF) {}
-    AD1CON1bits.ASAM = 0;
     
     for(count=0;count<=adc1_obj.intSample;count++)
     {

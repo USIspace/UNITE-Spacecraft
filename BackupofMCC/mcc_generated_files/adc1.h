@@ -75,6 +75,8 @@
  Remarks:
    None
  */
+        
+
 typedef enum 
 {
     ADC1_CHANNEL_AN2 =  0x2,
