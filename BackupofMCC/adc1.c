@@ -62,7 +62,7 @@ void InitializeADC1(void) {
     */
     
     /*AD1CON3 Register*/
-    AD1CON3 = 0x0002;       // Manual Sample; Tad = 3Tcy
+    AD1CON3 = 0x0002;       // Manual Sample; Tad = 3Tcy    
     /*
     AD1CON3bits.ADRC = 0;   // ADC clock uses system clock
     AD1CON3bits.SAMC = 31;  // Sample time = 31 Tad
