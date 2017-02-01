@@ -4,15 +4,15 @@
 
 /* Device header file */
 #if defined(__XC16__)
-    #include <xc.h>
+#include <xc.h>
 #elif defined(__C30__)
-    #if defined(__PIC24E__)
-    	#include <p24Exxxx.h>
-    #elif defined (__PIC24F__)||defined (__PIC24FK__)
-	#include <p24Fxxxx.h>
-    #elif defined(__PIC24H__)
-	#include <p24Hxxxx.h>
-    #endif
+#if defined(__PIC24E__)
+#include <p24Exxxx.h>
+#elif defined (__PIC24F__)||defined (__PIC24FK__)
+#include <p24Fxxxx.h>
+#elif defined(__PIC24H__)
+#include <p24Hxxxx.h>
+#endif
 #endif
 
 #include <stdint.h>        /* Includes uint16_t definition                    */
@@ -33,60 +33,91 @@
 
 /******************************************************************************/
 /* Main Program                                                               */
+
 /******************************************************************************/
- 
-int16_t main(void)
-{
+
+int16_t main(void) {
     /* Configure the oscillator for the device */
     SYSTEM_Initialize();
     /* Initialize IO ports and peripherals */
     InitApp();
     /* TODO <INSERT USER APPLICATION CODE HERE> */
-   
+
     //int count=10;
-    
+
     uint16_t count, channel;
-        
-    while(1)
-    {
-        
-        uint16_t ADCValue[8] = { 0 };
-        
-        // Iterates over each active ADC Channel from 8-15 and outputs results
+    char package[12];
+    //    uint8_t Storage[108]; //Storage for three packages 
+    int8_t ADCValue[8] = {0};
+    int16_t Send = 0;
+    //int Preamble[3] = {5, 5, 5};
+    //char temp[8];
+
+    int i;
+    int j;
+    
+    for (i = 0; i < 12; i++) {
+        package[i] = 0;
+        wait_ms(1);
+    }
+    while (1) {
         for (count = 0; count < 8; count++) {
-            channel = count + 8;                                    // Increment ADC channel
-            ADCValue[count] = ADC1_ResultGetFromChannel(channel);   // Get ADC Conversion Result for 'channel'
-            UART1_Write(ADCValue[count] / 4);                       // Output the shortened result to Arduino
+            _LATF0 = 1; //Purple LED
+            channel = count + 8; // Increment ADC channel
+            package[count + 2] = (ADC1_ResultGetFromChannel(channel)/4);
+             
+        }
+        if (package[0] == 0) {
+            package[0] = 212;
+            package[1] = 212;
+            package[10] = 212;
+            package[11] = 212;
+        }
+        UART1_Write(1);
+        UART1_Write(1);
+        UART1_Write(1);
+        for (j = 0; j < 12; j++) {
+            Send = package[j];
+            UART1_Write(Send);
             wait_ms(1);
         }
-        
-        
-        /* PIC24 documentation sample code */
-        /* 
-        int i, conversion;
-        //ADC1_Initialize();
-        ADC1_ChannelSelect(8);
-        ADC1_Start();
-        //Provide Delay
-        for(i=0;i <1000;i++)
-        {
+        for (i = 0; i < 12; i++) {
+            package[i] = 0;
+            wait_ms(1);
         }
-        ADC1_Stop();
-        while(!ADC1_IsConversionComplete())
-        {
-            //ADC1_Tasks();   
-        }
-        conversion = ADC1_ConversionResultGet() / 4;
-        */
-        
-        /* Simulate Idle line */
-        UART1_Write(0);
-        wait_ms(1);
-        UART1_Write(0);
-        wait_ms(1);
-        UART1_Write(0);
-
-        wait_ms(5000);
-        
     }
+
+
+    _LATF0 = 0; //Purple LED
 }
+
+
+
+//ADCValue[0] = ADC1_ResultGetFromChannel(8);
+//UART1_Write(ADCValue[0]/4);
+
+
+/* PIC24 documentation sample code */
+/* 
+int i, conversion;
+//ADC1_Initialize();
+ADC1_ChannelSelect(8);
+ADC1_Start();
+//Provide Delay
+for(i=0;i <1000;i++)
+{
+}
+ADC1_Stop();
+while(!ADC1_IsConversionComplete())
+{
+    //ADC1_Tasks();   
+}
+conversion = ADC1_ConversionResultGet() / 4;
+ */
+
+
+
+
+
+
+
