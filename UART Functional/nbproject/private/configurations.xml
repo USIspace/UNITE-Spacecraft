@@ -5,7 +5,7 @@
   <confs>
     <conf name="XC16_24FJ256GA110" type="2">
       <platformToolSN>:=MPLABComm-USB-Microchip:=&lt;vid>04D8:=&lt;pid>900A:=&lt;rev>0002:=&lt;man>Microchip Technology Inc.:=&lt;prod>PICkit 3:=&lt;sn>BUR162075307:=&lt;drv>x:=&lt;xpt>h:=end</platformToolSN>
-      <languageToolchainDir>/Applications/microchip/xc16/v1.30/bin</languageToolchainDir>
+      <languageToolchainDir>/Applications/microchip/xc16/v1.26/bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>
@@ -41,7 +41,7 @@
     </conf>
     <conf name="XC16_24F04KA200" type="2">
       <platformToolSN></platformToolSN>
-      <languageToolchainDir>/Applications/microchip/xc16/v1.30/bin</languageToolchainDir>
+      <languageToolchainDir>/Applications/microchip/xc16/v1.26/bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>
@@ -77,7 +77,7 @@
     </conf>
     <conf name="XC16_24FJ64GC010" type="2">
       <platformToolSN></platformToolSN>
-      <languageToolchainDir>/Applications/microchip/xc16/v1.30/bin</languageToolchainDir>
+      <languageToolchainDir>/Applications/microchip/xc16/v1.26/bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>
@@ -113,7 +113,7 @@
     </conf>
     <conf name="XC16_24FJ256DA210" type="2">
       <platformToolSN></platformToolSN>
-      <languageToolchainDir>/Applications/microchip/xc16/v1.30/bin</languageToolchainDir>
+      <languageToolchainDir>/Applications/microchip/xc16/v1.26/bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>
@@ -149,7 +149,7 @@
     </conf>
     <conf name="XC16_24EP128GP202" type="2">
       <platformToolSN></platformToolSN>
-      <languageToolchainDir>/Applications/microchip/xc16/v1.30/bin</languageToolchainDir>
+      <languageToolchainDir>/Applications/microchip/xc16/v1.26/bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>
@@ -185,7 +185,7 @@
     </conf>
     <conf name="XC16_24HJ128GP202" type="2">
       <platformToolSN></platformToolSN>
-      <languageToolchainDir>/Applications/microchip/xc16/v1.30/bin</languageToolchainDir>
+      <languageToolchainDir>/Applications/microchip/xc16/v1.26/bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>
@@ -221,7 +221,7 @@
     </conf>
     <conf name="XC16_24EP512GU814" type="2">
       <platformToolSN></platformToolSN>
-      <languageToolchainDir>/Applications/microchip/xc16/v1.30/bin</languageToolchainDir>
+      <languageToolchainDir>/Applications/microchip/xc16/v1.26/bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>

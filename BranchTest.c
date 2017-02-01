@@ -2,7 +2,7 @@
 //This is practice code, please do not edit.
 //Author: Colin Runnion
 
-//Version 1
+//Version 3
 
 
 int main(void){
@@ -11,7 +11,7 @@ int main(void){
    int i=0;
 
    while (i<20){
-    
+       
        count++;
        printf("%d", count);
        i++;
