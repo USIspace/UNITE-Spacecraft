@@ -46,41 +46,51 @@ int16_t main(void) {
     //int count=10;
 
     uint16_t count, channel;
-    char package[12];
-    //    uint8_t Storage[108]; //Storage for three packages 
-    int8_t ADCValue[8] = {0};
+    char package[12]; //This is the building of the package from the ADC data
     int16_t Send = 0;
-    //int Preamble[3] = {5, 5, 5};
-    //char temp[8];
+   
 
-    int i;
-    int j;
+    int i; //Index variables 
+    int j; //Index variables 
     
+    //This sets the intial array to zero by a For loop
     for (i = 0; i < 12; i++) {
-        package[i] = 0;
+        package[i] = 0; 
         wait_ms(1);
     }
+    
     while (1) {
+        /*This samples the data and places the values into the package array
+         * so this code polls the data and builds the package at the same time
+         this in the future code will build a larger 36 byte package that can be
+         send to the arduino once the busy line is in the non busy stage - colin*/
         for (count = 0; count < 8; count++) {
             _LATF0 = 1; //Purple LED
             channel = count + 8; // Increment ADC channel
             package[count + 2] = (ADC1_ResultGetFromChannel(channel)/4);
              
         }
+        //This is the buffer to fill the rest of the array 
         if (package[0] == 0) {
             package[0] = 212;
             package[1] = 212;
             package[10] = 212;
             package[11] = 212;
         }
-        UART1_Write(1);
-        UART1_Write(1);
-        UART1_Write(1);
+        UART1_Write(1); //Preamble
+        UART1_Write(1);//Preamble
+        UART1_Write(1);//Preamble 
+        
+        /* This here sends the package. Given that UART1_Write() is a function
+         passing a array through it is not not possible, it will later need to be
+         in pointer form, this was easier to code at the time - colin*/
         for (j = 0; j < 12; j++) {
             Send = package[j];
             UART1_Write(Send);
             wait_ms(1);
         }
+        /* Again this is rewriting the array for transmission to be all zeros,
+         for some reason package[] = {0} hated me - colin*/
         for (i = 0; i < 12; i++) {
             package[i] = 0;
             wait_ms(1);
