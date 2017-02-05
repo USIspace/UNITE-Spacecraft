@@ -14,4 +14,10 @@
 /BackupofMCC/nbproject/private/
 /BackupofMCC/build/XC16_24FJ256GA110/
 /BackupofMCC/dist/XC16_24FJ256GA110/
+<<<<<<< HEAD
+>>>>>>> master
+=======
+*.properties
+
+BackupofMCC/nbproject/Makefile-genesis.properties
 >>>>>>> master

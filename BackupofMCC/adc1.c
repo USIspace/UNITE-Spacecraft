@@ -62,7 +62,7 @@ void InitializeADC1(void) {
     */
     
     /*AD1CON3 Register*/
-    AD1CON3 = 0x0002;       // Manual Sample; Tad = 3Tcy
+    AD1CON3 = 0x0002;       // Manual Sample; Tad = 3Tcy    
     /*
     AD1CON3bits.ADRC = 0;   // ADC clock uses system clock
     AD1CON3bits.SAMC = 31;  // Sample time = 31 Tad
@@ -101,7 +101,7 @@ uint16_t ADC1_ResultGetFromChannel(int channel) {
     
     ADC1_ManualSampleFor(1000);             // Sample ADC for 1s [*needs refining*]
     
-    wait_ms(5000);                          // Wait for conversion to finish (5s) [*needs refining*]
+    wait_ms(10);                          // Wait for conversion to finish (5s) [*needs refining*]
         
     conversion = ADC1BUF0;                  // Get conversion value from buffer
     

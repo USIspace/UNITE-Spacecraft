@@ -4,15 +4,15 @@
 
 /* Device header file */
 #if defined(__XC16__)
-    #include <xc.h>
+#include <xc.h>
 #elif defined(__C30__)
-    #if defined(__PIC24E__)
-    	#include <p24Exxxx.h>
-    #elif defined (__PIC24F__)||defined (__PIC24FK__)
-	#include <p24Fxxxx.h>
-    #elif defined(__PIC24H__)
-	#include <p24Hxxxx.h>
-    #endif
+#if defined(__PIC24E__)
+#include <p24Exxxx.h>
+#elif defined (__PIC24F__)||defined (__PIC24FK__)
+#include <p24Fxxxx.h>
+#elif defined(__PIC24H__)
+#include <p24Hxxxx.h>
+#endif
 #endif
 
 #include <stdint.h>        /* Includes uint16_t definition                    */
@@ -33,60 +33,78 @@
 
 /******************************************************************************/
 /* Main Program                                                               */
+
 /******************************************************************************/
- 
-int16_t main(void)
-{
+
+int16_t main(void) {
     /* Configure the oscillator for the device */
     SYSTEM_Initialize();
     /* Initialize IO ports and peripherals */
     InitApp();
     /* TODO <INSERT USER APPLICATION CODE HERE> */
-   
-    //int count=10;
-    
-    uint16_t count, channel;
-        
-    while(1)
-    {
-        
-        uint16_t ADCValue[8] = { 0 };
-        
-        // Iterates over each active ADC Channel from 8-15 and outputs results
-        for (count = 0; count < 8; count++) {
-            channel = count + 8;                                    // Increment ADC channel
-            ADCValue[count] = ADC1_ResultGetFromChannel(channel);   // Get ADC Conversion Result for 'channel'
-            UART1_Write(ADCValue[count] / 4);                       // Output the shortened result to Arduino
-            wait_ms(1);
-        }
-        
-        
-        /* PIC24 documentation sample code */
-        /* 
-        int i, conversion;
-        //ADC1_Initialize();
-        ADC1_ChannelSelect(8);
-        ADC1_Start();
-        //Provide Delay
-        for(i=0;i <1000;i++)
-        {
-        }
-        ADC1_Stop();
-        while(!ADC1_IsConversionComplete())
-        {
-            //ADC1_Tasks();   
-        }
-        conversion = ADC1_ConversionResultGet() / 4;
-        */
-        
-        /* Simulate Idle line */
-        UART1_Write(0);
-        wait_ms(1);
-        UART1_Write(0);
-        wait_ms(1);
-        UART1_Write(0);
 
-        wait_ms(5000);
-        
+    //int count=10;
+
+    uint16_t count, channel;
+    char SamplePackage[8]; //This is the building of the package from the ADC data
+    int16_t Send = 0;
+    char Package[36];
+    char Storage[128]; //Can hold 16 sample packages 
+    int Location = 0;
+    int i; //Index variables 
+    int j; //Index variables 
+    int Keep = 8;
+    //This sets the initial array to zero by a For loop
+    for (i = 0; i < 12; i++) {
+        Package[i] = 0;
+        wait_ms(1);
     }
+
+
+    /*--------------------- MAIN LOOP HERE---------------*/
+    while (1) {
+
+        /*This samples the data and places the values into the package array
+         * so this code polls the data and builds the package at the same time
+      this in the future code will build a larger 36 byte package that can be
+      send to the arduino once the busy line is in the non busy stage - colin*/
+
+        while (PORTEbits.RE5) {
+            for (count = 0; count < 8; count++) {
+                _LATF0 = 1; //Purple LED when it is polling data
+                channel = count + 8; // Increment ADC channel
+                SamplePackage[count] = (ADC1_ResultGetFromChannel(channel) / 4);
+            }
+            wait_ms(5000);
+        }
+        /*Location =Find(Storage); //Finds the location of the last saved data.
+        int j=0;
+        
+        for (i = Location;i<=Location+8;Location++){
+            Storage[Location] = SamplePackage[j];
+            j++;
+    }
+         * */ //Soon to be implemented
+
+        while (!PORTEbits.RE5) {
+            _LATF0 = 0;
+            //Send 'Package'
+            for (i = 0; i < 8; i++) {
+                UART1_Write(SamplePackage[i]);
+            }
+            //check if more data - send while more
+            //When done send a finished data package 
+            UART1_Write(111);
+            wait_ms(1000);
+            //Wait till arduino switches its ready singal
+        }
+
+
+    }
+
 }
+
+
+
+
+

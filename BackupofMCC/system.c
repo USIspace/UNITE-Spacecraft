@@ -64,3 +64,12 @@ void wait_ms(uint16_t time)
     timel = time * 1000l;
     for( ; timel; timel--);// no initial condition, while time is >0, decrement time each loop
 }
+/*char Find(char Storage[])
+{ //This finds the value where the last stored value is
+    int i, count;
+    
+    while(Storage[i]==0){
+        count++;
+    }
+    return count;
+}*/

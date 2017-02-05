@@ -18,3 +18,4 @@ go here. */
 
 void ConfigureOscillator(void); /* Handles clock switching/osc initialization */
 void wait_ms(uint16_t); 
+//char Find(char);
