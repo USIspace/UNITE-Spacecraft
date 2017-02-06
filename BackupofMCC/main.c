@@ -29,22 +29,33 @@
 /* Global Variable Declaration                                                */
 /******************************************************************************/
 
-/* i.e. uint16_t <variable_name>; */
+/******************************************************************************/
+/* FUNCTIONS                                               */
 
+/******************************************************************************/
+int Find(uint8_t arr[]) { //This finds the value where the last stored value is
+    int i;
+    int count;
+
+    while (arr[i] == 0) {
+        count++;
+    }
+    return count;
+}
 /******************************************************************************/
 /* Main Program                                                               */
 
 /******************************************************************************/
-
 int16_t main(void) {
     /* Configure the oscillator for the device */
     SYSTEM_Initialize();
     /* Initialize IO ports and peripherals */
     InitApp();
-    /* TODO <INSERT USER APPLICATION CODE HERE> */
 
-    //int count=10;
 
+    /******************************************************************************/
+    /* Main Program Variable Declaration                                                  */
+    /******************************************************************************/
     uint16_t count, channel;
     char SamplePackage[8]; //This is the building of the package from the ADC data
     int16_t Send = 0;
@@ -54,14 +65,16 @@ int16_t main(void) {
     int i; //Index variables 
     int j; //Index variables 
     int Keep = 8;
-    //This sets the initial array to zero by a For loop
+    //This sets the initial array to zero by a for loop
     for (i = 0; i < 12; i++) {
         Package[i] = 0;
         wait_ms(1);
     }
 
+    /******************************************************************************/
+    /* MAIN LOOP HERE                                              */
+    /******************************************************************************/
 
-    /*--------------------- MAIN LOOP HERE---------------*/
     while (1) {
 
         /*This samples the data and places the values into the package array
