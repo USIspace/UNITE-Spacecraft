@@ -33,14 +33,14 @@
 /* FUNCTIONS                                               */
 
 /******************************************************************************/
-int Find(uint8_t arr[]) { //This finds the value where the last stored value is
+//This finds the index of the last stored value in array of length elements
+int Find(int *arr[], int length) { 
     int i;
-    int count;
 
-    while (arr[i] == 0) {
-        count++;
+    while ((arr[i] != 0) && (i < length)) {
+        i++;
     }
-    return count;
+    return i;
 }
 /******************************************************************************/
 /* Main Program                                                               */
@@ -57,16 +57,16 @@ int16_t main(void) {
     /* Main Program Variable Declaration                                                  */
     /******************************************************************************/
     uint16_t count, channel;
-    char SamplePackage[8]; //This is the building of the package from the ADC data
+    uint8_t SamplePackage[8]; //This is the building of the package from the ADC data
     int16_t Send = 0;
-    char Package[36];
-    char Storage[128]; //Can hold 16 sample packages 
+    uint8_t Package[36];
+    int *Storage[4]; //Can hold 4 packages 
     int Location = 0;
     int i; //Index variables 
     int j; //Index variables 
     int Keep = 8;
     //This sets the initial array to zero by a for loop
-    for (i = 0; i < 12; i++) {
+    for (i = 0; i < 36; i++) {
         Package[i] = 0;
         wait_ms(1);
     }
@@ -81,15 +81,28 @@ int16_t main(void) {
          * so this code polls the data and builds the package at the same time
       this in the future code will build a larger 36 byte package that can be
       send to the arduino once the busy line is in the non busy stage - colin*/
-
-        while (PORTEbits.RE5) {
+        for (j = 0; j < 4; j++) {
             for (count = 0; count < 8; count++) {
                 _LATF0 = 1; //Purple LED when it is polling data
-                channel = count + 8; // Increment ADC channel
-                SamplePackage[count] = (ADC1_ResultGetFromChannel(channel) / 4);
+                channel = (count + 8); // Increment ADC channel
+                SamplePackage[count] = (ADC1_ResultGetFromChannel(channel) / 4); //Get ADC value from channel
+
             }
-            wait_ms(5000);
+            
+            // Store a sweep of 8 ADC values in Package
+            for (count = 0; count < 8; count++) {
+                Package[count + 8*j] = SamplePackage[count % 8]; 
+            }
         }
+        
+        // Fill last four spots in package
+        Package[32] = 0; 
+        Package[33] = 0;
+        Package[34] = 0;
+        Package[35] = 0;
+
+        wait_ms(5000);
+        
         /*Location =Find(Storage); //Finds the location of the last saved data.
         int j=0;
         
@@ -98,21 +111,31 @@ int16_t main(void) {
             j++;
     }
          * */ //Soon to be implemented
-
-        while (!PORTEbits.RE5) {
+        
+        
+        if (!PORTEbits.RE5) {
             _LATF0 = 0;
             //Send 'Package'
-            for (i = 0; i < 8; i++) {
-                UART1_Write(SamplePackage[i]);
+            
+            for (i = 0; i < 36; i++) {
+                UART1_Write(Package[i]);
+                wait_ms(1);
             }
             //check if more data - send while more
             //When done send a finished data package 
             UART1_Write(111);
             wait_ms(1000);
             //Wait till arduino switches its ready singal
+        } else {
+            
+            // 
+            i = Find(Storage, 4);
+            
+            Storage[i] = Package;
         }
-
-
+        
+        
+        
     }
 
 }

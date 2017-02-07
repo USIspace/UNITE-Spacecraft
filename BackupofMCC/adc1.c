@@ -101,7 +101,7 @@ uint16_t ADC1_ResultGetFromChannel(int channel) {
     
     ADC1_ManualSampleFor(1000);             // Sample ADC for 1s [*needs refining*]
     
-    wait_ms(10);                          // Wait for conversion to finish (5s) [*needs refining*]
+    wait_ms(10);                            // Wait for conversion to finish (5s) [*needs refining*]
         
     conversion = ADC1BUF0;                  // Get conversion value from buffer
     
