@@ -109,7 +109,12 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _T3Interrupt (  )
 
     //***User Area Begin
     static volatile unsigned int CountCallBack = 0;
-
+    if (_RF1==1){
+    _LATF1=0;
+    }
+    else {
+    _LATF1=1;
+    }
     // callback function - called every 3th pass
     if (++CountCallBack >= TMR3_INTERRUPT_TICKER_FACTOR)
     {

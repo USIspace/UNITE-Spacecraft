@@ -74,9 +74,11 @@ int16_t main(void) {
     /******************************************************************************/
     /* MAIN LOOP HERE                                              */
     /******************************************************************************/
-
+    _LATF1=1;
+    void TMR3_Start();
+    
     while (1) {
-
+       
         /*This samples the data and places the values into the package array
          * so this code polls the data and builds the package at the same time
       this in the future code will build a larger 36 byte package that can be
