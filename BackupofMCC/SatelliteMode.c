@@ -3,6 +3,7 @@
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp */
 #include "SatelliteMode.h"
+#include "adc1.h"
 
 /*************************************
  Satellite Mode Definitions and Values
@@ -39,6 +40,18 @@ SatelliteMode ReEntryMode = {
 
 void GetTempData(int *buffer, int bufferSize) {
     // Sample Temp Data and store in buffer (an array of size bufferSize)
+    int sensorToStartAt = 8;
+    int numberOfSensors = 8;
+    
+    int count;
+    int channel = sensorToStartAt;
+    for (count = 0; count < bufferSize; count++) {
+        channel = count + numberOfSensors; // Increment ADC channel
+        
+        // Fill buffer and divide by 4 to send to Arduino
+        buffer[count] = (ADC1_ResultGetFromChannel(channel % numberOfSensors) / 4);
+    }
+    
 }
 
 void GetGPSData(int *buffer, int bufferSize) {
