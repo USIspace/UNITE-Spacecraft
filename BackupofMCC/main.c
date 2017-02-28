@@ -96,7 +96,7 @@ int16_t main(void) {
         for (i = Location;i<=Location+8;Location++){
             Storage[Location] = SamplePackage[j];
             j++;
-    }
+        }
          * */ //Soon to be implemented
 
         while (!PORTEbits.RE5) {
