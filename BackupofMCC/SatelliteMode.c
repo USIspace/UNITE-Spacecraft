@@ -49,7 +49,7 @@ void GetTempData(int *buffer, int bufferSize) {
         channel = count + numberOfSensors; // Increment ADC channel
         
         // Fill buffer and divide by 4 to send to Arduino
-        buffer[count] = (ADC1_ResultGetFromChannel(channel % numberOfSensors) / 4);
+        buffer[count] = (ADC1_ResultGetFromChannel(channel) / 4);
     }
     
 }
