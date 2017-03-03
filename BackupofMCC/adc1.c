@@ -89,9 +89,9 @@ uint16_t ADC1_ResultGet(uint16_t *buffer)
     return count;
 }
 
-uint16_t ADC1_ResultGetFromChannel(int channel) {
+int ADC1_ResultGetFromChannel(int channel) {
     
-    int16_t conversion;                     // Return value
+    int conversion;                     // Return value
 
     AD1CHS = ADC_CHANNEL_MAP[channel];      // Sets ADC Channel
     

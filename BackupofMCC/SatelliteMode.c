@@ -4,6 +4,7 @@
 #include "user.h"          /* User funct/params, such as InitApp */
 #include "SatelliteMode.h"
 #include "adc1.h"
+#include "mcc_generated_files/uart1.h"
 
 /*************************************
  Satellite Mode Definitions and Values
@@ -13,23 +14,30 @@
 
 // Stores the current mode the satellite should be in
 // Will be used as a switch for the satellite to change modes
-static UNITEMode currentMode; 
+static UNITEMode currentMode = interim; 
+static bool shouldChangeMode = false;
 
 SatelliteMode InterimMode = {
-    10, // Time in minutes between each sample of sensors
+    120,  // Time in seconds between each sample of sensors
     400, // Altitude to begin sampling in this mode 
     300, // Altitude to end sampling and switch to new mode
 };
 
 SatelliteMode ScienceMode = {
-    5,
+    60,
     300,
     200,
 };
 
 SatelliteMode ReEntryMode = {
-    1,
+    30,
     200,
+    0,
+};
+
+SatelliteMode SafeMode = {
+    0,
+    0,
     0,
 };
 
@@ -41,15 +49,15 @@ SatelliteMode ReEntryMode = {
 void GetTempData(int *buffer, int bufferSize) {
     // Sample Temp Data and store in buffer (an array of size bufferSize)
     int sensorToStartAt = 8;
-    int numberOfSensors = 8;
     
     int count;
-    int channel = sensorToStartAt;
+    int channel;
     for (count = 0; count < bufferSize; count++) {
-        channel = count + numberOfSensors; // Increment ADC channel
+        channel = count + sensorToStartAt; // Increment ADC channel
         
         // Fill buffer and divide by 4 to send to Arduino
         buffer[count] = (ADC1_ResultGetFromChannel(channel) / 4);
+        wait_ms(5);
     }
     
 }
@@ -77,7 +85,7 @@ void GetProbeData(int *buffer, int bufferSize) {
 // *gps => pointer to an array of GPS data
 // *mags => pointer to an array of Magnetometer data
 // *densities => pointer to an array of Plasma Probe data
-void PackageData(char *package, int stringLength, int *temps, int *gps, int *mags, int *densities) {
+void PackageData(int *package, int stringLength, int *temps, int *gps, int *mags, int *densities) {
     
     
     int i;
@@ -90,8 +98,12 @@ void PackageData(char *package, int stringLength, int *temps, int *gps, int *mag
 // Description: Handler for sending data via UART
 // *dataString => pointer to a string of packaged data
 // stringLength => length of packaged data string
-void SendData(char *dataString, int stringLength) {
+void SendData(int *dataString, int stringLength) {
     // Send data via UART here
+    int i;
+    for (i = 0; i < stringLength; i++) {
+        UART1_Write(dataString[i]);
+    }
 }
 
 /********************
@@ -99,10 +111,43 @@ void SendData(char *dataString, int stringLength) {
  ********************/
 
 // Description: Handler for switching satellite modes
-UNITEMode UpdateToMode() {
+UNITEMode UpdateMode() {
     // Check current altitude
     // Determine which mode should be active
     // Return value of mode
-    UNITEMode mode = interim;
-    return mode;
+    
+    if (shouldChangeMode) {
+        
+        shouldChangeMode = false;
+        
+        switch (currentMode) {
+            case interim:
+                return science;
+            case science:
+                return reentry;
+            case reentry:
+                return safe;
+            default:
+                return safe;
+        }
+    } else {
+        return currentMode;
+    }
 }
+
+// Description: Wait to start next mode
+int DelayForMode() {
+    
+    switch (currentMode) {
+        case interim:
+            return InterimMode.sampleRateInSec * 1000;
+        case science:
+            return ScienceMode.sampleRateInSec * 1000;
+        case reentry:
+            return ReEntryMode.sampleRateInSec * 1000;
+        case safe:
+            return SafeMode.sampleRateInSec * 1000;
+        default:
+            return 1000;
+    }
+} 

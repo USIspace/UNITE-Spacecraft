@@ -50,5 +50,5 @@ typedef enum
 void InitializeADC1(void);
 
 uint16_t ADC1_ResultGet(uint16_t *buffer);
-uint16_t ADC1_ResultGetFromChannel(int channel);
-void ADC1_ManualSampleFor(int ms);
+int ADC1_ResultGetFromChannel(int);
+void ADC1_ManualSampleFor(int);

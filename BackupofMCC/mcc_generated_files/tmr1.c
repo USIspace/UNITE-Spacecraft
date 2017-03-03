@@ -71,9 +71,9 @@
 typedef struct _TMR_OBJ_STRUCT
 {
     /* Timer Elapsed */
-    bool                                                    timerElapsed;
+    bool timerElapsed;
     /*Software Counter value*/
-    uint8_t                                                 count;
+    uint8_t count;
 
 } TMR_OBJ;
 

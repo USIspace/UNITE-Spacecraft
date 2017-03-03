@@ -58,7 +58,7 @@ void ConfigureOscillator(void)
 #endif
         
 }
-void wait_ms(uint16_t time)
+void wait_ms(int time)
 {
     static long timel = 0;
     timel = time * 1000l;

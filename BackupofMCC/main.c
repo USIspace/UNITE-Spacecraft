@@ -24,6 +24,7 @@
 #include "mcc_generated_files/pin_manager.h"
 #include "adc1.h"
 #include "mcc_generated_files/interrupt_manager.h"
+#include "SatelliteMode.h"
 
 /******************************************************************************/
 /* Global Variable Declaration                                                */
@@ -33,14 +34,30 @@
 /* FUNCTIONS                                               */
 
 /******************************************************************************/
-int Find(uint8_t arr[]) { //This finds the value where the last stored value is
-    int i;
-    int count;
 
-    while (arr[i] == 0) {
-        count++;
+void Clear(int *buffer, int size) {
+    int i;
+    for (i = 0; i < size; i++) {
+        buffer[i] = 0;
     }
-    return count;
+}
+
+void CheckForModeUpdate(int time) {
+    
+    /*
+     Debugging only
+    UART1_Write(0);
+    UART1_Write(time);
+    UART1_Write(0);
+    */
+    
+    if ((time == 21600) || ((currentMode == interim) && (time > 21600))) {
+        shouldChangeMode = true;
+    } else if ((time == 36000) || ((currentMode == science) && (time > 36000))) {
+        shouldChangeMode = true;
+    } else if ((time == 40500) || ((currentMode == reentry) && (time > 40500))) {
+        shouldChangeMode = true;
+    }
 }
 /******************************************************************************/
 /* Main Program                                                               */
@@ -56,66 +73,42 @@ int16_t main(void) {
     /******************************************************************************/
     /* Main Program Variable Declaration                                                  */
     /******************************************************************************/
-    uint16_t count, channel;
-    char SamplePackage[8]; //This is the building of the package from the ADC data
-    int16_t Send = 0;
-    char Package[36];
-    char Storage[128]; //Can hold 16 sample packages 
-    int Location = 0;
-    int i; //Index variables 
-    int j; //Index variables 
-    int Keep = 8;
-    //This sets the initial array to zero by a for loop
-    for (i = 0; i < 12; i++) {
-        Package[i] = 0;
-        wait_ms(1);
-    }
+    int SamplePackage[8]; //This is the building of the package from the ADC data
+    const int ARRAY_SIZE = 8;
 
+    int timeCount = 0;
     /******************************************************************************/
     /* MAIN LOOP HERE                                              */
     /******************************************************************************/
+    int wait;
+    // Wait for 2700 cycles of 1 second
+    for (wait = 0; wait < 2700; wait++) {
+        wait_ms(1000);
+    }
+    
+    while (currentMode != safe) {
 
-    while (1) {
-
-        /*This samples the data and places the values into the package array
-         * so this code polls the data and builds the package at the same time
-      this in the future code will build a larger 36 byte package that can be
-      send to the arduino once the busy line is in the non busy stage - colin*/
-
-        while (PORTEbits.RE5) {
-            for (count = 0; count < 8; count++) {
-                _LATF0 = 1; //Purple LED when it is polling data
-                channel = count + 8; // Increment ADC channel
-                SamplePackage[count] = (ADC1_ResultGetFromChannel(channel) / 4);
-            }
-            wait_ms(5000);
-        }
-        /*Location =Find(Storage); //Finds the location of the last saved data.
-        int j=0;
+        CheckForModeUpdate(timeCount);
         
-        for (i = Location;i<=Location+8;Location++){
-            Storage[Location] = SamplePackage[j];
-            j++;
-        }
-         * */ //Soon to be implemented
+        Clear(SamplePackage, ARRAY_SIZE);
 
-        while (!PORTEbits.RE5) {
-            _LATF0 = 0;
-            //Send 'Package'
-            for (i = 0; i < 8; i++) {
-                UART1_Write(SamplePackage[i]);
-            }
-            //check if more data - send while more
-            //When done send a finished data package 
-            UART1_Write(111);
-            wait_ms(1000);
-            //Wait till arduino switches its ready singal
-        }
+        GetTempData(SamplePackage, ARRAY_SIZE);
+        SendData(SamplePackage, ARRAY_SIZE);
+
+        currentMode = UpdateMode();
+        wait_ms(DelayForMode());
+
+        UART1_Write(111);
+        //check if more data - send while more
+        //When done send a finished data package 
 
 
+        timeCount = timeCount + (DelayForMode() / 1000);
     }
 
 }
+
+
 
 
 
