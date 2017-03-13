@@ -18,19 +18,19 @@ static UNITEMode currentMode = interim;
 static bool shouldChangeMode = false;
 
 SatelliteMode InterimMode = {
-    120,  // Time in seconds between each sample of sensors
+    60,  // Time in seconds between each sample of sensors
     400, // Altitude to begin sampling in this mode 
     300, // Altitude to end sampling and switch to new mode
 };
 
 SatelliteMode ScienceMode = {
-    60,
+    30,
     300,
     200,
 };
 
 SatelliteMode ReEntryMode = {
-    30,
+    15,
     200,
     0,
 };
@@ -77,6 +77,13 @@ void GetProbeData(int *buffer, int bufferSize) {
 /********************
  Data Manager Methods
  ********************/
+
+// Description: Saves data to SD card for packaging and sending later
+// *package => ready-to-send package
+// packageSize => size of package to send
+void SaveData(int *package, int packageSize) {
+    
+}
 
 // Description: Packaging algorithm for collected data
 // *package => pointer to a string which will be filled by this method

@@ -51,11 +51,17 @@ void CheckForModeUpdate(int time) {
     UART1_Write(0);
     */
     
-    if ((time == 21600) || ((currentMode == interim) && (time > 21600))) {
+    // Time begins with an offset of 15 min for balloon test
+    // After 30 min switch from interim to science mode
+    if ((time == 1800) || ((currentMode == interim) && (time > 1800))) {
         shouldChangeMode = true;
-    } else if ((time == 36000) || ((currentMode == science) && (time > 36000))) {
+    
+    // After 105 min switch from science to reentry mode
+    } else if ((time == 6300) || ((currentMode == science) && (time > 6300))) {
         shouldChangeMode = true;
-    } else if ((time == 40500) || ((currentMode == reentry) && (time > 40500))) {
+        
+    // After 165 min switch from reentry to safe mode and end loop
+    } else if ((time == 9900) || ((currentMode == reentry) && (time > 9900))) {
         shouldChangeMode = true;
     }
 }
@@ -81,8 +87,8 @@ int16_t main(void) {
     /* MAIN LOOP HERE                                              */
     /******************************************************************************/
     int wait;
-    // Wait for 2700 cycles of 1 second
-    for (wait = 0; wait < 2700; wait++) {
+    // Wait for 900 cycles of 1 second (15 min)
+    for (wait = 0; wait < 900; wait++) {
         wait_ms(1000);
     }
     
@@ -98,7 +104,7 @@ int16_t main(void) {
         currentMode = UpdateMode();
         wait_ms(DelayForMode());
 
-        UART1_Write(111);
+        //UART1_Write(111);
         //check if more data - send while more
         //When done send a finished data package 
 

@@ -45,6 +45,7 @@ void GetTempData(int *buffer, int bufferSize);
 void GetGPSData(int *buffer, int bufferSize);
 void GetMagnetometerData(int *buffer, int bufferSize);
 void GetProbeData(int *buffer, int bufferSize);
+void SaveData(int *package, int packageSize);
 void PackageData(int *package, int stringLength, int *temps, int *gps, int *mags, int *densities);
 void SendData(int *dataString, int stringLength);
 
