@@ -143,18 +143,18 @@ UNITEMode UpdateMode() {
 }
 
 // Description: Wait to start next mode
-int DelayForMode() {
+unsigned long DelayForMode() {
     
     switch (currentMode) {
         case interim:
-            return InterimMode.sampleRateInSec * 1000;
+            return InterimMode.sampleRateInSec;
         case science:
-            return ScienceMode.sampleRateInSec * 1000;
+            return ScienceMode.sampleRateInSec;
         case reentry:
-            return ReEntryMode.sampleRateInSec * 1000;
+            return ReEntryMode.sampleRateInSec;
         case safe:
-            return SafeMode.sampleRateInSec * 1000;
+            return SafeMode.sampleRateInSec;
         default:
-            return 1000;
+            return 1;
     }
 } 

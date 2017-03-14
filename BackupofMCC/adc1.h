@@ -51,4 +51,4 @@ void InitializeADC1(void);
 
 uint16_t ADC1_ResultGet(uint16_t *buffer);
 int ADC1_ResultGetFromChannel(int);
-void ADC1_ManualSampleFor(int);
+void ADC1_ManualSampleForMilSec(unsigned long);

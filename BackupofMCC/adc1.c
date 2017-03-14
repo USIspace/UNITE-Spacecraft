@@ -97,9 +97,9 @@ int ADC1_ResultGetFromChannel(int channel) {
     
     AD1CON1bits.ADON = 1;                   // Enables ADC (turned on/off to reset buffer)
 
-    wait_ms(500);                           // Wait for ADC startup to finish [*might not need*]
+    wait_ms(50);                           // Wait for ADC startup to finish [*might not need*]
     
-    ADC1_ManualSampleFor(1000);             // Sample ADC for 1s [*needs refining*]
+    ADC1_ManualSampleForMilSec(50);             // Sample ADC for 1s [*needs refining*]
     
     wait_ms(10);                          // Wait for conversion to finish (5s) [*needs refining*]
         
@@ -111,7 +111,7 @@ int ADC1_ResultGetFromChannel(int channel) {
         
 }
 
-void ADC1_ManualSampleFor(int ms) {
+void ADC1_ManualSampleForMilSec(unsigned long ms) {
     
     _SAMP = 1;                              // Begin Sampling
     wait_ms(ms);                            // Wait to gather sample data

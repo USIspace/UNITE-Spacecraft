@@ -42,7 +42,7 @@ void Clear(int *buffer, int size) {
     }
 }
 
-void CheckForModeUpdate(int time) {
+void CheckForModeUpdate(unsigned long time) {
     
     /*
      Debugging only
@@ -82,14 +82,14 @@ int16_t main(void) {
     int SamplePackage[8]; //This is the building of the package from the ADC data
     const int ARRAY_SIZE = 8;
 
-    int timeCount = 0;
+    unsigned long timeCount = 0;
     /******************************************************************************/
     /* MAIN LOOP HERE                                              */
     /******************************************************************************/
     int wait;
     // Wait for 900 cycles of 1 second (15 min)
     for (wait = 0; wait < 900; wait++) {
-        wait_ms(1000);
+       wait_ms(1000);
     }
     
     while (currentMode != safe) {
@@ -102,14 +102,11 @@ int16_t main(void) {
         SendData(SamplePackage, ARRAY_SIZE);
 
         currentMode = UpdateMode();
-        wait_ms(DelayForMode());
-
-        //UART1_Write(111);
-        //check if more data - send while more
-        //When done send a finished data package 
+        wait_sec(DelayForMode());
 
 
-        timeCount = timeCount + (DelayForMode() / 1000);
+
+        timeCount = timeCount + (DelayForMode());
     }
 
 }

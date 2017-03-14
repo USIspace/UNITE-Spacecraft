@@ -50,4 +50,4 @@ void PackageData(int *package, int stringLength, int *temps, int *gps, int *mags
 void SendData(int *dataString, int stringLength);
 
 UNITEMode UpdateMode();
-int DelayForMode();
+unsigned long DelayForMode();
