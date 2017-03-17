@@ -50,6 +50,8 @@
 
 #include <xc.h>
 #include "tmr1.h"
+#include "../SatelliteMode.h"
+#include"../system.h"
 
 /**
   Section: Data Type Definitions
@@ -91,10 +93,10 @@ void TMR1_Initialize (void)
     //Period = 0.5 s; Frequency = 16000000 Hz; PR1 31250; 
     PR1 = 0x7A12;
     //TCKPS 1:256; TON enabled; TSIDL disabled; TCS FOSC/2; TSYNC disabled; TGATE disabled; 
-    T1CON = 0x8030;
+    T1CON = 0x8020;
 
     
-    IFS0bits.T1IF = false;
+    IFS0bits.T1IF = true;
     IEC0bits.T1IE = true;
 	
     tmr1_obj.timerElapsed = false;
@@ -112,6 +114,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _T1Interrupt (  )
     // ticker function call;
     // ticker is 1 -> Callback function gets called everytime this ISR executes
     TMR1_CallBack();
+    
 
     //***User Area End
 
@@ -151,6 +154,13 @@ uint16_t TMR1_Counter16BitGet( void )
 void __attribute__ ((weak)) TMR1_CallBack(void)
 {
     // Add your custom callback code here
+    _LATF1 = 1;
+    wait_ms(1);   // Light stays on because the clock is too quick
+    _LATF1 = 0;   // Need to figure out how to set the timer duration
+    
+    //BeginSample();
+    
+    
 }
 
 void TMR1_Start( void )

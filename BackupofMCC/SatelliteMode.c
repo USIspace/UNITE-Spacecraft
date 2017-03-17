@@ -143,18 +143,76 @@ UNITEMode UpdateMode() {
 }
 
 // Description: Wait to start next mode
-int DelayForMode() {
+unsigned int DelayForMode() {
     
     switch (currentMode) {
         case interim:
-            return InterimMode.sampleRateInSec * 1000;
+            return InterimMode.sampleRateInSec;
         case science:
-            return ScienceMode.sampleRateInSec * 1000;
+            return ScienceMode.sampleRateInSec;
         case reentry:
-            return ReEntryMode.sampleRateInSec * 1000;
+            return ReEntryMode.sampleRateInSec;
         case safe:
-            return SafeMode.sampleRateInSec * 1000;
+            return SafeMode.sampleRateInSec;
         default:
-            return 1000;
+            return 1;
     }
 } 
+
+void Clear(int *buffer, int size) {
+    int i;
+    for (i = 0; i < size; i++) {
+        buffer[i] = 0;
+    }
+}
+
+void CheckForModeUpdate(int time) {
+    
+    /*
+     Debugging only
+    UART1_Write(0);
+    UART1_Write(time);
+    UART1_Write(0);
+    */
+    
+    // Time begins with an offset of 15 min for balloon test
+    // After 30 min switch from interim to science mode
+    if ((time == 1800) || ((currentMode == interim) && (time > 1800))) {
+        shouldChangeMode = true;
+    
+    // After 105 min switch from science to reentry mode
+    } else if ((time == 6300) || ((currentMode == science) && (time > 6300))) {
+        shouldChangeMode = true;
+        
+    // After 165 min switch from reentry to safe mode and end loop
+    } else if ((time == 9900) || ((currentMode == reentry) && (time > 9900))) {
+        shouldChangeMode = true;
+    }
+}
+
+void BeginSample() {
+    int SamplePackage[8]; //This is the building of the package from the ADC data
+    const int ARRAY_SIZE = 8;
+
+    int timeCount = 0;
+    
+    while (currentMode != safe) {
+
+        CheckForModeUpdate(timeCount);
+        
+        Clear(SamplePackage, ARRAY_SIZE);
+
+        GetTempData(SamplePackage, ARRAY_SIZE);
+        SendData(SamplePackage, ARRAY_SIZE);
+
+        currentMode = UpdateMode();
+        //wait_ms(DelayForMode());
+
+        //UART1_Write(111);
+        //check if more data - send while more
+        //When done send a finished data package 
+
+
+        timeCount = timeCount + (DelayForMode());
+    }
+}
