@@ -35,36 +35,9 @@
 
 /******************************************************************************/
 
-void Clear(int *buffer, int size) {
-    int i;
-    for (i = 0; i < size; i++) {
-        buffer[i] = 0;
-    }
-}
 
-void CheckForModeUpdate(unsigned long time) {
-    
-    /*
-     Debugging only
-    UART1_Write(0);
-    UART1_Write(time);
-    UART1_Write(0);
-    */
-    
-    // Time begins with an offset of 15 min for balloon test
-    // After 30 min switch from interim to science mode
-    if ((time == 1800) || ((currentMode == interim) && (time > 1800))) {
-        shouldChangeMode = true;
-    
-    // After 105 min switch from science to reentry mode
-    } else if ((time == 6300) || ((currentMode == science) && (time > 6300))) {
-        shouldChangeMode = true;
-        
-    // After 165 min switch from reentry to safe mode and end loop
-    } else if ((time == 9900) || ((currentMode == reentry) && (time > 9900))) {
-        shouldChangeMode = true;
-    }
-}
+
+
 /******************************************************************************/
 /* Main Program                                                               */
 
@@ -79,37 +52,11 @@ int16_t main(void) {
     /******************************************************************************/
     /* Main Program Variable Declaration                                                  */
     /******************************************************************************/
-    int SamplePackage[8]; //This is the building of the package from the ADC data
-    const int ARRAY_SIZE = 8;
-
-    unsigned long timeCount = 0;
-    /******************************************************************************/
-    /* MAIN LOOP HERE                                              */
-    /******************************************************************************/
-    int wait;
-    // Wait for 900 cycles of 1 second (15 min)
-    for (wait = 0; wait < 900; wait++) {
-       wait_ms(1000);
-    }
-    
-    while (currentMode != safe) {
-
-        CheckForModeUpdate(timeCount);
-        
-        Clear(SamplePackage, ARRAY_SIZE);
-
-        GetTempData(SamplePackage, ARRAY_SIZE);
-        SendData(SamplePackage, ARRAY_SIZE);
-
-        currentMode = UpdateMode();
-        wait_sec(DelayForMode());
-
-
-
-        timeCount = timeCount + (DelayForMode());
-    }
 
 }
+
+
+
 
 
 

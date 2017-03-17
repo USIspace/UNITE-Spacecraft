@@ -80,14 +80,17 @@ void SYSTEM_Initialize(void)
     INTERRUPT_Initialize();
     UART1_Initialize();
     UART3_Initialize();
-    TMR4_Initialize();
-    TMR2_Initialize();
+   
     UART2_Initialize();
     UART4_Initialize();
     //ADC1_Initialize(); //If using custom class, comment this line
-    TMR3_Initialize();
-    TMR5_Initialize();
+    
+    //Timer Initialization 
     TMR1_Initialize();
+    TMR2_Initialize();
+    TMR3_Initialize();
+    TMR4_Initialize();
+    TMR5_Initialize();
 }
 
 void OSCILLATOR_Initialize(void)

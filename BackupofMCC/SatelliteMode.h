@@ -51,3 +51,5 @@ void SendData(int *dataString, int stringLength);
 
 UNITEMode UpdateMode();
 unsigned long DelayForMode();
+
+void BeginSample();
