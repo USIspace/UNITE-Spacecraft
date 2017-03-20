@@ -60,8 +60,13 @@ void ConfigureOscillator(void)
 }
 
 void wait_sec(unsigned long time) {
+<<<<<<< HEAD
     unsigned long countdown = time;
     for ( ; countdown > 0; countdown--) {
+=======
+    unsigned long counter;
+    for (counter = 0; counter < time; counter++) {
+>>>>>>> origin/Dev-Branch
         wait_ms(1000);
     }
 }
@@ -70,5 +75,9 @@ void wait_ms(unsigned long time)
 {
     unsigned long timel = 0;
     timel = time * 1500;
+<<<<<<< HEAD
     for( ; timel > 0; timel--);// no initial condition, while time is >0, decrement time each loop
+=======
+    for( ; timel; timel--);// no initial condition, while time is >0, decrement time each loop
+>>>>>>> origin/Dev-Branch
 }

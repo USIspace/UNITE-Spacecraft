@@ -50,6 +50,12 @@ void PackageData(int *package, int stringLength, int *temps, int *gps, int *mags
 void SendData(int *dataString, int stringLength);
 
 UNITEMode UpdateMode();
+<<<<<<< HEAD
 unsigned long DelayForMode();
 
 void BeginSample();
+=======
+unsigned int DelayForMode();
+
+void BeginSample();
+>>>>>>> origin/Dev-Branch

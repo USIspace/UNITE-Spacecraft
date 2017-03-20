@@ -15,12 +15,12 @@
         <itemPath>mcc_generated_files/adc1.h</itemPath>
         <itemPath>mcc_generated_files/mcc.h</itemPath>
         <itemPath>mcc_generated_files/pin_manager.h</itemPath>
-        <itemPath>mcc_generated_files/tmr1.h</itemPath>
         <itemPath>mcc_generated_files/tmr2.h</itemPath>
         <itemPath>mcc_generated_files/traps.h</itemPath>
         <itemPath>mcc_generated_files/tmr3.h</itemPath>
         <itemPath>mcc_generated_files/tmr4.h</itemPath>
         <itemPath>mcc_generated_files/tmr5.h</itemPath>
+        <itemPath>mcc_generated_files/tmr1.h</itemPath>
       </logicalFolder>
       <itemPath>system.h</itemPath>
       <itemPath>user.h</itemPath>
@@ -43,7 +43,6 @@
         <itemPath>mcc_generated_files/interrupt_manager.c</itemPath>
         <itemPath>mcc_generated_files/mcc.c</itemPath>
         <itemPath>mcc_generated_files/pin_manager.c</itemPath>
-        <itemPath>mcc_generated_files/tmr1.c</itemPath>
         <itemPath>mcc_generated_files/tmr2.c</itemPath>
         <itemPath>mcc_generated_files/traps.c</itemPath>
         <itemPath>mcc_generated_files/tmr3.c</itemPath>
@@ -51,6 +50,7 @@
         <itemPath>mcc_generated_files/tmr5.c</itemPath>
         <itemPath>mcc_generated_files/uart1.c</itemPath>
         <itemPath>mcc_generated_files/uart2.c</itemPath>
+        <itemPath>mcc_generated_files/tmr1.c</itemPath>
       </logicalFolder>
       <itemPath>configuration_bits.c</itemPath>
       <itemPath>interrupts.c</itemPath>
@@ -71,6 +71,9 @@
     <itemPath>legal_disclaimer.txt</itemPath>
     <itemPath>project_information.txt</itemPath>
   </logicalFolder>
+  <sourceRootList>
+    <Elem>mcc_generated_files</Elem>
+  </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
     <conf name="XC16_24FJ256GA110" type="2">
