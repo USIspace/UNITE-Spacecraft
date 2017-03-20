@@ -153,19 +153,6 @@ uint16_t TMR1_Counter16BitGet( void )
 
 void __attribute__ ((weak)) TMR1_CallBack(void)
 {
-<<<<<<< HEAD
-    //BeginSample();
-    
-    _LATB1 = 1;
-    _LATD1 = 1;
-    _LATE1 = 1;
-    _LATF1 = 1;
-    wait_ms(140);
-    _LATB1 = 0;
-    _LATD1 = 0;
-    _LATE1 = 0;
-    _LATF1 = 0;
-=======
     // Add your custom callback code here
     _LATF1 = 1;
     wait_ms(1);   // Light stays on because the clock is too quick
@@ -173,7 +160,6 @@ void __attribute__ ((weak)) TMR1_CallBack(void)
     
     //BeginSample();
     
->>>>>>> origin/Dev-Branch
     
 }
 
