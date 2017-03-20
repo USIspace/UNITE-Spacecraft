@@ -143,11 +143,8 @@ UNITEMode UpdateMode() {
 }
 
 // Description: Wait to start next mode
-<<<<<<< HEAD
-unsigned long DelayForMode() {
-=======
+
 unsigned int DelayForMode() {
->>>>>>> origin/Dev-Branch
     
     switch (currentMode) {
         case interim:
@@ -162,10 +159,7 @@ unsigned int DelayForMode() {
             return 1;
     }
 } 
-<<<<<<< HEAD
-=======
 
->>>>>>> origin/Dev-Branch
 void Clear(int *buffer, int size) {
     int i;
     for (i = 0; i < size; i++) {
@@ -173,69 +167,31 @@ void Clear(int *buffer, int size) {
     }
 }
 
-<<<<<<< HEAD
 void CheckForModeUpdate(unsigned long time) {
 
-=======
-void CheckForModeUpdate(int time) {
-    
->>>>>>> origin/Dev-Branch
     /*
      Debugging only
     UART1_Write(0);
     UART1_Write(time);
     UART1_Write(0);
-<<<<<<< HEAD
      */
 
-=======
-    */
-    
->>>>>>> origin/Dev-Branch
+
     // Time begins with an offset of 15 min for balloon test
     // After 30 min switch from interim to science mode
     if ((time == 1800) || ((currentMode == interim) && (time > 1800))) {
         shouldChangeMode = true;
-<<<<<<< HEAD
 
         // After 105 min switch from science to reentry mode
     } else if ((time == 6300) || ((currentMode == science) && (time > 6300))) {
         shouldChangeMode = true;
 
         // After 165 min switch from reentry to safe mode and end loop
-=======
-    
-    // After 105 min switch from science to reentry mode
-    } else if ((time == 6300) || ((currentMode == science) && (time > 6300))) {
-        shouldChangeMode = true;
-        
-    // After 165 min switch from reentry to safe mode and end loop
->>>>>>> origin/Dev-Branch
     } else if ((time == 9900) || ((currentMode == reentry) && (time > 9900))) {
         shouldChangeMode = true;
     }
 }
-<<<<<<< HEAD
-void BeginSample() {
-    int SamplePackage[8]; //This is the building of the package from the ADC data
 
-    const int ARRAY_SIZE = 8;
-
-    unsigned long timeCount = 0;
-    /******************************************************************************/
-    /* MAIN LOOP HERE                                              */
-    /******************************************************************************/
-    int wait;
-    // Wait for 900 cycles of 1 second (15 min)
-    for (wait = 0; wait < 900; wait++) {
-        wait_ms(1000);
-    }
-
-    while (currentMode != safe) {
-
-        CheckForModeUpdate(timeCount);
-
-=======
 
 void BeginSample() {
     int SamplePackage[8]; //This is the building of the package from the ADC data
@@ -247,30 +203,20 @@ void BeginSample() {
 
         CheckForModeUpdate(timeCount);
         
->>>>>>> origin/Dev-Branch
         Clear(SamplePackage, ARRAY_SIZE);
 
         GetTempData(SamplePackage, ARRAY_SIZE);
         SendData(SamplePackage, ARRAY_SIZE);
 
         currentMode = UpdateMode();
-<<<<<<< HEAD
-        wait_sec(DelayForMode());
 
-=======
         //wait_ms(DelayForMode());
 
         //UART1_Write(111);
         //check if more data - send while more
         //When done send a finished data package 
->>>>>>> origin/Dev-Branch
 
 
         timeCount = timeCount + (DelayForMode());
     }
-<<<<<<< HEAD
 }
-
-=======
-}
->>>>>>> origin/Dev-Branch
