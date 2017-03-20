@@ -50,7 +50,7 @@
 
 #include <xc.h>
 #include "tmr1.h"
-#include "SatelliteMode.h"
+
 /**
   Section: Data Type Definitions
 */
@@ -110,7 +110,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _T1Interrupt (  )
     //***User Area Begin
 
     // ticker function call;
-    // ticker is 1 -> Callback function gets called everytime this ISR executes
+    // ticker is 1 -> Callback function gets called every time this ISR executes
     TMR1_CallBack();
 
     //***User Area End
@@ -150,7 +150,18 @@ uint16_t TMR1_Counter16BitGet( void )
 
 void __attribute__ ((weak)) TMR1_CallBack(void)
 {
-    BeginSample();
+    //BeginSample();
+    
+    _LATB1 = 1;
+    _LATD1 = 1;
+    _LATE1 = 1;
+    _LATF1 = 1;
+    wait_ms(140);
+    _LATB1 = 0;
+    _LATD1 = 0;
+    _LATE1 = 0;
+    _LATF1 = 0;
+    
 }
 
 void TMR1_Start( void )
