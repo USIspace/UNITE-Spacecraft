@@ -222,8 +222,6 @@ void BeginSample() {
     
     while (currentMode != safe) {
 
-        CheckForModeUpdate(timeCount);
-        
         Clear(SamplePackage, ARRAY_SIZE);
 
         GetTempData(SamplePackage, ARRAY_SIZE);
@@ -239,5 +237,8 @@ void BeginSample() {
 
 
         timeCount = timeCount + (DelayForMode());
+        
+        CheckForModeUpdate(timeCount);
+
     }
 }
