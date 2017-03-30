@@ -48,7 +48,7 @@ int16_t main(void) {
     /* Initialize IO ports and peripherals */
     InitApp();
 
-    TMR1_Start();
+    TMR3_Start();
     
     /******************************************************************************/
     /* Main Program Variable Declaration                                                  */
