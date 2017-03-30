@@ -34,12 +34,6 @@ typedef struct {
     int endAltitudeInKm; // Altitude to end sampling and switch to new mode
 } SatelliteMode;
 
-/*
- TODO: Add methods from SatelliteMode source file
- */
-
-static UNITEMode currentMode;
-static bool shouldChangeMode;
 
 void Satellite_Initialize(void);
 void GetTempData(int *buffer, int bufferSize);
