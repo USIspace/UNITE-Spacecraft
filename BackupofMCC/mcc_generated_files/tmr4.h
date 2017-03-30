@@ -60,7 +60,7 @@
 
 #endif
 
-#define TMR4_INTERRUPT_TICKER_FACTOR    15
+#define TMR4_INTERRUPT_TICKER_FACTOR    30
 
 /**
   Section: Interface Routines

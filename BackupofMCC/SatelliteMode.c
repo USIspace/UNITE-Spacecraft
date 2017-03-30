@@ -5,6 +5,9 @@
 #include "SatelliteMode.h"
 #include "adc1.h"
 #include "mcc_generated_files/uart1.h"
+#include "mcc_generated_files/tmr3.h"
+#include "mcc_generated_files/tmr4.h"
+#include "mcc_generated_files/tmr5.h"
 
 /*************************************
  Satellite Mode Definitions and Values
@@ -16,6 +19,14 @@
 // Will be used as a switch for the satellite to change modes
 static UNITEMode currentMode = interim; 
 static bool shouldChangeMode = false;
+unsigned long timeCount = 0; // Keeps track of overall mission clock
+
+
+// CONSTANTS
+unsigned long INTERIM_STOP_TIME = 1800;
+unsigned long SCIENCE_STOP_TIME = 6300;
+unsigned long REENTRY_STOP_TIME = 9900;
+
 
 SatelliteMode InterimMode = {
     60,  // Time in seconds between each sample of sensors
@@ -129,10 +140,22 @@ UNITEMode UpdateMode() {
         
         switch (currentMode) {
             case interim:
+                // Switch Timers
+                
+                TMR3_Stop();
+                TMR4_Start();
+                
                 return science;
             case science:
+                
+                TMR4_Stop();
+                TMR5_Start();
+                
                 return reentry;
             case reentry:
+                
+                TMR5_Stop();
+                
                 return safe;
             default:
                 return safe;
@@ -196,8 +219,6 @@ void CheckForModeUpdate(unsigned long time) {
 void BeginSample() {
     int SamplePackage[8]; //This is the building of the package from the ADC data
     const int ARRAY_SIZE = 8;
-
-    int timeCount = 0;
     
     while (currentMode != safe) {
 

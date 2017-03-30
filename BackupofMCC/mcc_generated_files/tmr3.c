@@ -50,6 +50,7 @@
 
 #include <xc.h>
 #include "tmr3.h"
+#include "../SatelliteMode.h"
 
 /**
   Section: Data Type Definitions
@@ -158,6 +159,8 @@ uint16_t TMR3_Counter16BitGet( void )
 void __attribute__ ((weak)) TMR3_CallBack(void)
 {
     // Add your custom callback code here
+    
+    BeginSample();                                  //User timer to call sampling function
 }
 
 void TMR3_Start( void )

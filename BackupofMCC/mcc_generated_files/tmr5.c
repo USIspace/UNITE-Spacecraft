@@ -158,6 +158,9 @@ uint16_t TMR5_Counter16BitGet( void )
 void __attribute__ ((weak)) TMR5_CallBack(void)
 {
     // Add your custom callback code here
+    
+    BeginSample();                                  //User timer to call sampling function
+
 }
 
 void TMR5_Start( void )

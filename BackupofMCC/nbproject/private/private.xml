@@ -3,7 +3,16 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+<<<<<<< Updated upstream
             <file>file:/Users/cdrunnion/GitHub/UNITE-Spacecraft/BackupofMCC/main.c</file>
+=======
+            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/BackupofMCC/main.c</file>
+            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/BackupofMCC/mcc_generated_files/tmr1.c</file>
+            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/BackupofMCC/SatelliteMode.h</file>
+            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/BackupofMCC/system.c</file>
+            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/BackupofMCC/system.h</file>
+            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/BackupofMCC/SatelliteMode.c</file>
+>>>>>>> Stashed changes
         </group>
     </open-files>
 </project-private>
