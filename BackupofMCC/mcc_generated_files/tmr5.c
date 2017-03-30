@@ -50,6 +50,7 @@
 
 #include <xc.h>
 #include "tmr5.h"
+#include "../SatelliteMode.h"
 
 /**
   Section: Data Type Definitions

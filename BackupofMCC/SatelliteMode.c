@@ -9,9 +9,9 @@
 #include "mcc_generated_files/tmr4.h"
 #include "mcc_generated_files/tmr5.h"
 
-/*************************************
- Satellite Mode Definitions and Values
- *************************************/
+/******************************
+ Satellite Mode Initializations
+ ******************************/
 
 
 
@@ -52,6 +52,9 @@ SatelliteMode SafeMode = {
     0,
 };
 
+void Satellite_Initialize() {
+    TMR3_Start();
+}
 
 /**************
  Getter Methods
@@ -227,7 +230,6 @@ void BeginSample() {
         GetTempData(SamplePackage, ARRAY_SIZE);
         SendData(SamplePackage, ARRAY_SIZE);
 
-        currentMode = UpdateMode();
 
         //wait_ms(DelayForMode());
 
@@ -239,6 +241,8 @@ void BeginSample() {
         timeCount = timeCount + (DelayForMode());
         
         CheckForModeUpdate(timeCount);
+        currentMode = UpdateMode();
+
 
     }
 }

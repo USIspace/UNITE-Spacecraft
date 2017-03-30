@@ -48,7 +48,8 @@ int16_t main(void) {
     /* Initialize IO ports and peripherals */
     InitApp();
 
-    TMR3_Start();
+    // Starts the CubeSat sampling in interim mode
+    Satellite_Initialize();
     
     /******************************************************************************/
     /* Main Program Variable Declaration                                                  */
