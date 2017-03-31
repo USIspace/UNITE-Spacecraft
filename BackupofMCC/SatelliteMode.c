@@ -8,6 +8,7 @@
 #include "mcc_generated_files/tmr3.h"
 #include "mcc_generated_files/tmr4.h"
 #include "mcc_generated_files/tmr5.h"
+#include "time.h"
 
 /******************************
  Satellite Mode Initializations
@@ -17,19 +18,19 @@
 
 // Stores the current mode the satellite should be in
 // Will be used as a switch for the satellite to change modes
-static UNITEMode currentMode = interim; 
+static UNITEMode currentMode = interim;
 static bool shouldChangeMode = false;
-unsigned long timeCount = 0; // Keeps track of overall mission clock
+unsigned long totalTime = 0; // Keeps track of overall mission clock
 
 
 // CONSTANTS
-unsigned long INTERIM_STOP_TIME = 1800;
-unsigned long SCIENCE_STOP_TIME = 6300;
-unsigned long REENTRY_STOP_TIME = 9900;
+unsigned long INTERIM_STOP_TIME = 120; //1800
+unsigned long SCIENCE_STOP_TIME = 180; //6300
+unsigned long REENTRY_STOP_TIME = 210; //9900
 
 
 SatelliteMode InterimMode = {
-    60,  // Time in seconds between each sample of sensors
+    60, // Time in seconds between each sample of sensors
     400, // Altitude to begin sampling in this mode 
     300, // Altitude to end sampling and switch to new mode
 };
@@ -53,7 +54,14 @@ SatelliteMode SafeMode = {
 };
 
 void Satellite_Initialize() {
+
+    TMR3_Initialize();
+    TMR4_Initialize();
+    TMR5_Initialize();
+
     TMR3_Start();
+    TMR4_Stop();
+    TMR5_Stop();
 }
 
 /**************
@@ -63,17 +71,17 @@ void Satellite_Initialize() {
 void GetTempData(int *buffer, int bufferSize) {
     // Sample Temp Data and store in buffer (an array of size bufferSize)
     int sensorToStartAt = 8;
-    
+
     int count;
     int channel;
     for (count = 0; count < bufferSize; count++) {
         channel = count + sensorToStartAt; // Increment ADC channel
-        
+
         // Fill buffer and divide by 4 to send to Arduino
         buffer[count] = (ADC1_ResultGetFromChannel(channel) / 4);
-        wait_ms(5);
+
     }
-    
+
 }
 
 void GetGPSData(int *buffer, int bufferSize) {
@@ -95,8 +103,9 @@ void GetProbeData(int *buffer, int bufferSize) {
 // Description: Saves data to SD card for packaging and sending later
 // *package => ready-to-send package
 // packageSize => size of package to send
+
 void SaveData(int *package, int packageSize) {
-    
+
 }
 
 // Description: Packaging algorithm for collected data
@@ -106,19 +115,21 @@ void SaveData(int *package, int packageSize) {
 // *gps => pointer to an array of GPS data
 // *mags => pointer to an array of Magnetometer data
 // *densities => pointer to an array of Plasma Probe data
+
 void PackageData(int *package, int stringLength, int *temps, int *gps, int *mags, int *densities) {
-    
-    
+
+
     int i;
     for (i = 0; i < stringLength; i++) {
         // Fill package char by char from buffers here
     }
-    
+
 }
 
 // Description: Handler for sending data via UART
 // *dataString => pointer to a string of packaged data
 // stringLength => length of packaged data string
+
 void SendData(int *dataString, int stringLength) {
     // Send data via UART here
     int i;
@@ -132,33 +143,34 @@ void SendData(int *dataString, int stringLength) {
  ********************/
 
 // Description: Handler for switching satellite modes
+
 UNITEMode UpdateMode() {
     // Check current altitude
     // Determine which mode should be active
     // Return value of mode
-    
+
     if (shouldChangeMode) {
-        
+
         shouldChangeMode = false;
-        
+
         switch (currentMode) {
             case interim:
                 // Switch Timers
-                
+
                 TMR3_Stop();
                 TMR4_Start();
-                
+
                 return science;
             case science:
-                
+
                 TMR4_Stop();
                 TMR5_Start();
-                
+
                 return reentry;
             case reentry:
-                
+
                 TMR5_Stop();
-                
+
                 return safe;
             default:
                 return safe;
@@ -171,7 +183,7 @@ UNITEMode UpdateMode() {
 // Description: Wait to start next mode
 
 unsigned int DelayForMode() {
-    
+
     switch (currentMode) {
         case interim:
             return InterimMode.sampleRateInSec;
@@ -184,7 +196,7 @@ unsigned int DelayForMode() {
         default:
             return 1;
     }
-} 
+}
 
 void Clear(int *buffer, int size) {
     int i;
@@ -205,44 +217,39 @@ void CheckForModeUpdate(unsigned long time) {
 
     // Time begins with an offset of 15 min for balloon test
     // After 30 min switch from interim to science mode
-    if ((time == 1800) || ((currentMode == interim) && (time > 1800))) {
+    if ((time == INTERIM_STOP_TIME) || ((currentMode == interim) && (time > INTERIM_STOP_TIME))) {
         shouldChangeMode = true;
 
         // After 105 min switch from science to reentry mode
-    } else if ((time == 6300) || ((currentMode == science) && (time > 6300))) {
+    } else if ((time == SCIENCE_STOP_TIME) || ((currentMode == science) && (time > SCIENCE_STOP_TIME))) {
         shouldChangeMode = true;
 
         // After 165 min switch from reentry to safe mode and end loop
-    } else if ((time == 9900) || ((currentMode == reentry) && (time > 9900))) {
+    } else if ((time == REENTRY_STOP_TIME) || ((currentMode == reentry) && (time > REENTRY_STOP_TIME))) {
         shouldChangeMode = true;
     }
 }
 
-
 void BeginSample() {
     int SamplePackage[8]; //This is the building of the package from the ADC data
     const int ARRAY_SIZE = 8;
-    
-    while (currentMode != safe) {
-
-        Clear(SamplePackage, ARRAY_SIZE);
-
-        GetTempData(SamplePackage, ARRAY_SIZE);
-        SendData(SamplePackage, ARRAY_SIZE);
 
 
-        //wait_ms(DelayForMode());
+    Clear(SamplePackage, ARRAY_SIZE);
 
-        //UART1_Write(111);
-        //check if more data - send while more
-        //When done send a finished data package 
+    GetTempData(SamplePackage, ARRAY_SIZE);
+    SendData(SamplePackage, ARRAY_SIZE);
+ 
+
+    // UNCOMMENT IF NOT TESTING
+    //if (!shouldChangeMode) {
+        totalTime = totalTime + DelayForMode();
+    //}
+    CheckForModeUpdate(totalTime);
 
 
-        timeCount = timeCount + (DelayForMode());
-        
-        CheckForModeUpdate(timeCount);
-        currentMode = UpdateMode();
+    currentMode = UpdateMode();
 
 
-    }
+
 }

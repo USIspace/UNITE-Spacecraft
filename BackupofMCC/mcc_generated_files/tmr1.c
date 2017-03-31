@@ -154,13 +154,6 @@ uint16_t TMR1_Counter16BitGet( void )
 void __attribute__ ((weak)) TMR1_CallBack(void)
 {
     // Add your custom callback code here
-    _LATF1 = 1;
-    wait_ms(1);   // Light stays on because the clock is too quick
-    _LATF1 = 0;   // Need to figure out how to set the timer duration
-    
-    //BeginSample();
-    
-    
 }
 
 void TMR1_Start( void )

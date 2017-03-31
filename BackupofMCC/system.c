@@ -19,6 +19,7 @@
 #include <stdbool.h>         /* For true/false definition */
 
 #include "system.h"          /* variables/params used by system.c */
+#include "time.h"
 
 /******************************************************************************/
 /* System Level Functions                                                     */
@@ -59,16 +60,30 @@ void ConfigureOscillator(void)
         
 }
 
+/*
 void wait_sec(unsigned long time) {
     unsigned long counter;
     for (counter = 0; counter < time; counter++) {
         wait_ms(1000);
     }
+}*/
+
+void wait_sec(unsigned long seconds)
+{
+    //unsigned long timel = 0;
+        
+    time_t *zero =  0;
+    unsigned long currentTime = time(zero);
+    time_t timeToStop = currentTime + seconds;
+    
+    while (time(zero) < timeToStop);
+    //timel = time * 1500;
+    //for( ; timel; timel--);// no initial condition, while time is >0, decrement time each loop
 }
 
-void wait_ms(unsigned long time)
-{
-    unsigned long timel = 0;
-    timel = time * 1500;
-    for( ; timel; timel--);// no initial condition, while time is >0, decrement time each loop
+void wait_for(unsigned long something) {
+    
+    unsigned long wait = something * 1000;
+    int i;
+    for (i = 0; i < wait; i++);
 }

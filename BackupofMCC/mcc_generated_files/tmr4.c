@@ -51,6 +51,7 @@
 #include <xc.h>
 #include "tmr4.h"
 #include "../SatelliteMode.h"
+#include "../system.h"
 
 /**
   Section: Data Type Definitions
@@ -155,12 +156,20 @@ uint16_t TMR4_Counter16BitGet( void )
     return( TMR4 );
 }
 
-
+bool isLightOn4 = false;
 void __attribute__ ((weak)) TMR4_CallBack(void)
 {
     // Add your custom callback code here
-    
     BeginSample();                                  //User timer to call sampling function
+
+    if (isLightOn4) { 
+        _LATF1 = 0;
+        isLightOn4 = false;
+    }
+    else { 
+        _LATF1 = 1;
+        isLightOn4 = true;
+    }
 
 }
 

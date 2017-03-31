@@ -86,11 +86,11 @@ void SYSTEM_Initialize(void)
     //ADC1_Initialize(); //If using custom class, comment this line
     
     //Timer Initialization 
-    TMR1_Initialize();
-    TMR2_Initialize();
-    TMR3_Initialize();
-    TMR4_Initialize();
-    TMR5_Initialize();
+    //TMR1_Initialize();
+    //TMR2_Initialize();
+    //TMR3_Initialize();
+    //TMR4_Initialize();
+    //TMR5_Initialize();
 }
 
 void OSCILLATOR_Initialize(void)

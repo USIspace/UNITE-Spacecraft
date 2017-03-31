@@ -48,13 +48,23 @@ int16_t main(void) {
     /* Initialize IO ports and peripherals */
     InitApp();
 
+    _LATF1 = 1;
+
+    //wait_sec(15);  // NEEDS FIXING PLZ HELP SOS
+    
+    //_LATF1 = 0;
+    
     // Starts the CubeSat sampling in interim mode
     Satellite_Initialize();
     
     /******************************************************************************/
     /* Main Program Variable Declaration                                                  */
     /******************************************************************************/
-
+    while (1) {
+        unsigned long timer3 = TMR3_Counter16BitGet();
+        unsigned long timer4 = TMR4_Counter16BitGet();
+        unsigned long timer5 = TMR4_Counter16BitGet();
+    };
 }
 
 

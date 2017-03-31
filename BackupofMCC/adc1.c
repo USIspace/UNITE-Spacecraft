@@ -96,12 +96,10 @@ int ADC1_ResultGetFromChannel(int channel) {
     AD1CHS = ADC_CHANNEL_MAP[channel];      // Sets ADC Channel
     
     AD1CON1bits.ADON = 1;                   // Enables ADC (turned on/off to reset buffer)
-
-    wait_ms(50);                           // Wait for ADC startup to finish [*might not need*]
     
-    ADC1_ManualSampleForMilSec(50);             // Sample ADC for 1s [*needs refining*]
+    ADC1_ManualSampleForSec(500);             // Sample ADC for 1s [*needs refining*]
     
-    wait_ms(10);                          // Wait for conversion to finish (5s) [*needs refining*]
+    wait_for(100);                          // Wait for conversion to finish (5s) [*needs refining*]
         
     conversion = ADC1BUF0;                  // Get conversion value from buffer
     
@@ -111,9 +109,9 @@ int ADC1_ResultGetFromChannel(int channel) {
         
 }
 
-void ADC1_ManualSampleForMilSec(unsigned long ms) {
+void ADC1_ManualSampleForSec(unsigned long sec) {
     
     _SAMP = 1;                              // Begin Sampling
-    wait_ms(ms);                            // Wait to gather sample data
+    wait_for(sec);                            // Wait to gather sample data
     _SAMP = 0;                              // Stop sampling
 }
