@@ -5,6 +5,7 @@
 #include "SatelliteMode.h"
 #include "adc1.h"
 #include "mcc_generated_files/uart1.h"
+#include "mcc_generated_files/tmr2.h"
 #include "mcc_generated_files/tmr3.h"
 #include "mcc_generated_files/tmr4.h"
 #include "mcc_generated_files/tmr5.h"
@@ -24,25 +25,25 @@ unsigned long totalTime = 0; // Keeps track of overall mission clock
 
 
 // CONSTANTS
-unsigned long INTERIM_STOP_TIME = 1800; //1800
-unsigned long SCIENCE_STOP_TIME = 6300; //6300
-unsigned long REENTRY_STOP_TIME = 9900; //9900
+unsigned long INTERIM_STOP_TIME = 1800; // 30 mins in
+unsigned long SCIENCE_STOP_TIME = 3600; // 60 mins in
+unsigned long REENTRY_STOP_TIME = 10800; // 3 hrs in
 
 
 SatelliteMode InterimMode = {
-    60, // Time in seconds between each sample of sensors
+    TMR3_INTERRUPT_TICKER_FACTOR, // Time in seconds between each sample of sensors
     400, // Altitude to begin sampling in this mode 
     300, // Altitude to end sampling and switch to new mode
 };
 
 SatelliteMode ScienceMode = {
-    30,
+    TMR4_INTERRUPT_TICKER_FACTOR,
     300,
     200,
 };
 
 SatelliteMode ReEntryMode = {
-    15,
+    TMR5_INTERRUPT_TICKER_FACTOR,
     200,
     0,
 };
@@ -59,10 +60,10 @@ void Satellite_Initialize() {
     TMR4_Initialize();
     TMR5_Initialize();
     
+    TMR2_Stop();
     TMR3_Start();
     TMR4_Stop();
     TMR5_Stop();
-    TMR2_Stop();
 }
 
 /**************

@@ -51,6 +51,7 @@
 #include <xc.h>
 #include "tmr2.h"
 #include "time.h"
+#include "../SatelliteMode.h"
 #include "../system.h"
 
 /**

@@ -13,5 +13,4 @@ mcc_generated_files/uart1.h  \
 mcc_generated_files/tmr2.h  \
  mcc_generated_files/tmr3.h  \
 mcc_generated_files/tmr4.h  \
- mcc_generated_files/tmr5.h  \
-
+ mcc_generated_files/tmr5.h 

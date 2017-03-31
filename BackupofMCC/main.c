@@ -36,7 +36,15 @@
 /******************************************************************************/
 
 
-
+void StartWaitTimer() {
+    
+    // Begins wait timer
+    TMR2_Initialize();
+    TMR2_Start();
+    
+    // Initialize Debug light to off
+   _LATF1 = 0;
+}
 
 /******************************************************************************/
 /* Main Program                                                               */
@@ -47,20 +55,9 @@ int16_t main(void) {
     SYSTEM_Initialize();
     /* Initialize IO ports and peripherals */
     InitApp();
-    //TMR1_Initialize();
-    TMR2_Initialize();
-    //TMR1_Start();
-    TMR2_Start();
-    
-   _LATF1 = 0;
 
-    
-    // Starts the CubeSat sampling in interim mode
-    
-    
-    /******************************************************************************/
-    /* Main Program Variable Declaration                                                  */
-    /******************************************************************************/
+    StartWaitTimer();
+
     while (1) {};
 }
 
