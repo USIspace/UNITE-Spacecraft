@@ -24,9 +24,9 @@ unsigned long totalTime = 0; // Keeps track of overall mission clock
 
 
 // CONSTANTS
-unsigned long INTERIM_STOP_TIME = 120; //1800
-unsigned long SCIENCE_STOP_TIME = 180; //6300
-unsigned long REENTRY_STOP_TIME = 210; //9900
+unsigned long INTERIM_STOP_TIME = 1800; //1800
+unsigned long SCIENCE_STOP_TIME = 6300; //6300
+unsigned long REENTRY_STOP_TIME = 9900; //9900
 
 
 SatelliteMode InterimMode = {
@@ -52,16 +52,17 @@ SatelliteMode SafeMode = {
     0,
     0,
 };
-
+ 
 void Satellite_Initialize() {
 
     TMR3_Initialize();
     TMR4_Initialize();
     TMR5_Initialize();
-
+    
     TMR3_Start();
     TMR4_Stop();
     TMR5_Stop();
+    TMR2_Stop();
 }
 
 /**************

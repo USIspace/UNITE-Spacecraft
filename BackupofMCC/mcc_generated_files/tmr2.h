@@ -60,7 +60,7 @@
 
 #endif
 
-#define TMR2_INTERRUPT_TICKER_FACTOR    1
+#define TMR2_INTERRUPT_TICKER_FACTOR   10
 
 /**
   Section: Interface Routines
@@ -108,6 +108,8 @@
     }
     </code>
 */
+        
+ 
 void TMR2_Initialize (void);
 
 

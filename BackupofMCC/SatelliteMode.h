@@ -28,6 +28,7 @@ typedef enum {
     safe
 } UNITEMode;
 
+
 typedef struct {
     int sampleRateInSec; // Time in minutes between each sample of sensors
     int startAltitudeInKm; // Altitude to begin sampling in this mode 

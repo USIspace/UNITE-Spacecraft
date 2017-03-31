@@ -50,6 +50,8 @@
 
 #include <xc.h>
 #include "tmr2.h"
+#include "time.h"
+#include "../system.h"
 
 /**
   Section: Data Type Definitions
@@ -107,11 +109,19 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _T2Interrupt (  )
 {
     /* Check if the Timer Interrupt/Status is set */
 
+    
     //***User Area Begin
+    static volatile unsigned int CountCallBack = 0;
 
-    // ticker function call;
-    // ticker is 1 -> Callback function gets called everytime this ISR executes
-    TMR2_CallBack();
+    // callback function - called every 3th pass
+    if (++CountCallBack >= TMR2_INTERRUPT_TICKER_FACTOR)
+    {
+        // ticker function call
+        TMR2_CallBack();
+
+        // reset ticker counter
+        CountCallBack = 0;
+    }
 
     //***User Area End
 
@@ -150,7 +160,9 @@ uint16_t TMR2_Counter16BitGet( void )
 
 void __attribute__ ((weak)) TMR2_CallBack(void)
 {
-    // Add your custom callback code here
+ 
+    Satellite_Initialize(); 
+ 
 }
 
 void TMR2_Start( void )

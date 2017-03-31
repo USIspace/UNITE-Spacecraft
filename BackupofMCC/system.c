@@ -72,11 +72,14 @@ void wait_sec(unsigned long seconds)
 {
     //unsigned long timel = 0;
         
-    time_t *zero =  0;
-    unsigned long currentTime = time(zero);
+    time_t *zero;
+    unsigned long currentTime = time(NULL);
     time_t timeToStop = currentTime + seconds;
     
-    while (time(zero) < timeToStop);
+    while (time(NULL) < timeToStop){
+        unsigned long dummy = time(NULL);
+        wait_for(10);
+    }
     //timel = time * 1500;
     //for( ; timel; timel--);// no initial condition, while time is >0, decrement time each loop
 }
@@ -87,3 +90,5 @@ void wait_for(unsigned long something) {
     int i;
     for (i = 0; i < wait; i++);
 }
+
+
