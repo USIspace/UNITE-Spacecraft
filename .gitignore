@@ -8,3 +8,13 @@ BackupofMCC/dist/XC16_24FJ256GA110/debug/memoryfile.xml
 BackupofMCC/dist/XC16_24FJ256GA110/debug/BackupofMCC.debug.map
 
 BackupofMCC/dist/XC16_24FJ256GA110/debug/BackupofMCC.debug.elf
+
+*.o
+
+*.o
+
+*.d
+
+*.xml
+
+*.properties
