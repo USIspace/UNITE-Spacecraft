@@ -105,12 +105,13 @@ void TMR1_Initialize (void)
 
 
 
-void __attribute__ ( ( interrupt, no_auto_psv ) ) _T1Interrupt (  )
+void __attribute__ ( ( interrupt, no_auto_psv ) ) _T1Interrupt ( )
 {
     /* Check if the Timer Interrupt/Status is set */
-
+    
     //***User Area Begin
 
+    
     // ticker function call;
     // ticker is 1 -> Callback function gets called every time this ISR executes
     TMR1_CallBack();
