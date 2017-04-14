@@ -2100,152 +2100,6 @@
 #define channel_AN9_SetDigitalOutput() _TRISB9 = 0
 /**
   @Summary
-    Sets the GPIO pin, RE0, high using LATE0.
-
-  @Description
-    Sets the GPIO pin, RE0, high using LATE0.
-
-  @Preconditions
-    The RE0 must be set to an output.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Set RE0 high (1)
-    IO_RE0_SetHigh();
-    </code>
-
-*/
-#define IO_RE0_SetHigh()          _LATE0 = 1
-/**
-  @Summary
-    Sets the GPIO pin, RE0, low using LATE0.
-
-  @Description
-    Sets the GPIO pin, RE0, low using LATE0.
-
-  @Preconditions
-    The RE0 must be set to an output.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Set RE0 low (0)
-    IO_RE0_SetLow();
-    </code>
-
-*/
-#define IO_RE0_SetLow()           _LATE0 = 0
-/**
-  @Summary
-    Toggles the GPIO pin, RE0, using LATE0.
-
-  @Description
-    Toggles the GPIO pin, RE0, using LATE0.
-
-  @Preconditions
-    The RE0 must be set to an output.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Toggle RE0
-    IO_RE0_Toggle();
-    </code>
-
-*/
-#define IO_RE0_Toggle()           _LATE0 ^= 1
-/**
-  @Summary
-    Reads the value of the GPIO pin, RE0.
-
-  @Description
-    Reads the value of the GPIO pin, RE0.
-
-  @Preconditions
-    None.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    uint16_t portValue;
-
-    // Read RE0
-    postValue = IO_RE0_GetValue();
-    </code>
-
-*/
-#define IO_RE0_GetValue()         _RE0
-/**
-  @Summary
-    Configures the GPIO pin, RE0, as an input.
-
-  @Description
-    Configures the GPIO pin, RE0, as an input.
-
-  @Preconditions
-    None.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Sets the RE0 as an input
-    IO_RE0_SetDigitalInput();
-    </code>
-
-*/
-#define IO_RE0_SetDigitalInput()  _TRISE0 = 1
-/**
-  @Summary
-    Configures the GPIO pin, RE0, as an output.
-
-  @Description
-    Configures the GPIO pin, RE0, as an output.
-
-  @Preconditions
-    None.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Sets the RE0 as an output
-    IO_RE0_SetDigitalOutput();
-    </code>
-
-*/
-#define IO_RE0_SetDigitalOutput() _TRISE0 = 0
-/**
-  @Summary
     Sets the GPIO pin, RE1, high using LATE1.
 
   @Description
@@ -2976,13 +2830,13 @@
 #define IO_RE5_SetDigitalOutput() _TRISE5 = 0
 /**
   @Summary
-    Sets the GPIO pin, RF0, high using LATF0.
+    Sets the GPIO pin, RE6, high using LATE6.
 
   @Description
-    Sets the GPIO pin, RF0, high using LATF0.
+    Sets the GPIO pin, RE6, high using LATE6.
 
   @Preconditions
-    The RF0 must be set to an output.
+    The RE6 must be set to an output.
 
   @Returns
     None.
@@ -2992,21 +2846,21 @@
 
   @Example
     <code>
-    // Set RF0 high (1)
-    IO_RF0_SetHigh();
+    // Set RE6 high (1)
+    IO_RE6_SetHigh();
     </code>
 
 */
-#define IO_RF0_SetHigh()          _LATF0 = 1
+#define IO_RE6_SetHigh()          _LATE6 = 1
 /**
   @Summary
-    Sets the GPIO pin, RF0, low using LATF0.
+    Sets the GPIO pin, RE6, low using LATE6.
 
   @Description
-    Sets the GPIO pin, RF0, low using LATF0.
+    Sets the GPIO pin, RE6, low using LATE6.
 
   @Preconditions
-    The RF0 must be set to an output.
+    The RE6 must be set to an output.
 
   @Returns
     None.
@@ -3016,21 +2870,21 @@
 
   @Example
     <code>
-    // Set RF0 low (0)
-    IO_RF0_SetLow();
+    // Set RE6 low (0)
+    IO_RE6_SetLow();
     </code>
 
 */
-#define IO_RF0_SetLow()           _LATF0 = 0
+#define IO_RE6_SetLow()           _LATE6 = 0
 /**
   @Summary
-    Toggles the GPIO pin, RF0, using LATF0.
+    Toggles the GPIO pin, RE6, using LATE6.
 
   @Description
-    Toggles the GPIO pin, RF0, using LATF0.
+    Toggles the GPIO pin, RE6, using LATE6.
 
   @Preconditions
-    The RF0 must be set to an output.
+    The RE6 must be set to an output.
 
   @Returns
     None.
@@ -3040,18 +2894,18 @@
 
   @Example
     <code>
-    // Toggle RF0
-    IO_RF0_Toggle();
+    // Toggle RE6
+    IO_RE6_Toggle();
     </code>
 
 */
-#define IO_RF0_Toggle()           _LATF0 ^= 1
+#define IO_RE6_Toggle()           _LATE6 ^= 1
 /**
   @Summary
-    Reads the value of the GPIO pin, RF0.
+    Reads the value of the GPIO pin, RE6.
 
   @Description
-    Reads the value of the GPIO pin, RF0.
+    Reads the value of the GPIO pin, RE6.
 
   @Preconditions
     None.
@@ -3066,18 +2920,18 @@
     <code>
     uint16_t portValue;
 
-    // Read RF0
-    postValue = IO_RF0_GetValue();
+    // Read RE6
+    postValue = IO_RE6_GetValue();
     </code>
 
 */
-#define IO_RF0_GetValue()         _RF0
+#define IO_RE6_GetValue()         _RE6
 /**
   @Summary
-    Configures the GPIO pin, RF0, as an input.
+    Configures the GPIO pin, RE6, as an input.
 
   @Description
-    Configures the GPIO pin, RF0, as an input.
+    Configures the GPIO pin, RE6, as an input.
 
   @Preconditions
     None.
@@ -3090,18 +2944,18 @@
 
   @Example
     <code>
-    // Sets the RF0 as an input
-    IO_RF0_SetDigitalInput();
+    // Sets the RE6 as an input
+    IO_RE6_SetDigitalInput();
     </code>
 
 */
-#define IO_RF0_SetDigitalInput()  _TRISF0 = 1
+#define IO_RE6_SetDigitalInput()  _TRISE6 = 1
 /**
   @Summary
-    Configures the GPIO pin, RF0, as an output.
+    Configures the GPIO pin, RE6, as an output.
 
   @Description
-    Configures the GPIO pin, RF0, as an output.
+    Configures the GPIO pin, RE6, as an output.
 
   @Preconditions
     None.
@@ -3114,21 +2968,21 @@
 
   @Example
     <code>
-    // Sets the RF0 as an output
-    IO_RF0_SetDigitalOutput();
+    // Sets the RE6 as an output
+    IO_RE6_SetDigitalOutput();
     </code>
 
 */
-#define IO_RF0_SetDigitalOutput() _TRISF0 = 0
+#define IO_RE6_SetDigitalOutput() _TRISE6 = 0
 /**
   @Summary
-    Sets the GPIO pin, RF1, high using LATF1.
+    Sets the GPIO pin, RE7, high using LATE7.
 
   @Description
-    Sets the GPIO pin, RF1, high using LATF1.
+    Sets the GPIO pin, RE7, high using LATE7.
 
   @Preconditions
-    The RF1 must be set to an output.
+    The RE7 must be set to an output.
 
   @Returns
     None.
@@ -3138,21 +2992,21 @@
 
   @Example
     <code>
-    // Set RF1 high (1)
-    IO_RF1_SetHigh();
+    // Set RE7 high (1)
+    IO_RE7_SetHigh();
     </code>
 
 */
-#define IO_RF1_SetHigh()          _LATF1 = 1
+#define IO_RE7_SetHigh()          _LATE7 = 1
 /**
   @Summary
-    Sets the GPIO pin, RF1, low using LATF1.
+    Sets the GPIO pin, RE7, low using LATE7.
 
   @Description
-    Sets the GPIO pin, RF1, low using LATF1.
+    Sets the GPIO pin, RE7, low using LATE7.
 
   @Preconditions
-    The RF1 must be set to an output.
+    The RE7 must be set to an output.
 
   @Returns
     None.
@@ -3162,21 +3016,21 @@
 
   @Example
     <code>
-    // Set RF1 low (0)
-    IO_RF1_SetLow();
+    // Set RE7 low (0)
+    IO_RE7_SetLow();
     </code>
 
 */
-#define IO_RF1_SetLow()           _LATF1 = 0
+#define IO_RE7_SetLow()           _LATE7 = 0
 /**
   @Summary
-    Toggles the GPIO pin, RF1, using LATF1.
+    Toggles the GPIO pin, RE7, using LATE7.
 
   @Description
-    Toggles the GPIO pin, RF1, using LATF1.
+    Toggles the GPIO pin, RE7, using LATE7.
 
   @Preconditions
-    The RF1 must be set to an output.
+    The RE7 must be set to an output.
 
   @Returns
     None.
@@ -3186,18 +3040,18 @@
 
   @Example
     <code>
-    // Toggle RF1
-    IO_RF1_Toggle();
+    // Toggle RE7
+    IO_RE7_Toggle();
     </code>
 
 */
-#define IO_RF1_Toggle()           _LATF1 ^= 1
+#define IO_RE7_Toggle()           _LATE7 ^= 1
 /**
   @Summary
-    Reads the value of the GPIO pin, RF1.
+    Reads the value of the GPIO pin, RE7.
 
   @Description
-    Reads the value of the GPIO pin, RF1.
+    Reads the value of the GPIO pin, RE7.
 
   @Preconditions
     None.
@@ -3212,18 +3066,18 @@
     <code>
     uint16_t portValue;
 
-    // Read RF1
-    postValue = IO_RF1_GetValue();
+    // Read RE7
+    postValue = IO_RE7_GetValue();
     </code>
 
 */
-#define IO_RF1_GetValue()         _RF1
+#define IO_RE7_GetValue()         _RE7
 /**
   @Summary
-    Configures the GPIO pin, RF1, as an input.
+    Configures the GPIO pin, RE7, as an input.
 
   @Description
-    Configures the GPIO pin, RF1, as an input.
+    Configures the GPIO pin, RE7, as an input.
 
   @Preconditions
     None.
@@ -3236,18 +3090,18 @@
 
   @Example
     <code>
-    // Sets the RF1 as an input
-    IO_RF1_SetDigitalInput();
+    // Sets the RE7 as an input
+    IO_RE7_SetDigitalInput();
     </code>
 
 */
-#define IO_RF1_SetDigitalInput()  _TRISF1 = 1
+#define IO_RE7_SetDigitalInput()  _TRISE7 = 1
 /**
   @Summary
-    Configures the GPIO pin, RF1, as an output.
+    Configures the GPIO pin, RE7, as an output.
 
   @Description
-    Configures the GPIO pin, RF1, as an output.
+    Configures the GPIO pin, RE7, as an output.
 
   @Preconditions
     None.
@@ -3260,12 +3114,158 @@
 
   @Example
     <code>
-    // Sets the RF1 as an output
-    IO_RF1_SetDigitalOutput();
+    // Sets the RE7 as an output
+    IO_RE7_SetDigitalOutput();
     </code>
 
 */
-#define IO_RF1_SetDigitalOutput() _TRISF1 = 0
+#define IO_RE7_SetDigitalOutput() _TRISE7 = 0
+/**
+  @Summary
+    Sets the GPIO pin, RF3, high using LATF3.
+
+  @Description
+    Sets the GPIO pin, RF3, high using LATF3.
+
+  @Preconditions
+    The RF3 must be set to an output.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Set RF3 high (1)
+    IO_RF3_SetHigh();
+    </code>
+
+*/
+#define IO_RF3_SetHigh()          _LATF3 = 1
+/**
+  @Summary
+    Sets the GPIO pin, RF3, low using LATF3.
+
+  @Description
+    Sets the GPIO pin, RF3, low using LATF3.
+
+  @Preconditions
+    The RF3 must be set to an output.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Set RF3 low (0)
+    IO_RF3_SetLow();
+    </code>
+
+*/
+#define IO_RF3_SetLow()           _LATF3 = 0
+/**
+  @Summary
+    Toggles the GPIO pin, RF3, using LATF3.
+
+  @Description
+    Toggles the GPIO pin, RF3, using LATF3.
+
+  @Preconditions
+    The RF3 must be set to an output.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Toggle RF3
+    IO_RF3_Toggle();
+    </code>
+
+*/
+#define IO_RF3_Toggle()           _LATF3 ^= 1
+/**
+  @Summary
+    Reads the value of the GPIO pin, RF3.
+
+  @Description
+    Reads the value of the GPIO pin, RF3.
+
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    uint16_t portValue;
+
+    // Read RF3
+    postValue = IO_RF3_GetValue();
+    </code>
+
+*/
+#define IO_RF3_GetValue()         _RF3
+/**
+  @Summary
+    Configures the GPIO pin, RF3, as an input.
+
+  @Description
+    Configures the GPIO pin, RF3, as an input.
+
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Sets the RF3 as an input
+    IO_RF3_SetDigitalInput();
+    </code>
+
+*/
+#define IO_RF3_SetDigitalInput()  _TRISF3 = 1
+/**
+  @Summary
+    Configures the GPIO pin, RF3, as an output.
+
+  @Description
+    Configures the GPIO pin, RF3, as an output.
+
+  @Preconditions
+    None.
+
+  @Returns
+    None.
+
+  @Param
+    None.
+
+  @Example
+    <code>
+    // Sets the RF3 as an output
+    IO_RF3_SetDigitalOutput();
+    </code>
+
+*/
+#define IO_RF3_SetDigitalOutput() _TRISF3 = 0
 
 /**
     Section: Function Prototypes

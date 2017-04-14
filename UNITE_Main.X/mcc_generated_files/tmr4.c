@@ -163,11 +163,11 @@ void __attribute__ ((weak)) TMR4_CallBack(void)
     BeginSample();                                  //User timer to call sampling function
 
     if (isLightOn4) { 
-        _LATF1 = 0;
+        _LATE1 = 0;
         isLightOn4 = false;
     }
     else { 
-        _LATF1 = 1;
+        _LATE1 = 1;
         isLightOn4 = true;
     }
 

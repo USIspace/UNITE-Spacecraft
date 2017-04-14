@@ -168,11 +168,11 @@ void __attribute__ ((weak)) TMR3_CallBack(void)
     BeginSample();                                  //User timer to call sampling function
 
     if (isLightOn3) { 
-        _LATF1 = 0;
+        _LATE1 = 0;
         isLightOn3 = false;
     }
     else { 
-        _LATF1 = 1;
+        _LATE1 = 1;
         isLightOn3 = true;
     }
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project>
-  <executable name="dist/XC16_24FJ256GA110/production/BackupofMCC.production.elf">
+  <executable name="dist/XC16_24FJ256GA110/production/UNITE_Main.X.production.elf">
     <memory name="data">
       <units>bytes</units>
       <length>16384</length>
@@ -11,8 +11,8 @@
     <memory name="program">
       <units>bytes</units>
       <length>261876</length>
-      <used>5568</used>
-      <free>256308</free>
+      <used>5673</used>
+      <free>256203</free>
     </memory>
   </executable>
 </project>
