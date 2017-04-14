@@ -18,3 +18,9 @@ BackupofMCC/nbproject/Makefile-genesis.properties
 *.properties
 /UNITE_Main.X/nbproject/private/
 *.xml
+
+*.xml
+
+*.mk
+
+*.xml
