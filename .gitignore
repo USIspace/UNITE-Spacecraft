@@ -17,3 +17,4 @@ BackupofMCC/nbproject/Makefile-genesis.properties
 
 *.properties
 /UNITE_Main.X/nbproject/private/
+UNITE_Main.X/nbproject/Makefile-variables.mk
