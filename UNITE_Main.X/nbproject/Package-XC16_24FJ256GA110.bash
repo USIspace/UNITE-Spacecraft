@@ -10,9 +10,9 @@ CND_CONF=XC16_24FJ256GA110
 CND_DISTDIR=dist
 TMPDIR=build/${CND_CONF}/${IMAGE_TYPE}/tmp-packaging
 TMPDIRNAME=tmp-packaging
-OUTPUT_PATH=dist/${CND_CONF}/${IMAGE_TYPE}/BackupofMCC.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
-OUTPUT_BASENAME=BackupofMCC.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
-PACKAGE_TOP_DIR=backupofmcc/
+OUTPUT_PATH=dist/${CND_CONF}/${IMAGE_TYPE}/UNITE_Main.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
+OUTPUT_BASENAME=UNITE_Main.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
+PACKAGE_TOP_DIR=unitemain.x/
 
 # Functions
 function checkReturnCode
@@ -57,15 +57,15 @@ mkdir -p ${TMPDIR}
 
 # Copy files and create directories and links
 cd "${TOP}"
-makeDirectory ${TMPDIR}/backupofmcc/bin
+makeDirectory ${TMPDIR}/unitemain.x/bin
 copyFileToTmpDir "${OUTPUT_PATH}" "${TMPDIR}/${PACKAGE_TOP_DIR}bin/${OUTPUT_BASENAME}" 0755
 
 
 # Generate tar file
 cd "${TOP}"
-rm -f ${CND_DISTDIR}/${CND_CONF}/package/backupofmcc.tar
+rm -f ${CND_DISTDIR}/${CND_CONF}/package/unitemain.x.tar
 cd ${TMPDIR}
-tar -vcf ../../../../${CND_DISTDIR}/${CND_CONF}/package/backupofmcc.tar *
+tar -vcf ../../../../${CND_DISTDIR}/${CND_CONF}/package/unitemain.x.tar *
 checkReturnCode
 
 # Cleanup
