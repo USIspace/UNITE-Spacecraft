@@ -97,6 +97,8 @@ int ADC1_ResultGetFromChannel(int channel) {
     
     AD1CON1bits.ADON = 1;                   // Enables ADC (turned on/off to reset buffer)
     
+    wait_for(100);
+    
     ADC1_ManualSampleForSec(500);             // Sample ADC for 1s [*needs refining*]
     
     wait_for(100);                          // Wait for conversion to finish (5s) [*needs refining*]
