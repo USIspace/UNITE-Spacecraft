@@ -175,7 +175,7 @@ UNITEMode UpdateMode() {
             case reentry:
            
                 TMR5_Stop(); //Stops timer 5
-                 UART3_Write(323); //Will tell us it is in reentry mode
+                UART3_Write(323); //Will tell us it is in reentry mode
                 return safe;
             default:
                 return safe;
