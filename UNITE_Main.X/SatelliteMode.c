@@ -162,19 +162,19 @@ UNITEMode UpdateMode() {
             case interim:
                 // Switch Timers
 
-                TMR3_Stop();
-                TMR4_Start();
+                TMR3_Stop(); //Stops the timer 3 
+                TMR4_Start(); //Starts timer 4
                 UART3_Write(321); //Will tell us it is in interim mode
                 return science;
             case science:
 
-                TMR4_Stop();
-                TMR5_Start();
+                TMR4_Stop(); //Stops timer 4
+                TMR5_Start(); //Starts timer 5
                 UART3_Write(322); //Will tell us it is in science mode
                 return reentry;
             case reentry:
-
-                TMR5_Stop();
+           
+                TMR5_Stop(); //Stops timer 5
                  UART3_Write(323); //Will tell us it is in reentry mode
                 return safe;
             default:
@@ -212,12 +212,7 @@ void Clear(int *buffer, int size) {
 
 void CheckForModeUpdate(unsigned long time) {
 
-    /*
-     Debugging only
-    UART1_Write(0);
-    UART1_Write(time);
-    UART1_Write(0);
-     */
+   
 
 
     // Time begins with an offset of 15 min for balloon test
