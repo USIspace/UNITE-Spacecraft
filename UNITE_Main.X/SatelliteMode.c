@@ -164,18 +164,18 @@ UNITEMode UpdateMode() {
 
                 TMR3_Stop();
                 TMR4_Start();
-
+                UART3_Write(321); //Will tell us it is in interim mode
                 return science;
             case science:
 
                 TMR4_Stop();
                 TMR5_Start();
-
+                UART3_Write(322); //Will tell us it is in science mode
                 return reentry;
             case reentry:
 
                 TMR5_Stop();
-
+                 UART3_Write(323); //Will tell us it is in reentry mode
                 return safe;
             default:
                 return safe;
