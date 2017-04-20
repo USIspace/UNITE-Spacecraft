@@ -89,9 +89,9 @@ uint16_t ADC1_ResultGet(uint16_t *buffer)
     return count;
 }
 
-int ADC1_ResultGetFromChannel(int channel) {
+uint8_t ADC1_ResultGetFromChannel(int channel) {
     
-    int conversion;                     // Return value
+    unsigned int bufferValue;               // Return value
 
     AD1CHS = ADC_CHANNEL_MAP[channel];      // Sets ADC Channel
     
@@ -103,9 +103,11 @@ int ADC1_ResultGetFromChannel(int channel) {
     
     wait_for(100);                          // Wait for conversion to finish (5s) [*needs refining*]
 
-    conversion = ADC1BUF0;                  // Get conversion value from buffer
+    bufferValue = ADC1BUF0;                  // Get conversion value from buffer
     
     AD1CON1bits.ADON = 0;                   // Disable ADC to reset buffer
+    
+    uint8_t conversion = bufferValue / 4;    // Convert to 8 bit value
     
     return conversion;
         

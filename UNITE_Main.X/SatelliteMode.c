@@ -12,6 +12,7 @@
 #include "mcc_generated_files/tmr3.h"
 #include "mcc_generated_files/tmr4.h"
 #include "mcc_generated_files/tmr5.h"
+#include "mcc_generated_files/spi2.h"
 #include "time.h"
 
 /******************************
@@ -73,7 +74,7 @@ void Satellite_Initialize() {
  Getter Methods
  **************/
 
-void GetTempData(int *buffer, int bufferSize) {
+void GetTempData(uint8_t *buffer, int bufferSize) {
     // Sample Temp Data and store in buffer (an array of size bufferSize)
     int sensorToStartAt = 8;
 
@@ -82,8 +83,8 @@ void GetTempData(int *buffer, int bufferSize) {
     for (count = 0; count < bufferSize; count++) {
         channel = count + sensorToStartAt; // Increment ADC channel
 
-        // Fill buffer and divide by 4 to send to Arduino
-        buffer[count] = (ADC1_ResultGetFromChannel(channel) / 4);
+        // ADC1_ResultGetFromChannel() returns unsigned 8 bit values
+        buffer[count] = ADC1_ResultGetFromChannel(channel); 
 
     }
 
@@ -135,12 +136,26 @@ void PackageData(int *package, int stringLength, int *temps, int *gps, int *mags
 // *dataString => pointer to a string of packaged data
 // stringLength => length of packaged data string
 
-void SendData(int *dataString, int stringLength) {
+void SendData(uint8_t *dataString, int stringLength) {
+    
+    /*==============
+     Save to SD Card
+     ==============*/
+    
+    int j;
+    for (j = 0; j < stringLength; j++) {
+        SPI2_Exchange8bit(dataString[j]);
+    }
+    
+    /*==============
+     Save to Arduino
+     ==============
+    
     // Send data via UART here
     int i;
     for (i = 0; i < stringLength; i++) {
         UART3_Write(dataString[i]);
-    }
+    }*/
 }
 
 /********************
@@ -164,18 +179,18 @@ UNITEMode UpdateMode() {
 
                 TMR3_Stop(); //Stops the timer 3 
                 TMR4_Start(); //Starts timer 4
-                UART3_Write(321); //Will tell us it is in interim mode
+                UART3_Write(321); //Will tell us it is in interim mode //ERROR 321 > 255
                 return science;
             case science:
 
                 TMR4_Stop(); //Stops timer 4
                 TMR5_Start(); //Starts timer 5
-                UART3_Write(322); //Will tell us it is in science mode
+                UART3_Write(322); //Will tell us it is in science mode //ERROR 322 > 255
                 return reentry;
             case reentry:
            
                 TMR5_Stop(); //Stops timer 5
-                UART3_Write(323); //Will tell us it is in reentry mode
+                UART3_Write(323); //Will tell us it is in reentry mode //ERROR 323> 255
                 return safe;
             default:
                 return safe;
@@ -203,7 +218,7 @@ unsigned int DelayForMode() {
     }
 }
 
-void Clear(int *buffer, int size) {
+void Clear(uint8_t *buffer, int size) {
     int i;
     for (i = 0; i < size; i++) {
         buffer[i] = 0;
@@ -232,22 +247,18 @@ void CheckForModeUpdate(unsigned long time) {
 
 void BeginSample() {
     int SamplePackage[8]; //This is the building of the package from the ADC data
+    uint8_t SDPackage[8]; //Use this package structure to save to SD Card
     const int ARRAY_SIZE = 8;
 
 
-    Clear(SamplePackage, ARRAY_SIZE);
+    Clear(SDPackage, ARRAY_SIZE);
 
-    GetTempData(SamplePackage, ARRAY_SIZE);
-    SendData(SamplePackage, ARRAY_SIZE);
+    GetTempData(SDPackage, ARRAY_SIZE);
+    SendData(SDPackage, ARRAY_SIZE);
  
-
-    // UNCOMMENT IF NOT TESTING
-    //if (!shouldChangeMode) {
-        totalTime = totalTime + DelayForMode();
-    //}
+    // Mode Update Test
+    totalTime = totalTime + DelayForMode();
     CheckForModeUpdate(totalTime);
-
-
     currentMode = UpdateMode();
 
 

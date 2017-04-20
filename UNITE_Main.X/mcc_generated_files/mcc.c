@@ -83,6 +83,9 @@ void SYSTEM_Initialize(void)
    
     UART2_Initialize();
     UART4_Initialize();
+    
+    SPI1_Initialize();  // DAC
+    SPI2_Initialize();  // SD Card
     //ADC1_Initialize(); //If using custom class, comment this line
     
     //Timer Initialization 
