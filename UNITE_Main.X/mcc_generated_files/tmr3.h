@@ -60,7 +60,7 @@
 
 #endif
 
-#define TMR3_INTERRUPT_TICKER_FACTOR  10 //120
+#define TMR3_INTERRUPT_TICKER_FACTOR  120
 
 /**
   Section: Interface Routines

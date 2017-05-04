@@ -60,7 +60,7 @@
 
 #endif
 
-#define TMR2_INTERRUPT_TICKER_FACTOR  10 //1800
+#define TMR2_INTERRUPT_TICKER_FACTOR  1800
 
 
 /**
