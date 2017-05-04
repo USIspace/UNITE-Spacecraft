@@ -7,10 +7,7 @@
 #include "mcc_generated_files/uart1.h"
 #include "mcc_generated_files/uart2.h"
 #include "mcc_generated_files/uart3.h"
-<<<<<<< Updated upstream:UNITE_Main.X/SatelliteMode.c
 #include "mcc_generated_files/uart4.h"
-=======
->>>>>>> Stashed changes:BackupofMCC/SatelliteMode.c
 #include "mcc_generated_files/tmr2.h"
 #include "mcc_generated_files/tmr3.h"
 #include "mcc_generated_files/tmr4.h"
@@ -141,31 +138,19 @@ void PackageData(int *package, int stringLength, int *temps, int *gps, int *mags
 
 void SendData(uint8_t *dataString, int stringLength) {
     
-    /*==============
-     Save to SD Card
-     ==============*/
-    
-    int j;
-    for (j = 0; j < stringLength; j++) {
-        SPI2_Exchange8bit(dataString[j]);
-    }
     
     /*==============
      Save to Arduino
-     ==============
+     ==============*/
     
     // Send data via UART here
     int i;
     for (i = 0; i < stringLength; i++) {
-<<<<<<< Updated upstream:UNITE_Main.X/SatelliteMode.c
+
         UART3_Write(dataString[i]);
-    }*/
-=======
-        UART1_Write(dataString[i]);
-        UART2_Write(dataString[i]);
-        UART3_Write(dataString[i]);
+        
     }
->>>>>>> Stashed changes:BackupofMCC/SatelliteMode.c
+
 }
 
 /********************
@@ -183,24 +168,28 @@ UNITEMode UpdateMode() {
 
         shouldChangeMode = false;
 
+        int i;
+        for (i = 0; i < 8; i++) {
+            UART3_Write(255); //Will tell us it is in interim mode 
+            UART3_Write(0);
+        }
         switch (currentMode) {
             case interim:
+                
                 // Switch Timers
 
                 TMR3_Stop(); //Stops the timer 3 
                 TMR4_Start(); //Starts timer 4
-                UART3_Write(321); //Will tell us it is in interim mode //ERROR 321 > 255
+                
                 return science;
             case science:
 
                 TMR4_Stop(); //Stops timer 4
                 TMR5_Start(); //Starts timer 5
-                UART3_Write(322); //Will tell us it is in science mode //ERROR 322 > 255
                 return reentry;
             case reentry:
            
                 TMR5_Stop(); //Stops timer 5
-                UART3_Write(323); //Will tell us it is in reentry mode //ERROR 323> 255
                 return safe;
             default:
                 return safe;
@@ -237,9 +226,6 @@ void Clear(uint8_t *buffer, int size) {
 
 void CheckForModeUpdate(unsigned long time) {
 
-   
-
-
     // Time begins with an offset of 15 min for balloon test
     // After 30 min switch from interim to science mode
     if ((time == INTERIM_STOP_TIME) || ((currentMode == interim) && (time > INTERIM_STOP_TIME))) {
@@ -256,7 +242,7 @@ void CheckForModeUpdate(unsigned long time) {
 }
 
 void BeginSample() {
-    int SamplePackage[8]; //This is the building of the package from the ADC data
+    //int SamplePackage[8]; //This is the building of the package from the ADC data
     uint8_t SDPackage[8]; //Use this package structure to save to SD Card
     const int ARRAY_SIZE = 8;
 
@@ -270,7 +256,5 @@ void BeginSample() {
     totalTime = totalTime + DelayForMode();
     CheckForModeUpdate(totalTime);
     currentMode = UpdateMode();
-
-
 
 }

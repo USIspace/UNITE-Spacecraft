@@ -60,11 +60,8 @@
 
 #endif
 
-<<<<<<< Updated upstream:UNITE_Main.X/mcc_generated_files/tmr2.h
 #define TMR2_INTERRUPT_TICKER_FACTOR  10 //1800
-=======
-#define TMR2_INTERRUPT_TICKER_FACTOR   1
->>>>>>> Stashed changes:BackupofMCC/mcc_generated_files/tmr2.h
+
 
 /**
   Section: Interface Routines
