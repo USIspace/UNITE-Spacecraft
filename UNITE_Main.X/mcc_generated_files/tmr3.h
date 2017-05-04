@@ -60,7 +60,11 @@
 
 #endif
 
+<<<<<<< Updated upstream:UNITE_Main.X/mcc_generated_files/tmr3.h
 #define TMR3_INTERRUPT_TICKER_FACTOR   20 //120
+=======
+#define TMR3_INTERRUPT_TICKER_FACTOR    10
+>>>>>>> Stashed changes:BackupofMCC/mcc_generated_files/tmr3.h
 
 /**
   Section: Interface Routines

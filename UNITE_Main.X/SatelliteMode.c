@@ -7,7 +7,10 @@
 #include "mcc_generated_files/uart1.h"
 #include "mcc_generated_files/uart2.h"
 #include "mcc_generated_files/uart3.h"
+<<<<<<< Updated upstream:UNITE_Main.X/SatelliteMode.c
 #include "mcc_generated_files/uart4.h"
+=======
+>>>>>>> Stashed changes:BackupofMCC/SatelliteMode.c
 #include "mcc_generated_files/tmr2.h"
 #include "mcc_generated_files/tmr3.h"
 #include "mcc_generated_files/tmr4.h"
@@ -154,8 +157,15 @@ void SendData(uint8_t *dataString, int stringLength) {
     // Send data via UART here
     int i;
     for (i = 0; i < stringLength; i++) {
+<<<<<<< Updated upstream:UNITE_Main.X/SatelliteMode.c
         UART3_Write(dataString[i]);
     }*/
+=======
+        UART1_Write(dataString[i]);
+        UART2_Write(dataString[i]);
+        UART3_Write(dataString[i]);
+    }
+>>>>>>> Stashed changes:BackupofMCC/SatelliteMode.c
 }
 
 /********************
