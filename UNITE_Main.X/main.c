@@ -43,7 +43,11 @@ void StartWaitTimer() {
     TMR2_Start();
     
     // Initialize Debug light to off
-   _LATE1 = 0;
+   _LATE1 = LED_ON;
+   
+   _LATE2 = LED_OFF;
+   _LATE3 = LED_OFF;
+   _LATE4 = LED_OFF;
 }
 
 /******************************************************************************/

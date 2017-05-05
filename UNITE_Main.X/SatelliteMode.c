@@ -68,6 +68,8 @@ void Satellite_Initialize() {
     TMR3_Start();
     TMR4_Stop();
     TMR5_Stop();
+    
+    _LATE2 = LED_ON;
 }
 
 /**************
@@ -177,6 +179,8 @@ UNITEMode UpdateMode() {
             case interim:
                 
                 // Switch Timers
+                _LATE2 = LED_OFF;
+                _LATE3 = LED_ON;
 
                 TMR3_Stop(); //Stops the timer 3 
                 TMR4_Start(); //Starts timer 4
@@ -184,14 +188,20 @@ UNITEMode UpdateMode() {
                 return science;
             case science:
 
+                _LATE3 = LED_OFF;
+                _LATE4 = LED_ON;
+                
                 TMR4_Stop(); //Stops timer 4
                 TMR5_Start(); //Starts timer 5
                 return reentry;
             case reentry:
            
+                _LATE4 = LED_OFF;
+                
                 TMR5_Stop(); //Stops timer 5
                 return safe;
             default:
+                
                 return safe;
         }
     } else {
