@@ -1,29 +1,10 @@
 *.o
 
-BackupofMCC/dist/XC16_24FJ256GA110/debug/BackupofMCC.debug.map
-
-BackupofMCC/dist/XC16_24FJ256GA110/debug/BackupofMCC.debug.elf
-
 *.d
 
 *.xml
 
 *.properties
 
-<<<<<<< Updated upstream
+*.mk
 
-BackupofMCC/nbproject/Makefile-variables.mk
-
-BackupofMCC/nbproject/Makefile-genesis.properties
-
-*.properties
-/UNITE_Main.X/nbproject/private/
-UNITE_Main.X/nbproject/Makefile-variables.mk
-
-*.xml
-=======
-/Command_Board/nbproject/private/
-/Command_Board/build/XC16_24FJ256GA110/
-/Command_Board/dist/XC16_24FJ256GA110/
-/MCC_Test/nbproject/private/
->>>>>>> Stashed changes
