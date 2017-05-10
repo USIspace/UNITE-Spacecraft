@@ -8,6 +8,7 @@
 #include "mcc_generated_files/uart2.h"
 #include "mcc_generated_files/uart3.h"
 #include "mcc_generated_files/uart4.h"
+#include "mcc_generated_files/tmr1.h"
 #include "mcc_generated_files/tmr2.h"
 #include "mcc_generated_files/tmr3.h"
 #include "mcc_generated_files/tmr4.h"
@@ -19,12 +20,17 @@
  Satellite Mode Initializations
  ******************************/
 
-
+/*******************
+  Global Variables
+ *******************/
 
 // Stores the current mode the satellite should be in
 // Will be used as a switch for the satellite to change modes
-static UNITEMode currentMode = interim;
+static UNITEMode currentMode = safe;
+static bool shouldSample = false;
 static bool shouldChangeMode = false;
+int results[16];
+
 unsigned long totalTime = 0; // Keeps track of overall mission clock
 
 
@@ -33,21 +39,24 @@ unsigned long INTERIM_STOP_TIME = 1800; // 30 mins in
 unsigned long SCIENCE_STOP_TIME = 3600; // 60 mins in
 unsigned long REENTRY_STOP_TIME = 10800; // 3 hrs in
 
+/*******************************
+  Satellite Mode Configurations
+ *******************************/
 
 SatelliteMode InterimMode = {
-    TMR3_INTERRUPT_TICKER_FACTOR, // Time in seconds between each sample of sensors
+    10, // Time in seconds between each sample of sensors
     400, // Altitude to begin sampling in this mode 
     300, // Altitude to end sampling and switch to new mode
 };
 
 SatelliteMode ScienceMode = {
-    TMR4_INTERRUPT_TICKER_FACTOR,
+    30,
     300,
     200,
 };
 
 SatelliteMode ReEntryMode = {
-    TMR5_INTERRUPT_TICKER_FACTOR,
+    15,
     200,
     0,
 };
@@ -57,17 +66,37 @@ SatelliteMode SafeMode = {
     0,
     0,
 };
+
+/**************************
+  Sampling Configurations
+ **************************/
+
+ADCSampleConfig lpADCConfig {
+    0,   // adc channel to start at   
+    0    // number of adc channels to sample
+};
+
+ADCSampleConfig magADCConfig {
+    0,
+    0
+};
+
+ADCSampleConfig tmpADCConfig {
+    8,
+    8
+};
  
 void Satellite_Initialize() {
 
-    TMR3_Initialize();
-    TMR4_Initialize();
+    InitializeADC1();
     TMR5_Initialize();
     
-    TMR2_Stop();
-    TMR3_Start();
-    TMR4_Stop();
-    TMR5_Stop();
+    currentMode = interim;
+    
+    TMR1_Stop();
+    TMR5_Start();
+    
+    TMR5_INTERRUPT_TICKER_FACTOR = InterimMode.sampleRateInSec;
     
     _LATE2 = LED_ON;
 }
@@ -77,17 +106,19 @@ void Satellite_Initialize() {
  **************/
 
 void GetTempData(uint8_t *buffer, int bufferSize) {
-    // Sample Temp Data and store in buffer (an array of size bufferSize)
-    int sensorToStartAt = 8;
-
-    int count;
-    int channel;
-    for (count = 0; count < bufferSize; count++) {
-        channel = count + sensorToStartAt; // Increment ADC channel
-
-        // ADC1_ResultGetFromChannel() returns unsigned 8 bit values
-        buffer[count] = ADC1_ResultGetFromChannel(channel); 
-
+    
+    shouldSample = true;                    // Allows ADC to sample data
+    TMR1_INTERRUPT_TICKER_FACTOR = 1;       // Sample for a duration of 1 sec
+    
+    TMR4_Start();                           // TMR4 samples every 1 s and stores in results
+    TMR1_Start();
+    while (shouldSample);                   // shouldSample is set to false upon TMR1 interrupt
+    TMR1_Stop();
+    TMR4_Stop();
+    
+    int i;
+    for (i = 0; i < bufferSize; i++) {
+        buffer[i] = results[i] / 4;
     }
 
 }
@@ -98,6 +129,20 @@ void GetGPSData(int *buffer, int bufferSize) {
 
 void GetMagnetometerData(int *buffer, int bufferSize) {
     // Sample Magnetometer Data and store in buffer
+    
+    shouldSample = true;                    // Allows ADC to sample data
+    TMR1_INTERRUPT_TICKER_FACTOR = 5;       // Sample for a duration of 5 sec
+    
+    TMR3_Start();                           // TMR3 samples every 5 ms and stores in results
+    TMR1_Start();   
+    while (shouldSample);                   // shouldSample is set to false upon TMR1 interrupt
+    TMR1_Stop();
+    TMR3_Stop();
+    
+    int i;
+    for (i = 0; i < bufferSize; i++) {
+        buffer[i] = results[i] / 4;
+    }
 }
 
 void GetProbeData(int *buffer, int bufferSize) {
@@ -182,8 +227,7 @@ UNITEMode UpdateMode() {
                 _LATE2 = LED_OFF;
                 _LATE3 = LED_ON;
 
-                TMR3_Stop(); //Stops the timer 3 
-                TMR4_Start(); //Starts timer 4
+                TMR5_INTERRUPT_TICKER_FACTOR = ScienceMode.sampleRateInSec;
                 
                 return science;
             case science:
@@ -191,14 +235,16 @@ UNITEMode UpdateMode() {
                 _LATE3 = LED_OFF;
                 _LATE4 = LED_ON;
                 
-                TMR4_Stop(); //Stops timer 4
-                TMR5_Start(); //Starts timer 5
+                TMR5_INTERRUPT_TICKER_FACTOR = ReEntryMode.sampleRateInSec;
+
+                
                 return reentry;
             case reentry:
            
                 _LATE4 = LED_OFF;
                 
-                TMR5_Stop(); //Stops timer 5
+                TMR5_Stop();
+                
                 return safe;
             default:
                 
@@ -251,7 +297,7 @@ void CheckForModeUpdate(unsigned long time) {
     }
 }
 
-void BeginSample() {
+void TakeSample() {
     //int SamplePackage[8]; //This is the building of the package from the ADC data
     uint8_t SDPackage[8]; //Use this package structure to save to SD Card
     const int ARRAY_SIZE = 8;

@@ -81,6 +81,8 @@ typedef struct _TMR_OBJ_STRUCT
 
 static TMR_OBJ tmr1_obj;
 
+int TMR1_INTERRUPT_TICKER_FACTOR = 10; //1800;  // Begin in interim
+
 /**
   Section: Driver Interface
 */
@@ -91,9 +93,9 @@ void TMR1_Initialize (void)
     //TMR1 0; 
     TMR1 = 0x0000;
     //Period = 0.5 s; Frequency = 16000000 Hz; PR1 31250; 
-    PR1 = 0x7A12;
+    PR1 = 0xF424;
     //TCKPS 1:256; TON enabled; TSIDL disabled; TCS FOSC/2; TSYNC disabled; TGATE disabled; 
-    T1CON = 0x8020;
+    T1CON = 0x8030;
 
     
     IFS0bits.T1IF = true;
@@ -110,12 +112,17 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _T1Interrupt ( )
     /* Check if the Timer Interrupt/Status is set */
     
     //***User Area Begin
+    static volatile unsigned int CountCallBack = 0;
 
-    
-    // ticker function call;
-    // ticker is 1 -> Callback function gets called every time this ISR executes
-    TMR1_CallBack();
-    
+    // callback function - called every 3th pass
+    if (++CountCallBack >= TMR1_INTERRUPT_TICKER_FACTOR)
+    {
+        // ticker function call
+        TMR1_CallBack();
+
+        // reset ticker counter
+        CountCallBack = 0;
+    }
 
     //***User Area End
 
@@ -154,7 +161,11 @@ uint16_t TMR1_Counter16BitGet( void )
 
 void __attribute__ ((weak)) TMR1_CallBack(void)
 {
-    // Add your custom callback code here
+    if (currentMode == safe) {
+        Satellite_Initialize();
+    } else {
+        shouldSample = false;
+    }
 }
 
 void TMR1_Start( void )

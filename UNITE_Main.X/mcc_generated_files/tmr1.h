@@ -60,8 +60,8 @@
 
 #endif
 
-#define TMR1_INTERRUPT_TICKER_FACTOR    1
-
+//#define TMR1_INTERRUPT_TICKER_FACTOR  10  //1800
+extern int TMR1_INTERRUPT_TICKER_FACTOR;
 /**
   Section: Interface Routines
 */

@@ -39,8 +39,8 @@
 void StartWaitTimer() {
     
     // Begins wait timer
-    TMR2_Initialize();
-    TMR2_Start();
+    TMR1_Initialize();
+    TMR1_Start();
     
     // Initialize Debug light to off
    _LATE1 = LED_ON;

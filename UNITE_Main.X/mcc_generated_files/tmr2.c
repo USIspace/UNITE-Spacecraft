@@ -91,10 +91,10 @@ void TMR2_Initialize (void)
 {
     //TMR2 0; 
     TMR2 = 0x0000;
-    //Period = 1 s; Frequency = 16000000 Hz; PR2 62500; 
-    PR2 = 0xF424;
-    //TCKPS 1:256; T32 16 Bit; TON enabled; TSIDL disabled; TCS FOSC/2; TGATE disabled; 
-    T2CON = 0x8030;
+    //Period = 5 ms; Frequency = 16000000 Hz; PR2 10000; 
+    PR2 = 2710;
+    //TCKPS 1:8; T32 16 Bit; TON enabled; TSIDL disabled; TCS FOSC/2; TGATE disabled; 
+    T2CON = 0x8010;
 
     
     IFS0bits.T2IF = false;
@@ -161,9 +161,7 @@ uint16_t TMR2_Counter16BitGet( void )
 
 void __attribute__ ((weak)) TMR2_CallBack(void)
 {
- 
-    Satellite_Initialize(); 
- 
+    ADC1_GetResultFromChannels(results, lpADCConfig.startChannel, lpADCConfig.channelCount);
 }
 
 void TMR2_Start( void )

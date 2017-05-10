@@ -91,9 +91,9 @@ void TMR3_Initialize (void)
     //TMR3 0; 
     TMR3 = 0x0000;
     //Period = 1 s; Frequency = 16000000 Hz; PR3 62500; 
-    PR3 = 0xF424;
-    //TCKPS 1:256; TON enabled; TSIDL disabled; TCS FOSC/2; TGATE disabled; 
-    T3CON = 0x8030;
+    PR3 = 0x30D4;
+    //TCKPS 1:64; TON enabled; TSIDL disabled; TCS FOSC/2; TGATE disabled; 
+    T3CON = 0x8020;
 
     
     IFS0bits.T3IF = false;
@@ -111,12 +111,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _T3Interrupt (  )
 
     //***User Area Begin
     static volatile unsigned int CountCallBack = 0;
-    if (_RF1==LED_ON) {
-    _LATE1=LED_OFF;
-    }
-    else {
-    _LATE1=LED_ON;
-    }
+
     // callback function - called every 3th pass
     if (++CountCallBack >= TMR3_INTERRUPT_TICKER_FACTOR)
     {
@@ -161,20 +156,9 @@ uint16_t TMR3_Counter16BitGet( void )
     return( TMR3 );
 }
 
-bool isLightOn3 = false;
 void __attribute__ ((weak)) TMR3_CallBack(void)
 {
-    // Add your custom callback code here
-    BeginSample();                                  //User timer to call sampling function
-
-    if (isLightOn3) { 
-        _LATE1 = LED_OFF;
-        isLightOn3 = false;
-    }
-    else { 
-        _LATE1 = LED_ON;
-        isLightOn3 = true;
-    }
+    ADC1_GetResultFromChannels(results, magADCConfig.startChannel, magADCConfig.channelCount);
 }
 
 void TMR3_Start( void )

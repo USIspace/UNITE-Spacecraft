@@ -35,6 +35,18 @@ typedef struct {
     int endAltitudeInKm; // Altitude to end sampling and switch to new mode
 } SatelliteMode;
 
+typedef struct {
+    int startChannel;
+    int channelCount;
+} ADCSampleConfig;
+
+extern UNITEMode currentMode;
+extern bool shouldSample;
+extern int results[16];
+
+extern ADCSampleConfig lpADCConfig;
+extern ADCSampleConfig magADCConfig;
+extern ADCSampleConfig tmpADCConfig;
 
 void Satellite_Initialize(void);
 void GetTempData(uint8_t *buffer, int bufferSize);
@@ -48,4 +60,4 @@ void SendData(uint8_t *dataString, int stringLength);
 UNITEMode UpdateMode(void);
 unsigned int DelayForMode(void);
 
-void BeginSample(void);
+void TakeSample(void);

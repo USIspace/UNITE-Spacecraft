@@ -60,8 +60,10 @@
 
 #endif
 
-#define TMR5_INTERRUPT_TICKER_FACTOR    15
+//#define TMR5_INTERRUPT_TICKER_FACTOR    15
 
+extern int TMR5_INTERRUPT_TICKER_FACTOR;
+        
 /**
   Section: Interface Routines
 */

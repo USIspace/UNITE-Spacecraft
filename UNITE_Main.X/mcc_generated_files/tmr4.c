@@ -52,6 +52,7 @@
 #include "tmr4.h"
 #include "../SatelliteMode.h"
 #include "../system.h"
+#include "../adc1.h"
 
 /**
   Section: Data Type Definitions
@@ -159,18 +160,7 @@ uint16_t TMR4_Counter16BitGet( void )
 bool isLightOn4 = false;
 void __attribute__ ((weak)) TMR4_CallBack(void)
 {
-    // Add your custom callback code here
-    BeginSample();                                  //User timer to call sampling function
-
-    if (isLightOn4) { 
-        _LATE1 = LED_OFF;
-        isLightOn4 = false;
-    }
-    else { 
-        _LATE1 = LED_ON;
-        isLightOn4 = true;
-    }
-
+    ADC1_GetResultFromChannels(results, tmpADCConfig.startChannel, tmpADCConfig.channelCount);
 }
 
 void TMR4_Start( void )

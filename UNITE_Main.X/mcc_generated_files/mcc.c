@@ -90,9 +90,9 @@ void SYSTEM_Initialize(void)
     
     //Timer Initialization 
     //TMR1_Initialize();
-    //TMR2_Initialize();
-    //TMR3_Initialize();
-    //TMR4_Initialize();
+    TMR2_Initialize();
+    TMR3_Initialize();
+    TMR4_Initialize();
     //TMR5_Initialize();
 }
 
