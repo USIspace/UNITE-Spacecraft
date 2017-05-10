@@ -73,6 +73,7 @@
   </logicalFolder>
   <sourceRootList>
     <Elem>mcc_generated_files</Elem>
+    <Elem>fat_file_sys</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
