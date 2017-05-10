@@ -68,6 +68,7 @@ void wait_sec(unsigned long time) {
     }
 }*/
 
+/*
 void wait_sec(unsigned long seconds)
 {
     //unsigned long timel = 0;
@@ -82,7 +83,7 @@ void wait_sec(unsigned long seconds)
     }
     //timel = time * 1500;
     //for( ; timel; timel--);// no initial condition, while time is >0, decrement time each loop
-}
+}*/
 
 void wait_for(unsigned long something) {
     

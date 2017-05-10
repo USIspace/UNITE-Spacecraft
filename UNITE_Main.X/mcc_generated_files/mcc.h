@@ -61,6 +61,8 @@
 #include "tmr3.h"
 #include "tmr4.h"
 #include "tmr5.h"
+#include "spi1.h"
+#include "spi2.h"
 
 #define _XTAL_FREQ  32000000UL
 

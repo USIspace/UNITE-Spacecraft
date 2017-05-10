@@ -111,11 +111,11 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _T3Interrupt (  )
 
     //***User Area Begin
     static volatile unsigned int CountCallBack = 0;
-    if (_RF1==1){
-    _LATF1=0;
+    if (_RF1==LED_ON) {
+    _LATE1=LED_OFF;
     }
     else {
-    _LATF1=1;
+    _LATE1=LED_ON;
     }
     // callback function - called every 3th pass
     if (++CountCallBack >= TMR3_INTERRUPT_TICKER_FACTOR)
@@ -168,11 +168,11 @@ void __attribute__ ((weak)) TMR3_CallBack(void)
     BeginSample();                                  //User timer to call sampling function
 
     if (isLightOn3) { 
-        _LATF1 = 0;
+        _LATE1 = LED_OFF;
         isLightOn3 = false;
     }
     else { 
-        _LATF1 = 1;
+        _LATE1 = LED_ON;
         isLightOn3 = true;
     }
 }
