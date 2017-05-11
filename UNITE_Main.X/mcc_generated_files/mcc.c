@@ -94,6 +94,10 @@ void SYSTEM_Initialize(void)
     TMR3_Initialize();
     TMR4_Initialize();
     //TMR5_Initialize();
+    
+    TMR2_Stop();
+    TMR3_Stop();
+    TMR4_Stop();
 }
 
 void OSCILLATOR_Initialize(void)

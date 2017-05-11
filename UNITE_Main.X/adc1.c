@@ -52,7 +52,7 @@ void InitializeADC1(void) {
     
     
     /*AD1CON2 Register*/
-    AD1CON2 = 0x00F0;
+    AD1CON2 = 0x0000;
     
     AD1CON2bits.CSCNA = 1;
     AD1CON2bits.VCFG = 0;   // VR+ = VDD, VR- = VSS
@@ -78,14 +78,16 @@ void InitializeADC1(void) {
 void ADC1_GetResultFromChannels(int *results, uint16_t channelSelect, int channelCount)
 {
     AD1CSSL = channelSelect;
-    _SMPI = channelCount - 1;
-    _ADON = 1;
+    AD1CON2bits.SMPI = channelCount - 1;
+    AD1CON1bits.ADON = 1;
     
     _ASAM = 1;
     
     while (_DONE==0);
     
     _ASAM = 0;
+    
+    AD1CON1bits.ADON = 0;
     
     results[0] = ADC1BUF0;
     results[1] = ADC1BUF1;

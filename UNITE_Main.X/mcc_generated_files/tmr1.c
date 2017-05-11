@@ -50,6 +50,9 @@
 
 #include <xc.h>
 #include "tmr1.h"
+#include "tmr2.h"
+#include "tmr3.h"
+#include "tmr4.h"
 #include "../SatelliteMode.h"
 #include "../SampleManager.h"
 #include"../system.h"
@@ -93,7 +96,7 @@ void TMR1_Initialize (void)
 {
     //TMR1 0; 
     TMR1 = 0x0000;
-    //Period = 0.5 s; Frequency = 16000000 Hz; PR1 31250; 
+    //Period = 1 s; Frequency = 16000000 Hz; PR1 62500; 
     PR1 = 0xF424;
     //TCKPS 1:256; TON enabled; TSIDL disabled; TCS FOSC/2; TSYNC disabled; TGATE disabled; 
     T1CON = 0x8030;
@@ -165,7 +168,10 @@ void __attribute__ ((weak)) TMR1_CallBack(void)
     if (currentMode == safe) {
         Satellite_Initialize();
     } else {
-        shouldSample = false;
+        TMR1_Stop();
+        TMR2_Stop();
+        TMR3_Stop();
+        TMR4_Stop();
     }
 }
 

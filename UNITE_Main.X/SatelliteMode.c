@@ -245,9 +245,9 @@ void TakeSample() {
 
     Clear(TmpPackage, TMP_PACKAGE_SIZE);
 
-    GetTempData(TmpPackage, TMP_PACKAGE_SIZE);
+    //GetTempData(TmpPackage, TMP_PACKAGE_SIZE);
     GetMagnetometerData(MagPackage, MAG_PACKAGE_SIZE);
-    SendData(TmpPackage, TMP_PACKAGE_SIZE);
+    //SendData(TmpPackage, TMP_PACKAGE_SIZE);
  
     // Mode Update Test
     totalTime = totalTime + DelayForMode();

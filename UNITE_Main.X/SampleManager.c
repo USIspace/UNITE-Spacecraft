@@ -32,7 +32,7 @@ ADCSampleConfig lpADCConfig = {
 };
 
 ADCSampleConfig magADCConfig = {
-    0x00C1,      // AN1, 6, 7
+    0x00C4,      // AN2, 6, 7
     0
 };
 
@@ -48,14 +48,10 @@ ADCSampleConfig tmpADCConfig = {
 
 void GetTempData(uint8_t *buffer, int bufferSize) {
     
-    shouldSample = true;                    // Allows ADC to sample data
     TMR1_INTERRUPT_TICKER_FACTOR = 1;       // Sample for a duration of 1 sec
     
     TMR4_Start();                           // TMR4 samples every 1 s and stores in results
     TMR1_Start();
-    while (shouldSample);                   // shouldSample is set to false upon TMR1 interrupt
-    TMR1_Stop();
-    TMR4_Stop();
     
     int i;
     for (i = 0; i < bufferSize; i++) {
@@ -71,19 +67,16 @@ void GetGPSData(int *buffer, int bufferSize) {
 void GetMagnetometerData(uint8_t *buffer, int bufferSize) {
     // Sample Magnetometer Data and store in buffer
     
-    shouldSample = true;                    // Allows ADC to sample data
     TMR1_INTERRUPT_TICKER_FACTOR = 5;       // Sample for a duration of 5 sec
     
     TMR3_Start();                           // TMR3 samples every 100 ms and stores in results
     TMR1_Start();   
-    while (shouldSample);                   // shouldSample is set to false upon TMR1 interrupt
-    TMR1_Stop();
-    TMR3_Stop();
     
+    /*
     int i;
     for (i = 0; i < bufferSize; i++) {
         buffer[i] = results[i] / 4;
-    }
+    }*/
 }
 
 void GetProbeData(int *buffer, int bufferSize) {
@@ -108,7 +101,7 @@ void TakeMagnetometerSample() {
     uint8_t buffer[3];
     int i;
     for (i = 0; i < 3; i++) {
-        buffer[i] = results[i];
+        buffer[i] = results[i] / 4;
     }
     SendData(buffer, 3);
 }
