@@ -75,24 +75,9 @@ void InitializeADC1(void) {
 }
 
 /* Not functioning yet...needs to be updated to return an array of buffer values*/
-void ADC1_GetResultFromChannels(int *results, int startChannel, int channelCount)
+void ADC1_GetResultFromChannels(int *results, uint16_t channelSelect, int channelCount)
 {
-    uint16_t CSSL_CON = 1;
-    int i;
-    
-    // Set starting channel
-    for (i = 0; i < startChannel; i++) {
-        CSSL_CON = CSSL_CON * 2;
-    }
-    
-    // Select all channels after starting channel
-    uint16_t CSSL_ADD = CSSL_CON;
-    for (i = 0; i < channelCount; i++) {
-        CSSL_ADD = CSSL_ADD * 2;
-        CSSL_CON = CSSL_CON + CSSL_ADD;
-    }
-    
-    AD1CSSL = CSSL_CON;
+    AD1CSSL = channelSelect;
     _SMPI = channelCount - 1;
     _ADON = 1;
     

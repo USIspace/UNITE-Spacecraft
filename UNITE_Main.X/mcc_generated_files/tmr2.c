@@ -52,6 +52,7 @@
 #include "tmr2.h"
 #include "time.h"
 #include "../SatelliteMode.h"
+#include "../SampleManager.h"
 #include "../system.h"
 
 /**
@@ -161,7 +162,7 @@ uint16_t TMR2_Counter16BitGet( void )
 
 void __attribute__ ((weak)) TMR2_CallBack(void)
 {
-    ADC1_GetResultFromChannels(results, lpADCConfig.startChannel, lpADCConfig.channelCount);
+    TakeProbeSample();
 }
 
 void TMR2_Start( void )

@@ -51,6 +51,7 @@
 #include <xc.h>
 #include "tmr4.h"
 #include "../SatelliteMode.h"
+#include "../SampleManager.h"
 #include "../system.h"
 #include "../adc1.h"
 
@@ -157,10 +158,9 @@ uint16_t TMR4_Counter16BitGet( void )
     return( TMR4 );
 }
 
-bool isLightOn4 = false;
 void __attribute__ ((weak)) TMR4_CallBack(void)
 {
-    ADC1_GetResultFromChannels(results, tmpADCConfig.startChannel, tmpADCConfig.channelCount);
+    TakeTemperatureSample();
 }
 
 void TMR4_Start( void )

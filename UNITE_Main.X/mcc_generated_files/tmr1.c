@@ -51,6 +51,7 @@
 #include <xc.h>
 #include "tmr1.h"
 #include "../SatelliteMode.h"
+#include "../SampleManager.h"
 #include"../system.h"
 
 /**

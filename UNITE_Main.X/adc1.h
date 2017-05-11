@@ -49,6 +49,6 @@ typedef enum
 
 void InitializeADC1(void);
 
-void ADC1_GetResultFromChannels(int *results, int startChannel, int channelCount);
+void ADC1_GetResultFromChannels(int *results, uint16_t channelSelect, int channelCount);
 uint8_t ADC1_ResultGetFromChannel(int);
 void ADC1_ManualSampleForSec(unsigned long);

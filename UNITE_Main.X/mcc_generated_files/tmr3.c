@@ -51,6 +51,7 @@
 #include <xc.h>
 #include "tmr3.h"
 #include "../SatelliteMode.h"
+#include "../SampleManager.h"
 #include "../system.h"
 
 /**
@@ -90,10 +91,10 @@ void TMR3_Initialize (void)
 {
     //TMR3 0; 
     TMR3 = 0x0000;
-    //Period = 1 s; Frequency = 16000000 Hz; PR3 62500; 
-    PR3 = 0x30D4;
-    //TCKPS 1:64; TON enabled; TSIDL disabled; TCS FOSC/2; TGATE disabled; 
-    T3CON = 0x8020;
+    //Period = 100 ms; Frequency = 16000000 Hz; PR3 62500; 
+    PR3 = 0x618A;
+    //TCKPS 1:8; TON enabled; TSIDL disabled; TCS FOSC/2; TGATE disabled; 
+    T3CON = 0x8010;
 
     
     IFS0bits.T3IF = false;
@@ -158,7 +159,7 @@ uint16_t TMR3_Counter16BitGet( void )
 
 void __attribute__ ((weak)) TMR3_CallBack(void)
 {
-    ADC1_GetResultFromChannels(results, magADCConfig.startChannel, magADCConfig.channelCount);
+    TakeMagnetometerSample();
 }
 
 void TMR3_Start( void )

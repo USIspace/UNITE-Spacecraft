@@ -3,6 +3,7 @@
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp */
 #include "SatelliteMode.h"
+#include "SampleManager.h"
 #include "adc1.h"
 #include "mcc_generated_files/uart1.h"
 #include "mcc_generated_files/uart2.h"
@@ -26,10 +27,8 @@
 
 // Stores the current mode the satellite should be in
 // Will be used as a switch for the satellite to change modes
-static UNITEMode currentMode = safe;
-static bool shouldSample = false;
-static bool shouldChangeMode = false;
-int results[16];
+UNITEMode currentMode = safe;
+bool shouldChangeMode = false;
 
 unsigned long totalTime = 0; // Keeps track of overall mission clock
 
@@ -67,24 +66,7 @@ SatelliteMode SafeMode = {
     0,
 };
 
-/**************************
-  Sampling Configurations
- **************************/
 
-ADCSampleConfig lpADCConfig {
-    0,   // adc channel to start at   
-    0    // number of adc channels to sample
-};
-
-ADCSampleConfig magADCConfig {
-    0,
-    0
-};
-
-ADCSampleConfig tmpADCConfig {
-    8,
-    8
-};
  
 void Satellite_Initialize() {
 
@@ -99,54 +81,6 @@ void Satellite_Initialize() {
     TMR5_INTERRUPT_TICKER_FACTOR = InterimMode.sampleRateInSec;
     
     _LATE2 = LED_ON;
-}
-
-/**************
- Getter Methods
- **************/
-
-void GetTempData(uint8_t *buffer, int bufferSize) {
-    
-    shouldSample = true;                    // Allows ADC to sample data
-    TMR1_INTERRUPT_TICKER_FACTOR = 1;       // Sample for a duration of 1 sec
-    
-    TMR4_Start();                           // TMR4 samples every 1 s and stores in results
-    TMR1_Start();
-    while (shouldSample);                   // shouldSample is set to false upon TMR1 interrupt
-    TMR1_Stop();
-    TMR4_Stop();
-    
-    int i;
-    for (i = 0; i < bufferSize; i++) {
-        buffer[i] = results[i] / 4;
-    }
-
-}
-
-void GetGPSData(int *buffer, int bufferSize) {
-    // Sample GPS Data and store in buffer
-}
-
-void GetMagnetometerData(int *buffer, int bufferSize) {
-    // Sample Magnetometer Data and store in buffer
-    
-    shouldSample = true;                    // Allows ADC to sample data
-    TMR1_INTERRUPT_TICKER_FACTOR = 5;       // Sample for a duration of 5 sec
-    
-    TMR3_Start();                           // TMR3 samples every 5 ms and stores in results
-    TMR1_Start();   
-    while (shouldSample);                   // shouldSample is set to false upon TMR1 interrupt
-    TMR1_Stop();
-    TMR3_Stop();
-    
-    int i;
-    for (i = 0; i < bufferSize; i++) {
-        buffer[i] = results[i] / 4;
-    }
-}
-
-void GetProbeData(int *buffer, int bufferSize) {
-    // Sample Plasma Probe Data and store in buffer
 }
 
 /********************
@@ -297,16 +231,23 @@ void CheckForModeUpdate(unsigned long time) {
     }
 }
 
+/*******************
+  Controller Method
+ *******************/
+
 void TakeSample() {
     //int SamplePackage[8]; //This is the building of the package from the ADC data
-    uint8_t SDPackage[8]; //Use this package structure to save to SD Card
-    const int ARRAY_SIZE = 8;
+    uint8_t TmpPackage[8]; //Use this package structure to save to SD Card
+    const int TMP_PACKAGE_SIZE = 8;
 
+    uint8_t MagPackage[3];
+    const int MAG_PACKAGE_SIZE = 3;
 
-    Clear(SDPackage, ARRAY_SIZE);
+    Clear(TmpPackage, TMP_PACKAGE_SIZE);
 
-    GetTempData(SDPackage, ARRAY_SIZE);
-    SendData(SDPackage, ARRAY_SIZE);
+    GetTempData(TmpPackage, TMP_PACKAGE_SIZE);
+    GetMagnetometerData(MagPackage, MAG_PACKAGE_SIZE);
+    SendData(TmpPackage, TMP_PACKAGE_SIZE);
  
     // Mode Update Test
     totalTime = totalTime + DelayForMode();

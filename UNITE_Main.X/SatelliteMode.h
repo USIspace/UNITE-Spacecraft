@@ -35,24 +35,12 @@ typedef struct {
     int endAltitudeInKm; // Altitude to end sampling and switch to new mode
 } SatelliteMode;
 
-typedef struct {
-    int startChannel;
-    int channelCount;
-} ADCSampleConfig;
+
 
 extern UNITEMode currentMode;
-extern bool shouldSample;
-extern int results[16];
-
-extern ADCSampleConfig lpADCConfig;
-extern ADCSampleConfig magADCConfig;
-extern ADCSampleConfig tmpADCConfig;
 
 void Satellite_Initialize(void);
-void GetTempData(uint8_t *buffer, int bufferSize);
-void GetGPSData(int *buffer, int bufferSize);
-void GetMagnetometerData(int *buffer, int bufferSize);
-void GetProbeData(int *buffer, int bufferSize);
+
 void SaveData(int *package, int packageSize);
 void PackageData(int *package, int stringLength, int *temps, int *gps, int *mags, int *densities);
 void SendData(uint8_t *dataString, int stringLength);
