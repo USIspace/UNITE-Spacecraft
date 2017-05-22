@@ -22,6 +22,14 @@ bool shouldSample = false;
 int results[16];
 
 
+/******************************
+  Instrument Timer Properties
+ ******************************/
+
+int currentLangmuirProbeWait = 0;
+int currentMagnetometerWait = 0;
+int currentTemperatureWait = 0;
+int currentGPSWait = 0;
 /**************************
   Sampling Configurations
  **************************/
@@ -46,25 +54,20 @@ ADCSampleConfig tmpADCConfig = {
  Data Manager Methods
  ********************/
 
-void GetTempData(uint8_t *buffer, int bufferSize) {
+void BeginTemperatureSampling() {
     
     TMR1_INTERRUPT_TICKER_FACTOR = 1;       // Sample for a duration of 1 sec
     
     TMR4_Start();                           // TMR4 samples every 1 s and stores in results
     TMR1_Start();
-    
-    int i;
-    for (i = 0; i < bufferSize; i++) {
-        buffer[i] = results[i] / 4;
-    }
 
 }
 
-void GetGPSData(int *buffer, int bufferSize) {
+void BeginGPSSampling() {
     // Sample GPS Data and store in buffer
 }
 
-void GetMagnetometerData(uint8_t *buffer, int bufferSize) {
+void BeginMagnetometerSampling() {
     // Sample Magnetometer Data and store in buffer
     
     TMR1_INTERRUPT_TICKER_FACTOR = 5;       // Sample for a duration of 5 sec
@@ -72,14 +75,9 @@ void GetMagnetometerData(uint8_t *buffer, int bufferSize) {
     TMR3_Start();                           // TMR3 samples every 100 ms and stores in results
     TMR1_Start();   
     
-    /*
-    int i;
-    for (i = 0; i < bufferSize; i++) {
-        buffer[i] = results[i] / 4;
-    }*/
 }
 
-void GetProbeData(int *buffer, int bufferSize) {
+void BeginLangmuirProbeSampling() {
     // Sample Plasma Probe Data and store in buffer
 }
 

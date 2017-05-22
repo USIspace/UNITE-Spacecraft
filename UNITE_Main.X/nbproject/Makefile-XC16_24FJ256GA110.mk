@@ -51,17 +51,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=mcc_generated_files/uart3.c mcc_generated_files/uart4.c mcc_generated_files/interrupt_manager.c mcc_generated_files/mcc.c mcc_generated_files/pin_manager.c mcc_generated_files/tmr2.c mcc_generated_files/traps.c mcc_generated_files/tmr3.c mcc_generated_files/tmr4.c mcc_generated_files/tmr5.c mcc_generated_files/uart1.c mcc_generated_files/uart2.c mcc_generated_files/tmr1.c mcc_generated_files/spi1.c mcc_generated_files/spi2.c configuration_bits.c main.c system.c traps.c user.c adc1.c SatelliteMode.c SampleManager.c
+SOURCEFILES_QUOTED_IF_SPACED=mcc_generated_files/uart3.c mcc_generated_files/uart4.c mcc_generated_files/interrupt_manager.c mcc_generated_files/mcc.c mcc_generated_files/pin_manager.c mcc_generated_files/tmr2.c mcc_generated_files/traps.c mcc_generated_files/tmr3.c mcc_generated_files/tmr4.c mcc_generated_files/tmr5.c mcc_generated_files/uart1.c mcc_generated_files/uart2.c mcc_generated_files/tmr1.c mcc_generated_files/spi1.c mcc_generated_files/spi2.c configuration_bits.c main.c system.c traps.c user.c adc1.c SatelliteMode.c SampleManager.c CommandParser.c SystemConfiguration.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/mcc_generated_files/uart3.o ${OBJECTDIR}/mcc_generated_files/uart4.o ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o ${OBJECTDIR}/mcc_generated_files/mcc.o ${OBJECTDIR}/mcc_generated_files/pin_manager.o ${OBJECTDIR}/mcc_generated_files/tmr2.o ${OBJECTDIR}/mcc_generated_files/traps.o ${OBJECTDIR}/mcc_generated_files/tmr3.o ${OBJECTDIR}/mcc_generated_files/tmr4.o ${OBJECTDIR}/mcc_generated_files/tmr5.o ${OBJECTDIR}/mcc_generated_files/uart1.o ${OBJECTDIR}/mcc_generated_files/uart2.o ${OBJECTDIR}/mcc_generated_files/tmr1.o ${OBJECTDIR}/mcc_generated_files/spi1.o ${OBJECTDIR}/mcc_generated_files/spi2.o ${OBJECTDIR}/configuration_bits.o ${OBJECTDIR}/main.o ${OBJECTDIR}/system.o ${OBJECTDIR}/traps.o ${OBJECTDIR}/user.o ${OBJECTDIR}/adc1.o ${OBJECTDIR}/SatelliteMode.o ${OBJECTDIR}/SampleManager.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/mcc_generated_files/uart3.o.d ${OBJECTDIR}/mcc_generated_files/uart4.o.d ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o.d ${OBJECTDIR}/mcc_generated_files/mcc.o.d ${OBJECTDIR}/mcc_generated_files/pin_manager.o.d ${OBJECTDIR}/mcc_generated_files/tmr2.o.d ${OBJECTDIR}/mcc_generated_files/traps.o.d ${OBJECTDIR}/mcc_generated_files/tmr3.o.d ${OBJECTDIR}/mcc_generated_files/tmr4.o.d ${OBJECTDIR}/mcc_generated_files/tmr5.o.d ${OBJECTDIR}/mcc_generated_files/uart1.o.d ${OBJECTDIR}/mcc_generated_files/uart2.o.d ${OBJECTDIR}/mcc_generated_files/tmr1.o.d ${OBJECTDIR}/mcc_generated_files/spi1.o.d ${OBJECTDIR}/mcc_generated_files/spi2.o.d ${OBJECTDIR}/configuration_bits.o.d ${OBJECTDIR}/main.o.d ${OBJECTDIR}/system.o.d ${OBJECTDIR}/traps.o.d ${OBJECTDIR}/user.o.d ${OBJECTDIR}/adc1.o.d ${OBJECTDIR}/SatelliteMode.o.d ${OBJECTDIR}/SampleManager.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/mcc_generated_files/uart3.o ${OBJECTDIR}/mcc_generated_files/uart4.o ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o ${OBJECTDIR}/mcc_generated_files/mcc.o ${OBJECTDIR}/mcc_generated_files/pin_manager.o ${OBJECTDIR}/mcc_generated_files/tmr2.o ${OBJECTDIR}/mcc_generated_files/traps.o ${OBJECTDIR}/mcc_generated_files/tmr3.o ${OBJECTDIR}/mcc_generated_files/tmr4.o ${OBJECTDIR}/mcc_generated_files/tmr5.o ${OBJECTDIR}/mcc_generated_files/uart1.o ${OBJECTDIR}/mcc_generated_files/uart2.o ${OBJECTDIR}/mcc_generated_files/tmr1.o ${OBJECTDIR}/mcc_generated_files/spi1.o ${OBJECTDIR}/mcc_generated_files/spi2.o ${OBJECTDIR}/configuration_bits.o ${OBJECTDIR}/main.o ${OBJECTDIR}/system.o ${OBJECTDIR}/traps.o ${OBJECTDIR}/user.o ${OBJECTDIR}/adc1.o ${OBJECTDIR}/SatelliteMode.o ${OBJECTDIR}/SampleManager.o ${OBJECTDIR}/CommandParser.o ${OBJECTDIR}/SystemConfiguration.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/mcc_generated_files/uart3.o.d ${OBJECTDIR}/mcc_generated_files/uart4.o.d ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o.d ${OBJECTDIR}/mcc_generated_files/mcc.o.d ${OBJECTDIR}/mcc_generated_files/pin_manager.o.d ${OBJECTDIR}/mcc_generated_files/tmr2.o.d ${OBJECTDIR}/mcc_generated_files/traps.o.d ${OBJECTDIR}/mcc_generated_files/tmr3.o.d ${OBJECTDIR}/mcc_generated_files/tmr4.o.d ${OBJECTDIR}/mcc_generated_files/tmr5.o.d ${OBJECTDIR}/mcc_generated_files/uart1.o.d ${OBJECTDIR}/mcc_generated_files/uart2.o.d ${OBJECTDIR}/mcc_generated_files/tmr1.o.d ${OBJECTDIR}/mcc_generated_files/spi1.o.d ${OBJECTDIR}/mcc_generated_files/spi2.o.d ${OBJECTDIR}/configuration_bits.o.d ${OBJECTDIR}/main.o.d ${OBJECTDIR}/system.o.d ${OBJECTDIR}/traps.o.d ${OBJECTDIR}/user.o.d ${OBJECTDIR}/adc1.o.d ${OBJECTDIR}/SatelliteMode.o.d ${OBJECTDIR}/SampleManager.o.d ${OBJECTDIR}/CommandParser.o.d ${OBJECTDIR}/SystemConfiguration.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/mcc_generated_files/uart3.o ${OBJECTDIR}/mcc_generated_files/uart4.o ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o ${OBJECTDIR}/mcc_generated_files/mcc.o ${OBJECTDIR}/mcc_generated_files/pin_manager.o ${OBJECTDIR}/mcc_generated_files/tmr2.o ${OBJECTDIR}/mcc_generated_files/traps.o ${OBJECTDIR}/mcc_generated_files/tmr3.o ${OBJECTDIR}/mcc_generated_files/tmr4.o ${OBJECTDIR}/mcc_generated_files/tmr5.o ${OBJECTDIR}/mcc_generated_files/uart1.o ${OBJECTDIR}/mcc_generated_files/uart2.o ${OBJECTDIR}/mcc_generated_files/tmr1.o ${OBJECTDIR}/mcc_generated_files/spi1.o ${OBJECTDIR}/mcc_generated_files/spi2.o ${OBJECTDIR}/configuration_bits.o ${OBJECTDIR}/main.o ${OBJECTDIR}/system.o ${OBJECTDIR}/traps.o ${OBJECTDIR}/user.o ${OBJECTDIR}/adc1.o ${OBJECTDIR}/SatelliteMode.o ${OBJECTDIR}/SampleManager.o
+OBJECTFILES=${OBJECTDIR}/mcc_generated_files/uart3.o ${OBJECTDIR}/mcc_generated_files/uart4.o ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o ${OBJECTDIR}/mcc_generated_files/mcc.o ${OBJECTDIR}/mcc_generated_files/pin_manager.o ${OBJECTDIR}/mcc_generated_files/tmr2.o ${OBJECTDIR}/mcc_generated_files/traps.o ${OBJECTDIR}/mcc_generated_files/tmr3.o ${OBJECTDIR}/mcc_generated_files/tmr4.o ${OBJECTDIR}/mcc_generated_files/tmr5.o ${OBJECTDIR}/mcc_generated_files/uart1.o ${OBJECTDIR}/mcc_generated_files/uart2.o ${OBJECTDIR}/mcc_generated_files/tmr1.o ${OBJECTDIR}/mcc_generated_files/spi1.o ${OBJECTDIR}/mcc_generated_files/spi2.o ${OBJECTDIR}/configuration_bits.o ${OBJECTDIR}/main.o ${OBJECTDIR}/system.o ${OBJECTDIR}/traps.o ${OBJECTDIR}/user.o ${OBJECTDIR}/adc1.o ${OBJECTDIR}/SatelliteMode.o ${OBJECTDIR}/SampleManager.o ${OBJECTDIR}/CommandParser.o ${OBJECTDIR}/SystemConfiguration.o
 
 # Source Files
-SOURCEFILES=mcc_generated_files/uart3.c mcc_generated_files/uart4.c mcc_generated_files/interrupt_manager.c mcc_generated_files/mcc.c mcc_generated_files/pin_manager.c mcc_generated_files/tmr2.c mcc_generated_files/traps.c mcc_generated_files/tmr3.c mcc_generated_files/tmr4.c mcc_generated_files/tmr5.c mcc_generated_files/uart1.c mcc_generated_files/uart2.c mcc_generated_files/tmr1.c mcc_generated_files/spi1.c mcc_generated_files/spi2.c configuration_bits.c main.c system.c traps.c user.c adc1.c SatelliteMode.c SampleManager.c
+SOURCEFILES=mcc_generated_files/uart3.c mcc_generated_files/uart4.c mcc_generated_files/interrupt_manager.c mcc_generated_files/mcc.c mcc_generated_files/pin_manager.c mcc_generated_files/tmr2.c mcc_generated_files/traps.c mcc_generated_files/tmr3.c mcc_generated_files/tmr4.c mcc_generated_files/tmr5.c mcc_generated_files/uart1.c mcc_generated_files/uart2.c mcc_generated_files/tmr1.c mcc_generated_files/spi1.c mcc_generated_files/spi2.c configuration_bits.c main.c system.c traps.c user.c adc1.c SatelliteMode.c SampleManager.c CommandParser.c SystemConfiguration.c
 
 
 CFLAGS=
@@ -249,6 +249,20 @@ ${OBJECTDIR}/SampleManager.o: SampleManager.c  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} $(MP_EXTRA_CC_PRE)  SampleManager.c  -o ${OBJECTDIR}/SampleManager.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/SampleManager.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1    -omf=elf -DXPRJ_XC16_24FJ256GA110=$(CND_CONF)  -no-legacy-libc  $(COMPARISON_BUILD)  -I"mcc_generated_files" -I"fat_file_sys" -I"fat_file_sys/option" -O0 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/SampleManager.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
+${OBJECTDIR}/CommandParser.o: CommandParser.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/CommandParser.o.d 
+	@${RM} ${OBJECTDIR}/CommandParser.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  CommandParser.c  -o ${OBJECTDIR}/CommandParser.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/CommandParser.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1    -omf=elf -DXPRJ_XC16_24FJ256GA110=$(CND_CONF)  -no-legacy-libc  $(COMPARISON_BUILD)  -I"mcc_generated_files" -I"fat_file_sys" -I"fat_file_sys/option" -O0 -msmart-io=1 -Wall -msfr-warn=off  
+	@${FIXDEPS} "${OBJECTDIR}/CommandParser.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/SystemConfiguration.o: SystemConfiguration.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/SystemConfiguration.o.d 
+	@${RM} ${OBJECTDIR}/SystemConfiguration.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  SystemConfiguration.c  -o ${OBJECTDIR}/SystemConfiguration.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/SystemConfiguration.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1    -omf=elf -DXPRJ_XC16_24FJ256GA110=$(CND_CONF)  -no-legacy-libc  $(COMPARISON_BUILD)  -I"mcc_generated_files" -I"fat_file_sys" -I"fat_file_sys/option" -O0 -msmart-io=1 -Wall -msfr-warn=off  
+	@${FIXDEPS} "${OBJECTDIR}/SystemConfiguration.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
 else
 ${OBJECTDIR}/mcc_generated_files/uart3.o: mcc_generated_files/uart3.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/mcc_generated_files" 
@@ -410,6 +424,20 @@ ${OBJECTDIR}/SampleManager.o: SampleManager.c  nbproject/Makefile-${CND_CONF}.mk
 	@${RM} ${OBJECTDIR}/SampleManager.o 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  SampleManager.c  -o ${OBJECTDIR}/SampleManager.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/SampleManager.o.d"        -g -omf=elf -DXPRJ_XC16_24FJ256GA110=$(CND_CONF)  -no-legacy-libc  $(COMPARISON_BUILD)  -I"mcc_generated_files" -I"fat_file_sys" -I"fat_file_sys/option" -O0 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/SampleManager.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/CommandParser.o: CommandParser.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/CommandParser.o.d 
+	@${RM} ${OBJECTDIR}/CommandParser.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  CommandParser.c  -o ${OBJECTDIR}/CommandParser.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/CommandParser.o.d"        -g -omf=elf -DXPRJ_XC16_24FJ256GA110=$(CND_CONF)  -no-legacy-libc  $(COMPARISON_BUILD)  -I"mcc_generated_files" -I"fat_file_sys" -I"fat_file_sys/option" -O0 -msmart-io=1 -Wall -msfr-warn=off  
+	@${FIXDEPS} "${OBJECTDIR}/CommandParser.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/SystemConfiguration.o: SystemConfiguration.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/SystemConfiguration.o.d 
+	@${RM} ${OBJECTDIR}/SystemConfiguration.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  SystemConfiguration.c  -o ${OBJECTDIR}/SystemConfiguration.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/SystemConfiguration.o.d"        -g -omf=elf -DXPRJ_XC16_24FJ256GA110=$(CND_CONF)  -no-legacy-libc  $(COMPARISON_BUILD)  -I"mcc_generated_files" -I"fat_file_sys" -I"fat_file_sys/option" -O0 -msmart-io=1 -Wall -msfr-warn=off  
+	@${FIXDEPS} "${OBJECTDIR}/SystemConfiguration.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 endif
 

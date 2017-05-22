@@ -33,10 +33,15 @@ typedef struct {
 extern bool shouldSample;
 extern int results[16];
 
-void GetTempData(uint8_t *buffer, int bufferSize);
-void GetGPSData(int *buffer, int bufferSize);
-void GetMagnetometerData(uint8_t *buffer, int bufferSize);
-void GetProbeData(int *buffer, int bufferSize);
+extern int currentLangmuirProbeWait;
+extern int currentMagnetometerWait;
+extern int currentTemperatureWait;
+extern int currentGPSWait;
+
+void BeginTemperatureSampling();
+void BeginGPSSampling();
+void BeginMagnetometerSampling();
+void BeginLangmuirProbeSampling();
 
 void TakeTemperatureSample();
 void TakeGPSSample();

@@ -22,6 +22,7 @@ go here. */
 void ConfigureOscillator(void); /* Handles clock switching/osc initialization */
 void wait_sec(unsigned long);
 void wait_for(unsigned long);
+uint16_t Pow(int, int);
 int add_sec(unsigned long *);
 
 //void wait_ms(unsigned long);

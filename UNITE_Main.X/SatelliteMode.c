@@ -236,18 +236,23 @@ void CheckForModeUpdate(unsigned long time) {
  *******************/
 
 void TakeSample() {
-    //int SamplePackage[8]; //This is the building of the package from the ADC data
-    uint8_t TmpPackage[8]; //Use this package structure to save to SD Card
-    const int TMP_PACKAGE_SIZE = 8;
 
-    uint8_t MagPackage[3];
-    const int MAG_PACKAGE_SIZE = 3;
-
-    Clear(TmpPackage, TMP_PACKAGE_SIZE);
-
-    //GetTempData(TmpPackage, TMP_PACKAGE_SIZE);
-    GetMagnetometerData(MagPackage, MAG_PACKAGE_SIZE);
-    //SendData(TmpPackage, TMP_PACKAGE_SIZE);
+    // Langmuir Probe 
+    if (currentLangmuirProbeWait++ > GetSampleRate(LangmuirProbe, currentMode)) {
+        
+    }
+    
+    if (currentMagnetometerWait++ > GetSampleRate(Magnetometer, currentMode)) {
+        
+    }
+    
+    if (currentTemperatureWait++ > GetSampleRate(TemperatureSensors, currentMode)) {
+        
+    }
+    
+    if (currentGPSWait++ > GetSampleRate(GPSUnit, currentMode)) {
+        
+    }
  
     // Mode Update Test
     totalTime = totalTime + DelayForMode();

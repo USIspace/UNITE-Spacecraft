@@ -29,6 +29,8 @@
       <itemPath>adc1.h</itemPath>
       <itemPath>SatelliteMode.h</itemPath>
       <itemPath>SampleManager.h</itemPath>
+      <itemPath>CommandParser.h</itemPath>
+      <itemPath>SystemConfiguration.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -66,6 +68,8 @@
       <itemPath>adc1.c</itemPath>
       <itemPath>SatelliteMode.c</itemPath>
       <itemPath>SampleManager.c</itemPath>
+      <itemPath>CommandParser.c</itemPath>
+      <itemPath>SystemConfiguration.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
