@@ -30,18 +30,25 @@ typedef struct {
 //extern ADCSampleConfig magADCConfig;
 //extern ADCSampleConfig tmpADCConfig;
 
-extern bool shouldSample;
-extern int results[16];
-
+// State Variables
 extern int currentLangmuirProbeWait;
 extern int currentMagnetometerWait;
 extern int currentTemperatureWait;
 extern int currentGPSWait;
 
+extern int currentLangmuirProbeSweepProgress;
+extern int currentMagnetometerSweepProgress;
+
+extern bool isLangmuirProbeSweeping;
+extern bool isMagnetometerSweeping;
+
+// Sampling Functions
 void BeginTemperatureSampling();
 void BeginGPSSampling();
 void BeginMagnetometerSampling();
 void BeginLangmuirProbeSampling();
+
+void ManageSweepingProgress();
 
 void TakeTemperatureSample();
 void TakeGPSSample();

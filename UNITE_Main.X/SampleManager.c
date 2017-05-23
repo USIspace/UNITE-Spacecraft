@@ -4,6 +4,7 @@
 #include "user.h"          /* User funct/params, such as InitApp */
 #include "SatelliteMode.h"
 #include "SampleManager.h"
+#include "SystemConfiguration.h"
 #include "adc1.h"
 #include "mcc_generated_files/uart1.h"
 #include "mcc_generated_files/uart2.h"
@@ -15,12 +16,28 @@
 #include "mcc_generated_files/tmr4.h"
 
 
-/***********************
-  Manager Declarations
- **********************/
-bool shouldSample = false;
-int results[16];
+/*****************************
+  Data Storage Initializations
+ *****************************/
+const int RESULTS_SIZE = 16;
+int langmuirProbeResults[16];
+int magnetometerResults[16];
+int temperatureResults[16];
 
+uint8_t langmuirProbeBuffer[100];
+uint8_t magnetometerBuffer[600];
+uint8_t temperatureBuffer[8];
+uint8_t gpsBuffer[100];
+
+int currentLangmuirProbeBufferIndex = 0;
+int currentMagnetometerBufferIndex = 0;
+int currentTemperatureBufferIndex = 0;
+int currentGPSBufferIndex = 0;
+
+const int LP_BUFFER_SIZE = 100;
+const int MAG_BUFFER_SIZE = 600;
+const int TMP_BUFFER_SIZE = 8;
+const int GPS_BUFFER_SIZE = 100;
 
 /******************************
   Instrument Timer Properties
@@ -30,6 +47,12 @@ int currentLangmuirProbeWait = 0;
 int currentMagnetometerWait = 0;
 int currentTemperatureWait = 0;
 int currentGPSWait = 0;
+
+int currentLangmuirProbeSweepProgress = 0;
+int currentMagnetometerSweepProgress = 0;
+
+bool isLangmuirProbeSweeping = false;
+bool isMagnetometerSweeping = false;
 /**************************
   Sampling Configurations
  **************************/
@@ -50,61 +73,133 @@ ADCSampleConfig tmpADCConfig = {
 };
 
 
-/********************
- Data Manager Methods
- ********************/
+/*****************************
+ Begin/End Instrument Sampling
+ *****************************/
+
+// MARK: Begin Methods
+
+void BeginLangmuirProbeSampling() {
+    // Sample Plasma Probe Data and store in buffer
+    isLangmuirProbeSweeping = true;
+    TMR2_Start();
+}
+
+void BeginMagnetometerSampling() {
+    // Sample Magnetometer Data and store in buffer
+    _LATE3 = LED_ON;
+
+    isMagnetometerSweeping = true;
+    TMR3_Start();                           // TMR3 samples every 100 ms and stores in results
+}
 
 void BeginTemperatureSampling() {
-    
-    TMR1_INTERRUPT_TICKER_FACTOR = 1;       // Sample for a duration of 1 sec
-    
-    TMR4_Start();                           // TMR4 samples every 1 s and stores in results
-    TMR1_Start();
-
+    _LATE4 = LED_ON;
+    TakeTemperatureSample();
+    EndTemperatureSensorSampling();
 }
 
 void BeginGPSSampling() {
     // Sample GPS Data and store in buffer
 }
 
-void BeginMagnetometerSampling() {
-    // Sample Magnetometer Data and store in buffer
+// MARK: End Methods
+
+void EndLangmuirProbeSampling() {
+    TMR2_Stop();
+    currentLangmuirProbeSweepProgress = 0;
+    isLangmuirProbeSweeping = false;
     
-    TMR1_INTERRUPT_TICKER_FACTOR = 5;       // Sample for a duration of 5 sec
-    
-    TMR3_Start();                           // TMR3 samples every 100 ms and stores in results
-    TMR1_Start();   
-    
+    SendData(langmuirProbeBuffer, LP_BUFFER_SIZE);
+    currentLangmuirProbeBufferIndex = 0;
 }
 
-void BeginLangmuirProbeSampling() {
-    // Sample Plasma Probe Data and store in buffer
+void EndMagnetometerSampling() {
+    TMR3_Stop();
+    currentMagnetometerSweepProgress = 0;
+    isMagnetometerSweeping = false;
+    
+    SendData(magnetometerBuffer, MAG_BUFFER_SIZE);
+    currentMagnetometerBufferIndex = 0;
+    
+    _LATE3 = LED_OFF;
 }
 
+void EndTemperatureSensorSampling() {
+    SendData(temperatureBuffer, MAG_BUFFER_SIZE);
+    currentTemperatureBufferIndex = 0;
+    
+    _LATE4 = LED_OFF;
+}
+
+void EndGPSSampling() {
+    
+}
+/***************************
+  Sweeping Progress Manager
+ **************************/
+
+void ManageSweepingProgress() {
+    
+    if (isLangmuirProbeSweeping) {
+        if (currentLangmuirProbeSweepProgress++ > GetSweepDuration(LangmuirProbe, currentMode)) {
+            EndLangmuirProbeSampling();
+        }
+    }
+    
+    if (isMagnetometerSweeping) {
+        if (currentMagnetometerSweepProgress++ > GetSweepDuration(Magnetometer, currentMode)) {
+            EndMagnetometerSampling();
+        }
+    }
+}
 /***********************
   Single Sample Methods
  ***********************/
 
+void TakeProbeSample() {
+    Clear(langmuirProbeResults, RESULTS_SIZE);
+    ADC1_GetResultFromChannels(langmuirProbeResults, lpADCConfig.channelSelect, lpADCConfig.channelCount);
+    
+    int probeResultSize = 1;
+    if (currentLangmuirProbeBufferIndex < LP_BUFFER_SIZE) {
+        Copy(langmuirProbeResults, langmuirProbeBuffer, 0, currentLangmuirProbeBufferIndex, probeResultSize);
+        currentLangmuirProbeBufferIndex = currentLangmuirProbeBufferIndex + probeResultSize;
+    } else {
+        EndLangmuirProbeSampling();
+    }
+}
+
+void TakeMagnetometerSample() {
+    Clear(magnetometerResults, RESULTS_SIZE);
+    ADC1_GetResultFromChannels(magnetometerResults, magADCConfig.channelSelect, magADCConfig.channelCount);
+    
+    int magnetometerResultSize = 3;
+    if (currentMagnetometerBufferIndex < MAG_BUFFER_SIZE) {
+        Copy(magnetometerResults, magnetometerBuffer, 0, currentMagnetometerBufferIndex, magnetometerResultSize);
+        currentMagnetometerBufferIndex = currentMagnetometerBufferIndex + magnetometerResultSize;
+    } else {
+        EndMagnetometerSampling();
+        
+    }
+}
+
 void TakeTemperatureSample() {
-    ADC1_GetResultFromChannels(results, tmpADCConfig.channelSelect, tmpADCConfig.channelCount);
+    Clear(temperatureResults, RESULTS_SIZE);
+    ADC1_GetResultFromChannels(temperatureResults, tmpADCConfig.channelSelect, tmpADCConfig.channelCount);
+    
+    int temperatureResultSize = 8;
+    if (currentTemperatureBufferIndex < TMP_BUFFER_SIZE) {
+        Copy(temperatureResults, temperatureBuffer, 0, currentTemperatureBufferIndex, temperatureResultSize);
+        currentTemperatureBufferIndex = currentTemperatureBufferIndex + temperatureResultSize;
+    } else {
+        EndTemperatureSensorSampling();
+    }
 }
 
 void TakeGPSSample() {
 
 }
 
-void TakeMagnetometerSample() {
-    ADC1_GetResultFromChannels(results, magADCConfig.channelSelect, magADCConfig.channelCount);
-    
-    uint8_t buffer[3];
-    int i;
-    for (i = 0; i < 3; i++) {
-        buffer[i] = results[i] / 4;
-    }
-    SendData(buffer, 3);
-}
 
-void TakeProbeSample() {
-    ADC1_GetResultFromChannels(results, lpADCConfig.channelSelect, lpADCConfig.channelCount);
 
-}

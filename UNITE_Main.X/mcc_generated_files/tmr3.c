@@ -52,6 +52,7 @@
 #include "tmr3.h"
 #include "../SatelliteMode.h"
 #include "../SampleManager.h"
+#include "../SystemConfiguration.h"
 #include "../system.h"
 
 /**
@@ -114,7 +115,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _T3Interrupt (  )
     static volatile unsigned int CountCallBack = 0;
 
     // callback function - called every 3th pass
-    if (++CountCallBack >= TMR3_INTERRUPT_TICKER_FACTOR)
+    if (++CountCallBack >= GetSweepRate(Magnetometer, currentMode))
     {
         // ticker function call
         TMR3_CallBack();

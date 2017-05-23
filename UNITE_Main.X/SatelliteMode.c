@@ -4,6 +4,7 @@
 #include "user.h"          /* User funct/params, such as InitApp */
 #include "SatelliteMode.h"
 #include "SampleManager.h"
+#include "SystemConfiguration.h"
 #include "adc1.h"
 #include "mcc_generated_files/uart1.h"
 #include "mcc_generated_files/uart2.h"
@@ -43,25 +44,21 @@ unsigned long REENTRY_STOP_TIME = 10800; // 3 hrs in
  *******************************/
 
 SatelliteMode InterimMode = {
-    10, // Time in seconds between each sample of sensors
     400, // Altitude to begin sampling in this mode 
     300, // Altitude to end sampling and switch to new mode
 };
 
 SatelliteMode ScienceMode = {
-    30,
     300,
     200,
 };
 
 SatelliteMode ReEntryMode = {
-    15,
     200,
     0,
 };
 
 SatelliteMode SafeMode = {
-    0,
     0,
     0,
 };
@@ -70,16 +67,20 @@ SatelliteMode SafeMode = {
  
 void Satellite_Initialize() {
 
+    // Initialize Analog/Digital Converter
     InitializeADC1();
+    
+    // Initialize Main Mode Timer
     TMR5_Initialize();
     
+    // Set Current Mode to interim on start
     currentMode = interim;
+    TMR1_INTERRUPT_TICKER_FACTOR = 1;
     
-    TMR1_Stop();
+    // Start Main Timer
     TMR5_Start();
-    
-    TMR5_INTERRUPT_TICKER_FACTOR = InterimMode.sampleRateInSec;
-    
+        
+    // Debug light
     _LATE2 = LED_ON;
 }
 
@@ -120,9 +121,9 @@ void PackageData(int *package, int stringLength, int *temps, int *gps, int *mags
 void SendData(uint8_t *dataString, int stringLength) {
     
     
-    /*==============
-     Save to Arduino
-     ==============*/
+    /*============================
+     Save to Data Acquisition Unit
+     =============================*/
     
     // Send data via UART here
     int i;
@@ -141,93 +142,61 @@ void SendData(uint8_t *dataString, int stringLength) {
 // Description: Handler for switching satellite modes
 
 UNITEMode UpdateMode() {
-    // Check current altitude
     // Determine which mode should be active
     // Return value of mode
-
-    if (shouldChangeMode) {
-
-        shouldChangeMode = false;
-
-        int i;
-        for (i = 0; i < 8; i++) {
-            UART3_Write(255); //Will tell us it is in interim mode 
-            UART3_Write(0);
-        }
-        switch (currentMode) {
-            case interim:
-                
-                // Switch Timers
-                _LATE2 = LED_OFF;
-                _LATE3 = LED_ON;
-
-                TMR5_INTERRUPT_TICKER_FACTOR = ScienceMode.sampleRateInSec;
-                
-                return science;
-            case science:
-
-                _LATE3 = LED_OFF;
-                _LATE4 = LED_ON;
-                
-                TMR5_INTERRUPT_TICKER_FACTOR = ReEntryMode.sampleRateInSec;
-
-                
-                return reentry;
-            case reentry:
-           
-                _LATE4 = LED_OFF;
-                
-                TMR5_Stop();
-                
-                return safe;
-            default:
-                
-                return safe;
-        }
-    } else {
-        return currentMode;
+    int i;
+    for (i = 0; i < 8; i++) {
+        UART3_Write(255); //Will tell us it is in interim mode 
+        UART3_Write(0);
     }
-}
-
-// Description: Wait to start next mode
-
-unsigned int DelayForMode() {
-
+    
     switch (currentMode) {
         case interim:
-            return InterimMode.sampleRateInSec;
+
+            // Switch Timers
+            _LATE2 = LED_OFF;
+            _LATE3 = LED_ON;
+
+            return science;
         case science:
-            return ScienceMode.sampleRateInSec;
+
+            _LATE3 = LED_OFF;
+            _LATE4 = LED_ON;
+
+            return reentry;
         case reentry:
-            return ReEntryMode.sampleRateInSec;
-        case safe:
-            return SafeMode.sampleRateInSec;
+
+            _LATE4 = LED_OFF;
+
+            TMR5_Stop();
+
+            return safe;
+            
         default:
-            return 1;
+
+            return safe;
     }
 }
 
-void Clear(uint8_t *buffer, int size) {
-    int i;
-    for (i = 0; i < size; i++) {
-        buffer[i] = 0;
-    }
-}
+bool ShouldUpdateMode(unsigned long time) {
 
-void CheckForModeUpdate(unsigned long time) {
+    // Check current altitude
 
-    // Time begins with an offset of 15 min for balloon test
+    
     // After 30 min switch from interim to science mode
     if ((time == INTERIM_STOP_TIME) || ((currentMode == interim) && (time > INTERIM_STOP_TIME))) {
-        shouldChangeMode = true;
+        return true;
 
-        // After 105 min switch from science to reentry mode
+    // After 105 min switch from science to reentry mode
     } else if ((time == SCIENCE_STOP_TIME) || ((currentMode == science) && (time > SCIENCE_STOP_TIME))) {
-        shouldChangeMode = true;
+        return true;
 
-        // After 165 min switch from reentry to safe mode and end loop
+    // After 165 min switch from reentry to safe mode and end loop
     } else if ((time == REENTRY_STOP_TIME) || ((currentMode == reentry) && (time > REENTRY_STOP_TIME))) {
-        shouldChangeMode = true;
+        return true;
+        
+    } else {
+        return false;
     }
 }
 
@@ -237,26 +206,37 @@ void CheckForModeUpdate(unsigned long time) {
 
 void TakeSample() {
 
-    // Langmuir Probe 
-    if (currentLangmuirProbeWait++ > GetSampleRate(LangmuirProbe, currentMode)) {
-        
+    // Langmuir Probe
+    if (!isLangmuirProbeSweeping) {
+        if (currentLangmuirProbeWait++ > GetSampleRate(LangmuirProbe, currentMode)) {
+            BeginLangmuirProbeSampling();
+            currentLangmuirProbeWait = 0;
+        }
     }
     
-    if (currentMagnetometerWait++ > GetSampleRate(Magnetometer, currentMode)) {
-        
+    // Magnetometer
+    if (!isMagnetometerSweeping) {
+        if (currentMagnetometerWait++ > GetSampleRate(Magnetometer, currentMode)) {
+            BeginMagnetometerSampling();
+            currentMagnetometerWait = 0;
+        }
     }
     
+    // Temperature Sensors
     if (currentTemperatureWait++ > GetSampleRate(TemperatureSensors, currentMode)) {
-        
+        BeginTemperatureSampling();
+        currentTemperatureWait = 0;
     }
     
+    // GPS
     if (currentGPSWait++ > GetSampleRate(GPSUnit, currentMode)) {
-        
+        BeginGPSSampling();
+        currentGPSWait = 0;
     }
  
-    // Mode Update Test
-    totalTime = totalTime + DelayForMode();
-    CheckForModeUpdate(totalTime);
-    currentMode = UpdateMode();
+    // Mode Update Test    
+    if (ShouldUpdateMode(++totalTime)) {
+        currentMode = UpdateMode();
+    }
 
 }

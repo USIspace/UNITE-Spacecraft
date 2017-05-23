@@ -40,13 +40,13 @@ Instrument LangmuirProbe = {
 };
 
 Instrument TemperatureSensors = {
-    { 120, 0, 0 },
+    { 10, 0, 1 },
     { 30, 0, 0 },
     { 15, 0, 0 }
 };
 
 Instrument Magnetometer = {
-    { 120, 0, 0 },
+    { 20, 0, 5 },
     { 30, 0, 0 },
     { 15, 0, 0 }
 };

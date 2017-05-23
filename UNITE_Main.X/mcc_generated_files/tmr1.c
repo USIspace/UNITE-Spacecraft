@@ -168,10 +168,7 @@ void __attribute__ ((weak)) TMR1_CallBack(void)
     if (currentMode == safe) {
         Satellite_Initialize();
     } else {
-        TMR1_Stop();
-        TMR2_Stop();
-        TMR3_Stop();
-        TMR4_Stop();
+        ManageSweepingProgress();
     }
 }
 

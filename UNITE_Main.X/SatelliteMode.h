@@ -30,7 +30,6 @@ typedef enum {
 
 
 typedef struct {
-    int sampleRateInSec; // Time in minutes between each sample of sensors
     int startAltitudeInKm; // Altitude to begin sampling in this mode 
     int endAltitudeInKm; // Altitude to end sampling and switch to new mode
 } SatelliteMode;
@@ -46,6 +45,5 @@ void PackageData(int *package, int stringLength, int *temps, int *gps, int *mags
 void SendData(uint8_t *dataString, int stringLength);
 
 UNITEMode UpdateMode(void);
-unsigned int DelayForMode(void);
 
 void TakeSample(void);

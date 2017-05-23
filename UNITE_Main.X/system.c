@@ -101,3 +101,18 @@ uint16_t Pow(int base, int exponent) {
   
   return returnValue;
 }
+
+void Clear(int *buffer, int size) {
+    int i;
+    for (i = 0; i < size; i++) {
+        buffer[i] = 0;
+    }
+}
+
+void Copy(int *source, uint8_t *destination, int sourceStart, int destStart, int numberOfItems) {
+    
+    int i;
+    for (i = sourceStart; i < numberOfItems; i++) {
+        destination[i + destStart] = source[i];
+    }
+}
