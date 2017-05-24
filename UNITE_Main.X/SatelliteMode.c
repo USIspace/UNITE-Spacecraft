@@ -2,6 +2,7 @@
 #include <stdbool.h>       /* Includes true/false definition                  */
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp */
+#include "CommandParser.h"
 #include "SatelliteMode.h"
 #include "SampleManager.h"
 #include "SystemConfiguration.h"
@@ -33,6 +34,18 @@ bool shouldChangeMode = false;
 
 unsigned long totalTime = 0; // Keeps track of overall mission clock
 
+/***********************
+  Transmission Package 
+ ***********************/
+bool isSending = false;
+uint8_t transmitQueue[2000];
+uint16_t transmitQueueStartIndex = 0;
+uint16_t transmitQueueLength = 0;
+const uint16_t QUEUE_SIZE = 2000;
+
+const int PREAMBLE_LENGTH = 4;
+const uint8_t powerPackagePreamble[4] = {0x50, 0x50, 0x50, 0x0B};
+const uint8_t simplexPackagePreamble[4] = {0x50, 0x50, 0x50, 0x0C};
 
 // CONSTANTS
 unsigned long INTERIM_STOP_TIME = 1800; // 30 mins in
@@ -63,6 +76,11 @@ SatelliteMode SafeMode = {
     0,
 };
 
+void SatelliteProperties_Initialize() {
+    // Set Current Mode to interim on start
+    currentMode = interim;
+    TMR1_INTERRUPT_TICKER_FACTOR = 1;
+}
 
  
 void Satellite_Initialize() {
@@ -73,9 +91,8 @@ void Satellite_Initialize() {
     // Initialize Main Mode Timer
     TMR5_Initialize();
     
-    // Set Current Mode to interim on start
-    currentMode = interim;
-    TMR1_INTERRUPT_TICKER_FACTOR = 1;
+    // Initialize main variables
+    SatelliteProperties_Initialize();
     
     // Start Main Timer
     TMR5_Start();
@@ -88,42 +105,79 @@ void Satellite_Initialize() {
  Data Manager Methods
  ********************/
 
-// Description: Saves data to SD card for packaging and sending later
+// Description: Saves data to a transmission queue for sending later
 // *package => ready-to-send package
 // packageSize => size of package to send
 
-void SaveData(int *package, int packageSize) {
+void SaveData(uint8_t *package, uint16_t packageSize) {
 
+    int i;
+    for (i = 0; i < packageSize; i++) {
+        transmitQueue[(transmitQueueStartIndex + i) % QUEUE_SIZE] = package[i];
+    }
+    
+    transmitQueueStartIndex = (transmitQueueStartIndex + i) % QUEUE_SIZE;
+    transmitQueueLength = transmitQueueLength + packageSize;
 }
 
 // Description: Packaging algorithm for collected data
-// *package => pointer to a string which will be filled by this method
-// stringLength => length of package string in characters
-// *temps => pointer to an array of Temperature data
-// *gps => pointer to an array of GPS data
-// *mags => pointer to an array of Magnetometer data
-// *densities => pointer to an array of Plasma Probe data
+// system => determines which system sampled the data
+// time => time the sampling began
+// *buffer => pointer to an array of instrument data
+// bufferSize => length of package string in characters
 
-void PackageData(int *package, int stringLength, int *temps, int *gps, int *mags, int *densities) {
+uint16_t PackageData(System system, uint16_t time, uint8_t *buffer, uint16_t bufferSize) {
 
-
+    int headerSize = 5;
+    uint8_t package[bufferSize + headerSize];
+    
+    // Setup Package Header
+    package[0] = GetSystemHeaderID(system);
+    package[1] = time >> 4;
+    package[2] = time;
+    package[3] = bufferSize >> 4;
+    package[4] = bufferSize;
+    
     int i;
-    for (i = 0; i < stringLength; i++) {
-        // Fill package char by char from buffers here
+    for (i = 0; i < bufferSize; i++) {
+        package[headerSize + i] = buffer[i];
     }
+    
+    SaveData(package, bufferSize + headerSize);
 
+    return i;
 }
 
 // Description: Handler for sending data via UART
 // *dataString => pointer to a string of packaged data
 // stringLength => length of packaged data string
 
-void SendData(uint8_t *dataString, int stringLength) {
+void SendData(uint8_t *queue, uint16_t startIndex, uint16_t queueLength) {
+    
+    int i;
+    for (i = 0; i < PREAMBLE_LENGTH; i++) {
+        UART3_Write(simplexPackagePreamble[i]);
+    }
+    
+    while (queueLength > 0) {
+        // System Header Parser
+        uint8_t sysID = queue[startIndex];
+        uint8_t timeH = queue[startIndex + 1];
+        uint8_t timeL =queue[startIndex + 2];
+        uint16_t dataLength = queue[startIndex + 3] << 4 + queue[startIndex];
+        
+        // UART header here then proceed to send package
+        
+        for (i = 0; i < dataLength; i++) {
+            
+        }
+    }
     
     
+    /* DEBUGGING ONLY
     /*============================
      Save to Data Acquisition Unit
-     =============================*/
+     =============================
     
     // Send data via UART here
     int i;
@@ -131,7 +185,7 @@ void SendData(uint8_t *dataString, int stringLength) {
 
         UART3_Write(dataString[i]);
         
-    }
+    }*/
 
 }
 
@@ -232,6 +286,10 @@ void TakeSample() {
     if (currentGPSWait++ > GetSampleRate(GPSUnit, currentMode)) {
         BeginGPSSampling();
         currentGPSWait = 0;
+    }
+    
+    if (!isSending && transmitQueueLength > 0) {
+        SendData(transmitQueue, transmitQueueLength);
     }
  
     // Mode Update Test    

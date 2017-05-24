@@ -50,10 +50,11 @@
 
 #include <xc.h>
 #include "tmr4.h"
+#include "../CommandParser.h"
 #include "../SatelliteMode.h"
+#include "../SystemConfiguration.h"
 #include "../SampleManager.h"
 #include "../system.h"
-#include "../adc1.h"
 
 /**
   Section: Data Type Definitions
@@ -160,7 +161,6 @@ uint16_t TMR4_Counter16BitGet( void )
 
 void __attribute__ ((weak)) TMR4_CallBack(void)
 {
-    TakeTemperatureSample();
 }
 
 void TMR4_Start( void )

@@ -37,12 +37,13 @@ typedef struct {
 
 
 extern UNITEMode currentMode;
+extern uint8_t transmitQueue[2000];
 
 void Satellite_Initialize(void);
 
-void SaveData(int *package, int packageSize);
-void PackageData(int *package, int stringLength, int *temps, int *gps, int *mags, int *densities);
-void SendData(uint8_t *dataString, int stringLength);
+void SaveData(uint8_t *, uint16_t);
+uint16_t PackageData(System, uint16_t, uint8_t *, uint16_t);
+void SendData(uint8_t *, uint16_t, uint16_t);
 
 UNITEMode UpdateMode(void);
 

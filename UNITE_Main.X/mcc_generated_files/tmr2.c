@@ -49,11 +49,14 @@
 */
 
 #include <xc.h>
+#include <stdint.h>        /* Includes uint16_t definition                    */
+#include <stdbool.h>       /* Includes true/false definition                  */
 #include "tmr2.h"
 #include "time.h"
+#include "../CommandParser.h"
 #include "../SatelliteMode.h"
-#include "../SampleManager.h"
 #include "../SystemConfiguration.h"
+#include "../SampleManager.h"
 #include "../system.h"
 
 /**

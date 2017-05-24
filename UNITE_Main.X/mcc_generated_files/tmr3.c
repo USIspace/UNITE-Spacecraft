@@ -50,9 +50,10 @@
 
 #include <xc.h>
 #include "tmr3.h"
+#include "../CommandParser.h"
 #include "../SatelliteMode.h"
-#include "../SampleManager.h"
 #include "../SystemConfiguration.h"
+#include "../SampleManager.h"
 #include "../system.h"
 
 /**

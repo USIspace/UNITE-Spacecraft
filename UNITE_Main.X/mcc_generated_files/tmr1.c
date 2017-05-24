@@ -50,12 +50,11 @@
 
 #include <xc.h>
 #include "tmr1.h"
-#include "tmr2.h"
-#include "tmr3.h"
-#include "tmr4.h"
+#include "../CommandParser.h"
 #include "../SatelliteMode.h"
+#include "../SystemConfiguration.h"
 #include "../SampleManager.h"
-#include"../system.h"
+#include "../system.h"
 
 /**
   Section: Data Type Definitions

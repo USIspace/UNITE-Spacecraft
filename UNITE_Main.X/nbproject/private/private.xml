@@ -5,9 +5,13 @@
         <group>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/SatelliteMode.c</file>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/SampleManager.c</file>
+            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/CommandParser.h</file>
+            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/SatelliteMode.h</file>
+            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/SystemConfiguration.h</file>
+            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/SampleManager.h</file>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/CommandParser.c</file>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/SystemConfiguration.c</file>
-            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/mcc_generated_files/tmr1.c</file>
+            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/mcc_generated_files/tmr2.c</file>
         </group>
     </open-files>
 </project-private>

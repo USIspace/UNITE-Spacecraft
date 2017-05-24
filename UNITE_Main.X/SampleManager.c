@@ -2,14 +2,11 @@
 #include <stdbool.h>       /* Includes true/false definition                  */
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp */
+#include "CommandParser.h"
 #include "SatelliteMode.h"
 #include "SampleManager.h"
 #include "SystemConfiguration.h"
 #include "adc1.h"
-#include "mcc_generated_files/uart1.h"
-#include "mcc_generated_files/uart2.h"
-#include "mcc_generated_files/uart3.h"
-#include "mcc_generated_files/uart4.h"
 #include "mcc_generated_files/tmr1.h"
 #include "mcc_generated_files/tmr2.h"
 #include "mcc_generated_files/tmr3.h"
@@ -53,6 +50,7 @@ int currentMagnetometerSweepProgress = 0;
 
 bool isLangmuirProbeSweeping = false;
 bool isMagnetometerSweeping = false;
+
 /**************************
   Sampling Configurations
  **************************/
@@ -135,6 +133,7 @@ void EndTemperatureSensorSampling() {
 void EndGPSSampling() {
     
 }
+
 /***************************
   Sweeping Progress Manager
  **************************/

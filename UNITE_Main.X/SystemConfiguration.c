@@ -2,9 +2,9 @@
 #include <stdbool.h>       /* Includes true/false definition                  */
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp */
+#include "CommandParser.h"
 #include "SatelliteMode.h"
 #include "SampleManager.h"
-#include "CommandParser.h"
 #include "SystemConfiguration.h"
 
 uint16_t GetSampleRate(Instrument instrument, UNITEMode currentMode) {
@@ -28,6 +28,16 @@ uint16_t GetSweepDuration(Instrument instrument, UNITEMode currentMode) {
         case interim: return instrument.Interim.sweepDuration;
         case science: return instrument.Science.sweepDuration;
         case reentry: return instrument.ReEntry.sweepDuration;
+        default: return 0;
+    }
+}
+
+uint8_t GetSystemHeaderID(System system) {
+    switch (system) {
+        case LP: return 0x10;
+        case MAG: return 0x20;
+        case TMP: return 0x30;
+        case GPS: return 0x40;
         default: return 0;
     }
 }

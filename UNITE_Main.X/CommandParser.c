@@ -2,9 +2,9 @@
 #include <stdbool.h>       /* Includes true/false definition                  */
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp */
+#include "CommandParser.h"
 #include "SatelliteMode.h"
 #include "SampleManager.h"
-#include "CommandParser.h"
 #include "SystemConfiguration.h"
 
 CommandByteIndex byteIndex = 0;
@@ -99,7 +99,7 @@ uint16_t convertHexToDecimal(uint8_t *bits) {
     return decimalValue;
 }
 
-uint16_t convertTime(Unit current, Unit final) {
+unsigned long convertTime(Unit current, Unit final) {
     
     // Make sure the final unit is smaller than the original
     if (current > final) {
@@ -115,7 +115,7 @@ uint16_t convertTime(Unit current, Unit final) {
     }
 }
 
-void RunCommand(System system, Mode mode, Property property, Unit unit, uint16_t value) {
+void RunCommand(System system, Mode mode, Property property, Unit unit, unsigned long value) {
     
     Instrument *instrument;
     Properties *modeProperties;
@@ -145,9 +145,10 @@ void RunCommand(System system, Mode mode, Property property, Unit unit, uint16_t
     
     // Convert Value to proper ticker
     if (unit != None) {
-        uint16_t unitConversion = 0;
+        unsigned long unitConversion = 0;
         switch (property) {
             case SamplingRate: 
+                
                 modeProperties->sampleRate = value * convertTime(unit, Sec);
                 
             case SweepRate:
@@ -161,6 +162,7 @@ void RunCommand(System system, Mode mode, Property property, Unit unit, uint16_t
                 modeProperties->sweepDuration = value * unitConversion;
                 
             case SweepDuration:
+                
                 modeProperties->sampleRate = value * convertTime(unit, Sec);
                 
             default:

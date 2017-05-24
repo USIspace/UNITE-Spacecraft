@@ -22,8 +22,8 @@ extern "C" {
 #endif	/* SYSTEMCONFIGURATION_H */
 
 typedef struct {
-    uint16_t sampleRate;
-    uint16_t sweepRate;
+    unsigned long sampleRate;
+    unsigned long sweepRate;
     uint16_t sweepDuration;
 } Properties;
 
@@ -41,3 +41,6 @@ extern Instrument GPSUnit;
 uint16_t GetSampleRate(Instrument instrument, UNITEMode currentMode);
 uint16_t GetSweepRate(Instrument instrument, UNITEMode currentMode);
 uint16_t GetSweepDuration(Instrument instrument, UNITEMode currentMode);
+
+// Transmission Methods
+uint8_t GetSystemHeaderID(System);

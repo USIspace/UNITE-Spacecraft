@@ -24,7 +24,6 @@
 #include "mcc_generated_files/pin_manager.h"
 #include "adc1.h"
 #include "mcc_generated_files/interrupt_manager.h"
-#include "SatelliteMode.h"
 
 /******************************************************************************/
 /* Global Variable Declaration                                                */

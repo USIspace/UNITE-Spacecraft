@@ -48,6 +48,11 @@ void BeginGPSSampling();
 void BeginMagnetometerSampling();
 void BeginLangmuirProbeSampling();
 
+void EndLangmuirProbeSampling();
+void EndMagnetometerSampling();
+void EndTemperatureSensorSampling();
+void EndGPSSampling();
+
 void ManageSweepingProgress();
 
 void TakeTemperatureSample();
