@@ -88,7 +88,7 @@ void wait_sec(unsigned long seconds)
 void wait_for(unsigned long something) {
     
     unsigned long wait = something * 1000;
-    int i;
+    uint16_t i;
     for (i = 0; i < wait; i++);
 }
 
@@ -102,10 +102,17 @@ uint16_t Pow(int base, int exponent) {
   return returnValue;
 }
 
-void Clear(int *buffer, int size) {
+void ClearQueue(uint8_t *buffer, int size, int startIndex) {
     int i;
     for (i = 0; i < size; i++) {
-        buffer[i] = 0;
+        buffer[i + startIndex] = 0;
+    }
+}
+
+void Clear(int *buffer, int size, int startIndex) {
+    int i;
+    for (i = 0; i < size; i++) {
+        buffer[i + startIndex] = 0;
     }
 }
 

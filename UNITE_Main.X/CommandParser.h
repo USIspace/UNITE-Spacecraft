@@ -52,7 +52,7 @@ typedef enum {
     SweepDuration,
     Simplex,
     Duplex,
-    SimplexDuplex
+    Simplex_Duplex
 } Property;
 
 typedef enum {

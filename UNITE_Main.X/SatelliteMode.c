@@ -1,11 +1,13 @@
 #include <stdint.h>        /* Includes uint16_t definition                    */
 #include <stdbool.h>       /* Includes true/false definition                  */
+#include <stdio.h>
+#include <stdlib.h>
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp */
 #include "CommandParser.h"
-#include "SatelliteMode.h"
-#include "SampleManager.h"
 #include "SystemConfiguration.h"
+#include "SampleManager.h"
+#include "SatelliteMode.h"
 #include "adc1.h"
 #include "mcc_generated_files/uart1.h"
 #include "mcc_generated_files/uart2.h"
@@ -38,19 +40,20 @@ unsigned long totalTime = 0; // Keeps track of overall mission clock
   Transmission Package 
  ***********************/
 bool isSending = false;
-uint8_t transmitQueue[2000];
-uint16_t transmitQueueStartIndex = 0;
-uint16_t transmitQueueLength = 0;
-const uint16_t QUEUE_SIZE = 2000;
+uint8_t transmitQueue[1000];
+int transmitQueueStartIndex = 0;
+int transmitQueueLength = 0;
+const int HEADER_SIZE = 5;
+const uint16_t QUEUE_SIZE = 1000;
 
 const int PREAMBLE_LENGTH = 4;
-const uint8_t powerPackagePreamble[4] = {0x50, 0x50, 0x50, 0x0B};
-const uint8_t simplexPackagePreamble[4] = {0x50, 0x50, 0x50, 0x0C};
+const uint8_t powerPackagePreamble[4] = {80, 80, 80, 11};
+const uint8_t simplexPackagePreamble[4] = {80, 80, 80, 12};
 
 // CONSTANTS
-unsigned long INTERIM_STOP_TIME = 1800; // 30 mins in
-unsigned long SCIENCE_STOP_TIME = 3600; // 60 mins in
-unsigned long REENTRY_STOP_TIME = 10800; // 3 hrs in
+uint16_t INTERIM_STOP_TIME = 1800; // 30 mins in
+uint16_t SCIENCE_STOP_TIME = 3600; // 60 mins in
+uint16_t REENTRY_STOP_TIME = 10800; // 3 hrs in
 
 /*******************************
   Satellite Mode Configurations
@@ -111,71 +114,121 @@ void Satellite_Initialize() {
 
 void SaveData(uint8_t *package, uint16_t packageSize) {
 
+    while (isSending);
     int i;
     for (i = 0; i < packageSize; i++) {
-        transmitQueue[(transmitQueueStartIndex + i) % QUEUE_SIZE] = package[i];
+        transmitQueue[(transmitQueueStartIndex + transmitQueueLength + i) % QUEUE_SIZE] = package[i];
     }
     
-    transmitQueueStartIndex = (transmitQueueStartIndex + i) % QUEUE_SIZE;
     transmitQueueLength = transmitQueueLength + packageSize;
+    free(package);
 }
 
 // Description: Packaging algorithm for collected data
 // system => determines which system sampled the data
-// time => time the sampling began
+// time => time in min since 00:00 that the sampling began 
 // *buffer => pointer to an array of instrument data
 // bufferSize => length of package string in characters
 
 uint16_t PackageData(System system, uint16_t time, uint8_t *buffer, uint16_t bufferSize) {
 
-    int headerSize = 5;
-    uint8_t package[bufferSize + headerSize];
+    int packageSize = bufferSize + HEADER_SIZE;
+    uint8_t package[packageSize];
     
     // Setup Package Header
     package[0] = GetSystemHeaderID(system);
     package[1] = time >> 4;
-    package[2] = time;
+    package[2] = time & 0x00FF;
     package[3] = bufferSize >> 4;
-    package[4] = bufferSize;
+    package[4] = bufferSize & 0x00FF;
     
     int i;
     for (i = 0; i < bufferSize; i++) {
-        package[headerSize + i] = buffer[i];
+        package[HEADER_SIZE + i] = buffer[i];
     }
     
-    SaveData(package, bufferSize + headerSize);
-
+    SaveData(package, bufferSize + HEADER_SIZE);    
     return i;
 }
+
+void TransmitSimplexPreamble() {
+    int i;
+    for (i = 0; i < PREAMBLE_LENGTH; i++) {
+        UART3_Write(simplexPackagePreamble[i]);
+        wait_for(10);
+    }
+ }
 
 // Description: Handler for sending data via UART
 // *dataString => pointer to a string of packaged data
 // stringLength => length of packaged data string
 
-void SendData(uint8_t *queue, uint16_t startIndex, uint16_t queueLength) {
+void SendData(uint8_t *queue, int queueLength) {
     
-    int i;
-    for (i = 0; i < PREAMBLE_LENGTH; i++) {
-        UART3_Write(simplexPackagePreamble[i]);
-    }
+    isSending = true;
     
     while (queueLength > 0) {
         // System Header Parser
-        uint8_t sysID = queue[startIndex];
-        uint8_t timeH = queue[startIndex + 1];
-        uint8_t timeL =queue[startIndex + 2];
-        uint16_t dataLength = queue[startIndex + 3] << 4 + queue[startIndex];
+        uint8_t *sysID = (uint8_t *)&queue[transmitQueueStartIndex];
+        uint8_t *timeH = (uint8_t *)&queue[transmitQueueStartIndex + 1];
+        uint8_t *timeL = (uint8_t *)&queue[transmitQueueStartIndex + 2];
+        uint16_t dataLength = (queue[transmitQueueStartIndex + 3] << 4) | queue[transmitQueueStartIndex + 4];
+        
+        uint8_t headerByte1 = *sysID + *timeH;
+        uint8_t headerByte2 = *timeL;
+        
+        free(sysID);
+        free(timeH);
+        free(timeL);
         
         // UART header here then proceed to send package
+        TransmitSimplexPreamble();
+        UART3_Write(headerByte1);
+        wait_for(10);
+        UART3_Write(headerByte2);
+        wait_for(10);
         
-        for (i = 0; i < dataLength; i++) {
+        ClearQueue(transmitQueue, HEADER_SIZE, transmitQueueStartIndex);
+        transmitQueueStartIndex = (transmitQueueStartIndex + HEADER_SIZE) % QUEUE_SIZE;
+        transmitQueueLength = max(transmitQueueLength - HEADER_SIZE, 0);
+        int i = 0;
+        while (i < dataLength) {
+            
+            
+            // One Package Transmission
+            int j;
+            uint16_t packageLength;
+            if (i==0) {
+                packageLength = GetTransmissionPackageLength(currentTransmissionUnit) - 2;
+            } 
+            else 
+            {
+                TransmitSimplexPreamble();
+//                wait_for(10);
+                packageLength = GetTransmissionPackageLength(currentTransmissionUnit);
+            }
+            
+            for (j = 0; j < packageLength; j++) {
+                if (j >= dataLength - i) { UART3_Write(0); }
+                else { UART3_Write(queue[(transmitQueueStartIndex + j) % QUEUE_SIZE]); }
+                wait_for(10);
+            }
+            
+            ClearQueue(transmitQueue, packageLength, transmitQueueStartIndex);
+            transmitQueueStartIndex = (transmitQueueStartIndex + j) % QUEUE_SIZE;
+            transmitQueueLength = max(transmitQueueLength - j, 0);
+            i = i + j;
             
         }
-    }
+        
+//        transmitQueueStartIndex = (transmitQueueStartIndex + HEADER_SIZE + dataLength) % QUEUE_SIZE;
+        queueLength = max(queueLength - HEADER_SIZE - dataLength, 0);
+    }   
     
+    isSending = false;
     
     /* DEBUGGING ONLY
-    /*============================
+    ============================
      Save to Data Acquisition Unit
      =============================
     
@@ -188,6 +241,8 @@ void SendData(uint8_t *queue, uint16_t startIndex, uint16_t queueLength) {
     }*/
 
 }
+
+
 
 /********************
  Mode Switch Handling
@@ -202,8 +257,7 @@ UNITEMode UpdateMode() {
     for (i = 0; i < 8; i++) {
         UART3_Write(255); //Will tell us it is in interim mode 
         UART3_Write(0);
-    }
-    
+    }    
     switch (currentMode) {
         case interim:
 
@@ -262,7 +316,7 @@ void TakeSample() {
 
     // Langmuir Probe
     if (!isLangmuirProbeSweeping) {
-        if (currentLangmuirProbeWait++ > GetSampleRate(LangmuirProbe, currentMode)) {
+        if (currentLangmuirProbeWait++ >= GetSampleRate(&LangmuirProbe)) {
             BeginLangmuirProbeSampling();
             currentLangmuirProbeWait = 0;
         }
@@ -270,20 +324,20 @@ void TakeSample() {
     
     // Magnetometer
     if (!isMagnetometerSweeping) {
-        if (currentMagnetometerWait++ > GetSampleRate(Magnetometer, currentMode)) {
+        if (currentMagnetometerWait++ >= GetSampleRate(&Magnetometer)) {
             BeginMagnetometerSampling();
             currentMagnetometerWait = 0;
         }
     }
     
     // Temperature Sensors
-    if (currentTemperatureWait++ > GetSampleRate(TemperatureSensors, currentMode)) {
+    if (currentTemperatureWait++ >= GetSampleRate(&TemperatureSensors)) {
         BeginTemperatureSampling();
         currentTemperatureWait = 0;
     }
     
     // GPS
-    if (currentGPSWait++ > GetSampleRate(GPSUnit, currentMode)) {
+    if (currentGPSWait++ >= GetSampleRate(&GPSUnit)) {
         BeginGPSSampling();
         currentGPSWait = 0;
     }

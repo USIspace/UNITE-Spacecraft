@@ -1,11 +1,12 @@
 #include <stdint.h>        /* Includes uint16_t definition                    */
 #include <stdbool.h>       /* Includes true/false definition                  */
+#include <stdio.h>
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp */
 #include "CommandParser.h"
-#include "SatelliteMode.h"
-#include "SampleManager.h"
 #include "SystemConfiguration.h"
+#include "SampleManager.h"
+#include "SatelliteMode.h"
 #include "adc1.h"
 #include "mcc_generated_files/tmr1.h"
 #include "mcc_generated_files/tmr2.h"
@@ -21,20 +22,20 @@ int langmuirProbeResults[16];
 int magnetometerResults[16];
 int temperatureResults[16];
 
-uint8_t langmuirProbeBuffer[100];
-uint8_t magnetometerBuffer[600];
-uint8_t temperatureBuffer[8];
-uint8_t gpsBuffer[100];
+uint8_t langmuirProbeBuffer[200];
+uint8_t magnetometerBuffer[300];
+uint8_t temperatureBuffer[32];
+uint8_t gpsBuffer[20];
 
 int currentLangmuirProbeBufferIndex = 0;
 int currentMagnetometerBufferIndex = 0;
 int currentTemperatureBufferIndex = 0;
 int currentGPSBufferIndex = 0;
 
-const int LP_BUFFER_SIZE = 100;
-const int MAG_BUFFER_SIZE = 600;
-const int TMP_BUFFER_SIZE = 8;
-const int GPS_BUFFER_SIZE = 100;
+const int LP_BUFFER_SIZE = 200;
+const int MAG_BUFFER_SIZE = 300;
+const int TMP_BUFFER_SIZE = 32;
+const int GPS_BUFFER_SIZE = 20;
 
 /******************************
   Instrument Timer Properties
@@ -94,7 +95,8 @@ void BeginMagnetometerSampling() {
 void BeginTemperatureSampling() {
     _LATE4 = LED_ON;
     TakeTemperatureSample();
-    EndTemperatureSensorSampling();
+//    EndTemperatureSensorSampling();
+    _LATE4 = LED_OFF;
 }
 
 void BeginGPSSampling() {
@@ -108,7 +110,7 @@ void EndLangmuirProbeSampling() {
     currentLangmuirProbeSweepProgress = 0;
     isLangmuirProbeSweeping = false;
     
-    SendData(langmuirProbeBuffer, LP_BUFFER_SIZE);
+    //PackageData(LP, GetDayTimeInMin(totalTime), langmuirProbeBuffer, LP_BUFFER_SIZE);
     currentLangmuirProbeBufferIndex = 0;
 }
 
@@ -117,14 +119,14 @@ void EndMagnetometerSampling() {
     currentMagnetometerSweepProgress = 0;
     isMagnetometerSweeping = false;
     
-    SendData(magnetometerBuffer, MAG_BUFFER_SIZE);
+    PackageData(MAG, GetDayTimeInMin(totalTime), magnetometerBuffer, MAG_BUFFER_SIZE);
     currentMagnetometerBufferIndex = 0;
     
     _LATE3 = LED_OFF;
 }
 
 void EndTemperatureSensorSampling() {
-    SendData(temperatureBuffer, MAG_BUFFER_SIZE);
+    PackageData(TMP, GetDayTimeInMin(totalTime), temperatureBuffer, TMP_BUFFER_SIZE);
     currentTemperatureBufferIndex = 0;
     
     _LATE4 = LED_OFF;
@@ -141,13 +143,13 @@ void EndGPSSampling() {
 void ManageSweepingProgress() {
     
     if (isLangmuirProbeSweeping) {
-        if (currentLangmuirProbeSweepProgress++ > GetSweepDuration(LangmuirProbe, currentMode)) {
+        if (currentLangmuirProbeSweepProgress++ > GetSweepDuration(LP)) {
             EndLangmuirProbeSampling();
         }
     }
     
     if (isMagnetometerSweeping) {
-        if (currentMagnetometerSweepProgress++ > GetSweepDuration(Magnetometer, currentMode)) {
+        if (currentMagnetometerSweepProgress++ > GetSweepDuration(MAG)) {
             EndMagnetometerSampling();
         }
     }
@@ -157,7 +159,7 @@ void ManageSweepingProgress() {
  ***********************/
 
 void TakeProbeSample() {
-    Clear(langmuirProbeResults, RESULTS_SIZE);
+    Clear(langmuirProbeResults, RESULTS_SIZE, 0);
     ADC1_GetResultFromChannels(langmuirProbeResults, lpADCConfig.channelSelect, lpADCConfig.channelCount);
     
     int probeResultSize = 1;
@@ -170,7 +172,7 @@ void TakeProbeSample() {
 }
 
 void TakeMagnetometerSample() {
-    Clear(magnetometerResults, RESULTS_SIZE);
+    Clear(magnetometerResults, RESULTS_SIZE, 0);
     ADC1_GetResultFromChannels(magnetometerResults, magADCConfig.channelSelect, magADCConfig.channelCount);
     
     int magnetometerResultSize = 3;
@@ -179,12 +181,11 @@ void TakeMagnetometerSample() {
         currentMagnetometerBufferIndex = currentMagnetometerBufferIndex + magnetometerResultSize;
     } else {
         EndMagnetometerSampling();
-        
     }
 }
 
 void TakeTemperatureSample() {
-    Clear(temperatureResults, RESULTS_SIZE);
+    Clear(temperatureResults, RESULTS_SIZE, 0);
     ADC1_GetResultFromChannels(temperatureResults, tmpADCConfig.channelSelect, tmpADCConfig.channelCount);
     
     int temperatureResultSize = 8;

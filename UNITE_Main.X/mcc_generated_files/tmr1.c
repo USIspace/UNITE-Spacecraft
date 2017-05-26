@@ -51,9 +51,9 @@
 #include <xc.h>
 #include "tmr1.h"
 #include "../CommandParser.h"
-#include "../SatelliteMode.h"
 #include "../SystemConfiguration.h"
 #include "../SampleManager.h"
+#include "../SatelliteMode.h"
 #include "../system.h"
 
 /**

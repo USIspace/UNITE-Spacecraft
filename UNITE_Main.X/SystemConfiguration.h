@@ -33,14 +33,24 @@ typedef struct {
     Properties ReEntry;
 } Instrument;
 
+typedef enum {
+    SimplexOnly,
+    DuplexOnly,
+    Simplex_DuplexMix
+} TransmissionUnit;
+
 extern Instrument LangmuirProbe;
 extern Instrument TemperatureSensors;
 extern Instrument Magnetometer;
 extern Instrument GPSUnit;
 
-uint16_t GetSampleRate(Instrument instrument, UNITEMode currentMode);
-uint16_t GetSweepRate(Instrument instrument, UNITEMode currentMode);
-uint16_t GetSweepDuration(Instrument instrument, UNITEMode currentMode);
+extern TransmissionUnit currentTransmissionUnit;
+
+uint16_t GetSampleRate(Instrument *);
+uint16_t GetSweepRate(System);
+uint16_t GetSweepDuration(System);
 
 // Transmission Methods
 uint8_t GetSystemHeaderID(System);
+uint16_t GetDayTimeInMin(unsigned long);
+uint8_t GetTransmissionPackageLength(TransmissionUnit);

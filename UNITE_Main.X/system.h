@@ -23,7 +23,8 @@ void ConfigureOscillator(void); /* Handles clock switching/osc initialization */
 void wait_sec(unsigned long);
 void wait_for(unsigned long);
 uint16_t Pow(int, int);
-void Clear(int *,int);
+void ClearQueue(uint8_t *,int,int);
+void Clear(int *,int,int);
 void Copy(int *source, uint8_t *destination, int, int, int);
 int add_sec(unsigned long *);
 

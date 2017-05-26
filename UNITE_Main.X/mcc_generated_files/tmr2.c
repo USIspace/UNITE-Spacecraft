@@ -54,9 +54,9 @@
 #include "tmr2.h"
 #include "time.h"
 #include "../CommandParser.h"
-#include "../SatelliteMode.h"
 #include "../SystemConfiguration.h"
 #include "../SampleManager.h"
+#include "../SatelliteMode.h"
 #include "../system.h"
 
 /**
@@ -120,7 +120,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _T2Interrupt (  )
     static volatile unsigned int CountCallBack = 0;
 
     // callback function - called every 3th pass
-    if (++CountCallBack >= GetSweepRate(LangmuirProbe, currentMode))
+    if (++CountCallBack >= GetSweepRate(LP))
     {
         // ticker function call
         TMR2_CallBack();
