@@ -6,6 +6,7 @@
 #include "SystemConfiguration.h"
 #include "SampleManager.h"
 #include "SatelliteMode.h"
+#include "TransmitManager.h"
 
 TransmissionUnit currentTransmissionUnit = SimplexOnly;
 
@@ -17,15 +18,15 @@ Instrument LangmuirProbe = {
 };
 
 Instrument TemperatureSensors = {
+    { 2, 0, 0 },
     { 1, 0, 0 },
-    { 30, 0, 0 },
-    { 15, 0, 0 }
+    { 1, 0, 0 }
 };
 
 Instrument Magnetometer = {
-    { 25, 0, 5 },
-    { 30, 0, 0 },
-    { 15, 0, 0 }
+    { 10, 1, 5 },
+    { 20, 1, 20 },
+    { 15, 1, 20 }
 };
 
 Instrument GPSUnit = {
@@ -43,41 +44,21 @@ uint16_t GetSampleRate(Instrument *instrument) {
         default: return 0;
     }
 }
-uint16_t GetSweepRate(System system) {
-    
-    Instrument instrument;
-    
-    switch (system) {
-        case LP: instrument = LangmuirProbe; break;
-        case MAG: instrument = Magnetometer; break;
-        case TMP: instrument = TemperatureSensors; break;
-        case GPS: instrument = GPSUnit; break;
-        default: break;
-    }
+uint16_t GetSweepRate(Instrument *instrument) {
     
     switch (currentMode) {
-        case interim: return instrument.Interim.sweepRate;
-        case science: return instrument.Science.sweepRate;
-        case reentry: return instrument.ReEntry.sweepRate;
+        case interim: return instrument->Interim.sweepRate;
+        case science: return instrument->Science.sweepRate;
+        case reentry: return instrument->ReEntry.sweepRate;
         default: return 0;
     }
 }
-uint16_t GetSweepDuration(System system) {
-    
-    Instrument instrument;
-    
-    switch (system) {
-        case LP: instrument = LangmuirProbe; break;
-        case MAG: instrument = Magnetometer; break;
-        case TMP: instrument = TemperatureSensors; break;
-        case GPS: instrument = GPSUnit; break;
-        default: break;
-    }
+uint16_t GetSweepDuration(Instrument *instrument) {
     
     switch (currentMode) {
-        case interim: return instrument.Interim.sweepDuration;
-        case science: return instrument.Science.sweepDuration;
-        case reentry: return instrument.ReEntry.sweepDuration;
+        case interim: return instrument->Interim.sweepDuration;
+        case science: return instrument->Science.sweepDuration;
+        case reentry: return instrument->ReEntry.sweepDuration;
         default: return 0;
     }
 }

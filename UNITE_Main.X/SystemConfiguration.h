@@ -22,9 +22,9 @@ extern "C" {
 #endif	/* SYSTEMCONFIGURATION_H */
 
 typedef struct {
-    unsigned long sampleRate;
-    unsigned long sweepRate;
-    uint16_t sweepDuration;
+    unsigned long sampleRate; // Seconds between each sample
+    unsigned long sweepRate;  // Rate in tmr ticks between sweep samples
+    uint16_t sweepDuration;   // Length of sweep in seconds
 } Properties;
 
 typedef struct {
@@ -47,8 +47,8 @@ extern Instrument GPSUnit;
 extern TransmissionUnit currentTransmissionUnit;
 
 uint16_t GetSampleRate(Instrument *);
-uint16_t GetSweepRate(System);
-uint16_t GetSweepDuration(System);
+uint16_t GetSweepRate(Instrument *);
+uint16_t GetSweepDuration(Instrument *);
 
 // Transmission Methods
 uint8_t GetSystemHeaderID(System);

@@ -7,6 +7,7 @@
 #include "SystemConfiguration.h"
 #include "SampleManager.h"
 #include "SatelliteMode.h"
+#include "TransmitManager.h"
 
 CommandByteIndex byteIndex = 0;
 

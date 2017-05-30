@@ -78,7 +78,7 @@ void InitializeADC1(void) {
 void ADC1_GetResultFromChannels(int *results, uint16_t channelSelect, int channelCount)
 {
     AD1CSSL = channelSelect;
-    AD1CON2bits.SMPI = channelCount - 1;
+    AD1CON2bits.SMPI = channelCount;
     AD1CON1bits.ADON = 1;
     
     _ASAM = 1;
@@ -87,28 +87,27 @@ void ADC1_GetResultFromChannels(int *results, uint16_t channelSelect, int channe
     
     _ASAM = 0;
     
+    results[0] = ADC1BUF0 / 4;
+    results[1] = ADC1BUF1 / 4;
+    results[2] = ADC1BUF2 / 4;
+    results[3] = ADC1BUF3 / 4;
+    
+    results[4] = ADC1BUF4 / 4;
+    results[5] = ADC1BUF5 / 4;
+    results[6] = ADC1BUF6 / 4;
+    results[7] = ADC1BUF7 / 4;
+
+    results[8] = ADC1BUF8 / 4;
+    results[9] = ADC1BUF9 / 4;
+    results[10] = ADC1BUFA / 4;
+    results[11] = ADC1BUFB / 4;
+
+    results[12] = ADC1BUFC / 4;
+    results[13] = ADC1BUFD / 4;
+    results[14] = ADC1BUFE / 4;
+    results[15] = ADC1BUFF / 4;
+    
     AD1CON1bits.ADON = 0;
-    
-    results[0] = ADC1BUF0;
-    results[1] = ADC1BUF1;
-    results[2] = ADC1BUF2;
-    results[3] = ADC1BUF3;
-    
-    results[4] = ADC1BUF4;
-    results[5] = ADC1BUF5;
-    results[6] = ADC1BUF6;
-    results[7] = ADC1BUF7;
-
-    results[8] = ADC1BUF8;
-    results[9] = ADC1BUF9;
-    results[10] = ADC1BUFA;
-    results[11] = ADC1BUFB;
-
-    results[12] = ADC1BUFC;
-    results[13] = ADC1BUFD;
-    results[14] = ADC1BUFE;
-    results[15] = ADC1BUFF;
-
 }
 
 uint8_t ADC1_ResultGetFromChannel(int channel) {
@@ -119,19 +118,15 @@ uint8_t ADC1_ResultGetFromChannel(int channel) {
         
     AD1CON1bits.ADON = 1;                   // Enables ADC (turned on/off to reset buffer)
     
-    wait_for(100);
+    wait_for(10);
     
     // Auto convert section
     _SAMP = 1;
+        
+
+    ADC1_ManualSampleForSec(10);             // Sample ADC for 1s [*needs refining*]
     
-    while (!_DONE) {}
-    
-    // Manual convert section
-    /*
-    ADC1_ManualSampleForSec(500);             // Sample ADC for 1s [*needs refining*]
-    
-    wait_for(100);                          // Wait for conversion to finish (5s) [*needs refining*]
-    */
+    wait_for(10);                          // Wait for conversion to finish (5s) [*needs refining*]
     
     
     bufferValue = ADC1BUF0;                  // Get conversion value from buffer

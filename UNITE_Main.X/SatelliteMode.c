@@ -8,22 +8,11 @@
 #include "SystemConfiguration.h"
 #include "SampleManager.h"
 #include "SatelliteMode.h"
+#include "TransmitManager.h"
 #include "adc1.h"
-#include "mcc_generated_files/uart1.h"
-#include "mcc_generated_files/uart2.h"
 #include "mcc_generated_files/uart3.h"
-#include "mcc_generated_files/uart4.h"
 #include "mcc_generated_files/tmr1.h"
-#include "mcc_generated_files/tmr2.h"
-#include "mcc_generated_files/tmr3.h"
-#include "mcc_generated_files/tmr4.h"
 #include "mcc_generated_files/tmr5.h"
-#include "mcc_generated_files/spi2.h"
-#include "time.h"
-
-/******************************
- Satellite Mode Initializations
- ******************************/
 
 /*******************
   Global Variables
@@ -35,20 +24,6 @@ UNITEMode currentMode = safe;
 bool shouldChangeMode = false;
 
 unsigned long totalTime = 0; // Keeps track of overall mission clock
-
-/***********************
-  Transmission Package 
- ***********************/
-bool isSending = false;
-uint8_t transmitQueue[1000];
-int transmitQueueStartIndex = 0;
-int transmitQueueLength = 0;
-const int HEADER_SIZE = 5;
-const uint16_t QUEUE_SIZE = 1000;
-
-const int PREAMBLE_LENGTH = 4;
-const uint8_t powerPackagePreamble[4] = {80, 80, 80, 11};
-const uint8_t simplexPackagePreamble[4] = {80, 80, 80, 12};
 
 // CONSTANTS
 uint16_t INTERIM_STOP_TIME = 1800; // 30 mins in
@@ -79,6 +54,10 @@ SatelliteMode SafeMode = {
     0,
 };
 
+/******************************
+ Satellite Mode Initializations
+ ******************************/
+
 void SatelliteProperties_Initialize() {
     // Set Current Mode to interim on start
     currentMode = interim;
@@ -103,146 +82,6 @@ void Satellite_Initialize() {
     // Debug light
     _LATE2 = LED_ON;
 }
-
-/********************
- Data Manager Methods
- ********************/
-
-// Description: Saves data to a transmission queue for sending later
-// *package => ready-to-send package
-// packageSize => size of package to send
-
-void SaveData(uint8_t *package, uint16_t packageSize) {
-
-    while (isSending);
-    int i;
-    for (i = 0; i < packageSize; i++) {
-        transmitQueue[(transmitQueueStartIndex + transmitQueueLength + i) % QUEUE_SIZE] = package[i];
-    }
-    
-    transmitQueueLength = transmitQueueLength + packageSize;
-    free(package);
-}
-
-// Description: Packaging algorithm for collected data
-// system => determines which system sampled the data
-// time => time in min since 00:00 that the sampling began 
-// *buffer => pointer to an array of instrument data
-// bufferSize => length of package string in characters
-
-uint16_t PackageData(System system, uint16_t time, uint8_t *buffer, uint16_t bufferSize) {
-
-    int packageSize = bufferSize + HEADER_SIZE;
-    uint8_t package[packageSize];
-    
-    // Setup Package Header
-    package[0] = GetSystemHeaderID(system);
-    package[1] = time >> 4;
-    package[2] = time & 0x00FF;
-    package[3] = bufferSize >> 4;
-    package[4] = bufferSize & 0x00FF;
-    
-    int i;
-    for (i = 0; i < bufferSize; i++) {
-        package[HEADER_SIZE + i] = buffer[i];
-    }
-    
-    SaveData(package, bufferSize + HEADER_SIZE);    
-    return i;
-}
-
-void TransmitSimplexPreamble() {
-    int i;
-    for (i = 0; i < PREAMBLE_LENGTH; i++) {
-        UART3_Write(simplexPackagePreamble[i]);
-        wait_for(10);
-    }
- }
-
-// Description: Handler for sending data via UART
-// *dataString => pointer to a string of packaged data
-// stringLength => length of packaged data string
-
-void SendData(uint8_t *queue, int queueLength) {
-    
-    isSending = true;
-    
-    while (queueLength > 0) {
-        // System Header Parser
-        uint8_t *sysID = (uint8_t *)&queue[transmitQueueStartIndex];
-        uint8_t *timeH = (uint8_t *)&queue[transmitQueueStartIndex + 1];
-        uint8_t *timeL = (uint8_t *)&queue[transmitQueueStartIndex + 2];
-        uint16_t dataLength = (queue[transmitQueueStartIndex + 3] << 4) | queue[transmitQueueStartIndex + 4];
-        
-        uint8_t headerByte1 = *sysID + *timeH;
-        uint8_t headerByte2 = *timeL;
-        
-        free(sysID);
-        free(timeH);
-        free(timeL);
-        
-        // UART header here then proceed to send package
-        TransmitSimplexPreamble();
-        UART3_Write(headerByte1);
-        wait_for(10);
-        UART3_Write(headerByte2);
-        wait_for(10);
-        
-        ClearQueue(transmitQueue, HEADER_SIZE, transmitQueueStartIndex);
-        transmitQueueStartIndex = (transmitQueueStartIndex + HEADER_SIZE) % QUEUE_SIZE;
-        transmitQueueLength = max(transmitQueueLength - HEADER_SIZE, 0);
-        int i = 0;
-        while (i < dataLength) {
-            
-            
-            // One Package Transmission
-            int j;
-            uint16_t packageLength;
-            if (i==0) {
-                packageLength = GetTransmissionPackageLength(currentTransmissionUnit) - 2;
-            } 
-            else 
-            {
-                TransmitSimplexPreamble();
-//                wait_for(10);
-                packageLength = GetTransmissionPackageLength(currentTransmissionUnit);
-            }
-            
-            for (j = 0; j < packageLength; j++) {
-                if (j >= dataLength - i) { UART3_Write(0); }
-                else { UART3_Write(queue[(transmitQueueStartIndex + j) % QUEUE_SIZE]); }
-                wait_for(10);
-            }
-            
-            ClearQueue(transmitQueue, packageLength, transmitQueueStartIndex);
-            transmitQueueStartIndex = (transmitQueueStartIndex + j) % QUEUE_SIZE;
-            transmitQueueLength = max(transmitQueueLength - j, 0);
-            i = i + j;
-            
-        }
-        
-//        transmitQueueStartIndex = (transmitQueueStartIndex + HEADER_SIZE + dataLength) % QUEUE_SIZE;
-        queueLength = max(queueLength - HEADER_SIZE - dataLength, 0);
-    }   
-    
-    isSending = false;
-    
-    /* DEBUGGING ONLY
-    ============================
-     Save to Data Acquisition Unit
-     =============================
-    
-    // Send data via UART here
-    int i;
-    for (i = 0; i < stringLength; i++) {
-
-        UART3_Write(dataString[i]);
-        
-    }*/
-
-}
-
-
 
 /********************
  Mode Switch Handling
@@ -342,9 +181,7 @@ void TakeSample() {
         currentGPSWait = 0;
     }
     
-    if (!isSending && transmitQueueLength > 0) {
-        SendData(transmitQueue, transmitQueueLength);
-    }
+    TransmitQueue();
  
     // Mode Update Test    
     if (ShouldUpdateMode(++totalTime)) {

@@ -50,6 +50,7 @@
 
 #include <xc.h>
 #include "tmr3.h"
+#include "uart3.h"
 #include "../CommandParser.h"
 #include "../SystemConfiguration.h"
 #include "../SampleManager.h"
@@ -94,9 +95,9 @@ void TMR3_Initialize (void)
     //TMR3 0; 
     TMR3 = 0x0000;
     //Period = 100 ms; Frequency = 16000000 Hz; PR3 62500; 
-    PR3 = 0x618A;
+    PR3 = 0x61A8;
     //TCKPS 1:8; TON enabled; TSIDL disabled; TCS FOSC/2; TGATE disabled; 
-    T3CON = 0x8010;
+    T3CON = 0x8020;
 
     
     IFS0bits.T3IF = false;
@@ -115,8 +116,8 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _T3Interrupt (  )
     //***User Area Begin
     static volatile unsigned int CountCallBack = 0;
 
-    // callback function - called every 3th pass
-    if (++CountCallBack >= GetSweepRate(MAG))
+    // callback function - called every pass
+    if (++CountCallBack >= GetSweepRate(&Magnetometer))
     {
         // ticker function call
         TMR3_CallBack();
