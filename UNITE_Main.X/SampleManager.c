@@ -34,7 +34,7 @@ int currentTemperatureBufferIndex = 0;
 int currentGPSBufferIndex = 0;
 
 const uint16_t LP_BUFFER_SIZE = 200;
-const uint16_t MAG_BUFFER_SIZE = 150;
+const uint16_t MAG_BUFFER_SIZE = 600;
 const uint16_t TMP_BUFFER_SIZE = 32;
 const uint16_t GPS_BUFFER_SIZE = 20;
 
@@ -63,12 +63,12 @@ ADCSampleConfig lpADCConfig = {
 };
 
 ADCSampleConfig magADCConfig = {
-    0x00C5,      // AN2, 6, 7
+    0x00C4,      // AN2, 6, 7
     3
 };
 
 ADCSampleConfig tmpADCConfig = {
-    0xFF01,      // AN8, 9, A, B, C, D, E, F
+    0xFF00,      // AN8, 9, A, B, C, D, E, F
     8
 };
 
@@ -144,13 +144,13 @@ void EndGPSSampling() {
 void ManageSweepingProgress() {
     
     if (isLangmuirProbeSweeping) {
-        if (currentLangmuirProbeSweepProgress++ > GetSweepDuration(&LangmuirProbe)) {
+        if (++currentLangmuirProbeSweepProgress++ > GetSweepDuration(&LangmuirProbe)) {
             EndLangmuirProbeSampling();
         }
     }
     
     if (isMagnetometerSweeping) {
-        if (currentMagnetometerSweepProgress++ > GetSweepDuration(&Magnetometer)) {
+        if (++currentMagnetometerSweepProgress > GetSweepDuration(&Magnetometer)) {
             EndMagnetometerSampling();
         }
     }
@@ -162,6 +162,8 @@ void ManageSweepingProgress() {
 void TakeProbeSample() {
     Clear(langmuirProbeResults, RESULTS_SIZE, 0);
     ADC1_GetResultFromChannels(langmuirProbeResults, lpADCConfig.channelSelect, lpADCConfig.channelCount);
+    
+    
     
     int probeResultSize = 1;
     if (currentLangmuirProbeBufferIndex < LP_BUFFER_SIZE) {
@@ -176,9 +178,15 @@ void TakeMagnetometerSample() {
     Clear(magnetometerResults, RESULTS_SIZE, 0);
     ADC1_GetResultFromChannels(magnetometerResults, magADCConfig.channelSelect, magADCConfig.channelCount);
     
+    // Scale Results down to a byte
+    int i;
+    for (i=0; i < RESULTS_SIZE; i++) {
+        magnetometerResults[i] = (magnetometerResults[i] - 520) / 2;
+    }
+    
     int magnetometerResultSize = 3;
     if (currentMagnetometerBufferIndex < MAG_BUFFER_SIZE) {
-        Copy(magnetometerResults, magnetometerBuffer, 1, currentMagnetometerBufferIndex, magnetometerResultSize);
+        Copy(magnetometerResults, magnetometerBuffer, 0, currentMagnetometerBufferIndex, magnetometerResultSize);
         currentMagnetometerBufferIndex = currentMagnetometerBufferIndex + magnetometerResultSize;
     } else {
         EndMagnetometerSampling();
@@ -189,9 +197,15 @@ void TakeTemperatureSample() {
     Clear(temperatureResults, RESULTS_SIZE, 0);
     ADC1_GetResultFromChannels(temperatureResults, tmpADCConfig.channelSelect, tmpADCConfig.channelCount);
         
+    // Scale Results down to a byte
+    int i;
+    for (i=0; i < RESULTS_SIZE; i++) {
+        temperatureResults[i] = temperatureResults[i] / 4;
+    }
+    
     int temperatureResultSize = 8;
     if (currentTemperatureBufferIndex < TMP_BUFFER_SIZE) {
-        Copy(temperatureResults, temperatureBuffer, 1, currentTemperatureBufferIndex, temperatureResultSize);
+        Copy(temperatureResults, temperatureBuffer, 0, currentTemperatureBufferIndex, temperatureResultSize);
         currentTemperatureBufferIndex = currentTemperatureBufferIndex + temperatureResultSize;
     } else {
         EndTemperatureSensorSampling();

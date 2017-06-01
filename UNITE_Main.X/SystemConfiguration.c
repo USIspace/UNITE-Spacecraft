@@ -24,7 +24,7 @@ Instrument TemperatureSensors = {
 };
 
 Instrument Magnetometer = {
-    { 10, 1, 5 },
+    { 25, 1, 20 },
     { 20, 1, 20 },
     { 15, 1, 20 }
 };

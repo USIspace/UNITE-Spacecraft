@@ -33,7 +33,7 @@
 /* Refer to the device Family Reference Manual Oscillator section for
 information about available oscillator configurations.  Typically
 this would involve configuring the oscillator tuning register or clock
-switching useing the compiler's __builtin_write_OSCCON functions.
+switching using the compiler's __builtin_write_OSCCON functions.
 Refer to the C Compiler for PIC24 MCUs and dsPIC DSCs User Guide in the
 compiler installation directory /doc folder for documentation on the
 __builtin functions. */

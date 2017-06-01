@@ -155,7 +155,7 @@ void TakeSample() {
 
     // Langmuir Probe
     if (!isLangmuirProbeSweeping) {
-        if (currentLangmuirProbeWait++ >= GetSampleRate(&LangmuirProbe)) {
+        if (++currentLangmuirProbeWait >= GetSampleRate(&LangmuirProbe)) {
             BeginLangmuirProbeSampling();
             currentLangmuirProbeWait = 0;
         }
@@ -163,20 +163,20 @@ void TakeSample() {
     
     // Magnetometer
     if (!isMagnetometerSweeping) {
-        if (currentMagnetometerWait++ >= GetSampleRate(&Magnetometer)) {
+        if (++currentMagnetometerWait >= GetSampleRate(&Magnetometer)) {
             BeginMagnetometerSampling();
             currentMagnetometerWait = 0;
         }
     }
     
     // Temperature Sensors
-    if (currentTemperatureWait++ >= GetSampleRate(&TemperatureSensors)) {
+    if (++currentTemperatureWait >= GetSampleRate(&TemperatureSensors)) {
         BeginTemperatureSampling();
         currentTemperatureWait = 0;
     }
     
     // GPS
-    if (currentGPSWait++ >= GetSampleRate(&GPSUnit)) {
+    if (++currentGPSWait >= GetSampleRate(&GPSUnit)) {
         BeginGPSSampling();
         currentGPSWait = 0;
     }

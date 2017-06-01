@@ -65,8 +65,8 @@ void InitializeADC1(void) {
     AD1CON3 = 0x0000;       // Manual Sample; Tad = 3Tcy    
     
     AD1CON3bits.ADRC = 0;   // ADC clock uses system clock
-    AD1CON3bits.SAMC = 16;  // Sample time = 31 Tad
-    AD1CON3bits.ADCS = 4;   // Tad = 5Tc
+    AD1CON3bits.SAMC = 31;  // Sample time = 31 Tad
+    AD1CON3bits.ADCS = 5;   // Tad = 5Tcy
     
     
     //AD1PCFG = 0x00FF;       // Sets AN8 - AN15 as analog inputs (Must set to 0 for analog input)
@@ -78,7 +78,7 @@ void InitializeADC1(void) {
 void ADC1_GetResultFromChannels(int *results, uint16_t channelSelect, int channelCount)
 {
     AD1CSSL = channelSelect;
-    AD1CON2bits.SMPI = channelCount;
+    AD1CON2bits.SMPI = channelCount - 1;
     AD1CON1bits.ADON = 1;
     
     _ASAM = 1;
@@ -87,25 +87,28 @@ void ADC1_GetResultFromChannels(int *results, uint16_t channelSelect, int channe
     
     _ASAM = 0;
     
-    results[0] = ADC1BUF0 / 4;
-    results[1] = ADC1BUF1 / 4;
-    results[2] = ADC1BUF2 / 4;
-    results[3] = ADC1BUF3 / 4;
+//    AD1CON1bits.ADON = 0;
+    wait_for(1);
     
-    results[4] = ADC1BUF4 / 4;
-    results[5] = ADC1BUF5 / 4;
-    results[6] = ADC1BUF6 / 4;
-    results[7] = ADC1BUF7 / 4;
+    results[0] = ADC1BUF0;
+    results[1] = ADC1BUF1;
+    results[2] = ADC1BUF2;
+    results[3] = ADC1BUF3;
+    
+    results[4] = ADC1BUF4;
+    results[5] = ADC1BUF5;
+    results[6] = ADC1BUF6;
+    results[7] = ADC1BUF7;
 
-    results[8] = ADC1BUF8 / 4;
-    results[9] = ADC1BUF9 / 4;
-    results[10] = ADC1BUFA / 4;
-    results[11] = ADC1BUFB / 4;
+    results[8] = ADC1BUF8;
+    results[9] = ADC1BUF9;
+    results[10] = ADC1BUFA;
+    results[11] = ADC1BUFB;
 
-    results[12] = ADC1BUFC / 4;
-    results[13] = ADC1BUFD / 4;
-    results[14] = ADC1BUFE / 4;
-    results[15] = ADC1BUFF / 4;
+    results[12] = ADC1BUFC;
+    results[13] = ADC1BUFD;
+    results[14] = ADC1BUFE;
+    results[15] = ADC1BUFF;
     
     AD1CON1bits.ADON = 0;
 }
