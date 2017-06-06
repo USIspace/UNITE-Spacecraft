@@ -17,16 +17,15 @@
   Transmission Package 
  ***********************/
 bool isSending = false;
-uint8_t transmitQueue[1000];
+uint8_t transmitQueue[2000];
 int transmitQueueStartIndex = 0;
 int transmitQueueLength = 0;
 const int HEADER_SIZE = 5;
-const uint16_t QUEUE_SIZE = 1000;
+const uint16_t QUEUE_SIZE = 2000;
 
 // Simplex Comm Configs
-const int SIMPLEX_PREAMBLE_LENGTH = 4;
-const uint8_t powerPackagePreamble[4] = {80, 80, 80, 11}; // 0x50 0x50 0x50 0x0B
-const uint8_t simplexPackagePreamble[4] = {80, 80, 80, 12}; // 0x50 0x50 0x50 0x0C
+const int PREAMBLE_LENGTH = 4;
+uint8_t simplexPackagePreamble[4] = {80, 80, 80, 12}; // 0x50 0x50 0x50 0x0C
 const int SIM_RES_LENGTH = 3;
 const uint8_t simplexACKResponse[3] = {170, 5, 0}; // 0xAA 0x05 0x00
 const uint8_t simplexNAKResponse[3] = {170, 5, 255}; // 0xAA 0x05 0xFF
@@ -38,6 +37,16 @@ const int DUP_RES_LENGTH = 11;
 const uint8_t duplexACKResponse[11] = {71, 85, 0, 0, 0, 0, 6, 0, 0, 0, 0}; // 0x4755LLLLLLLL06CCCCCCCC
 const uint8_t duplexNAKResponse[11] = {71, 85, 0, 0, 0, 0, 15, 0, 0, 0, 0}; // 0x4755LLLLLLLL0FCCCCCCCC
 
+/*************************
+  Power Switch Properties
+ *************************/
+
+uint8_t powerPackagePreamble[4] = {80, 80, 80, 11}; // 0x50 0x50 0x50 0x0B
+const uint8_t commandBoardPowerSwitch = 0xFF; // SW1
+uint8_t temperaturePowerSwitch = 0xFF;
+uint8_t langmuirMagPowerSwitch = 0xFF;
+uint8_t gpsPowerSwitch = 0xFF;
+uint8_t duplexPowerSwitch = 0xFF;
 
 /********************
  Data Manager Methods
@@ -117,10 +126,10 @@ uint8_t Read(TransmissionUnit unit) {
     }
 }
 
-void TransmitSimplexPreamble() {
+void TransmitPreamble(uint8_t *preamble) {
     int i;
-    for (i = 0; i < SIMPLEX_PREAMBLE_LENGTH; i++) {
-        Send(simplexPackagePreamble[i], SimplexOnly);
+    for (i = 0; i < PREAMBLE_LENGTH; i++) {
+        Send(preamble[i], SimplexOnly);
         wait_for(10);
     }
  }
@@ -152,7 +161,7 @@ void SendData(uint8_t *queue, int queueLength) {
         free(timeL);
         
         // UART header here then proceed to send package
-        TransmitSimplexPreamble();
+        TransmitPreamble(simplexPackagePreamble);
         UART3_Write(headerByte1);
         wait_for(10);
         UART3_Write(headerByte2);
@@ -177,7 +186,7 @@ void SendData(uint8_t *queue, int queueLength) {
             } 
             else 
             {
-                TransmitSimplexPreamble();
+                TransmitPreamble(simplexPackagePreamble);
                 packageLength = GetTransmissionPackageLength(currentTransmissionUnit);
             }
             
@@ -191,7 +200,7 @@ void SendData(uint8_t *queue, int queueLength) {
                 wait_for(10);
             }
             
-//            if (ReadACKForMode(currentTransmissionUnit)) {
+//            if (ReadACKForUnit(currentTransmissionUnit)) {
             if (true) {
                 ClearQueue(transmitQueue, min(packageLength, dataLength - i), transmitQueueStartIndex);
                 transmitQueueStartIndex = (transmitQueueStartIndex + min(j, dataLength - i)) % QUEUE_SIZE;
@@ -222,7 +231,7 @@ void SendData(uint8_t *queue, int queueLength) {
 
 }
 
-bool ReadACKForMode(TransmissionUnit unit) {
+bool ReadACKForUnit(TransmissionUnit unit) {
     
     int i;
 
@@ -252,3 +261,46 @@ bool ReadACKForMode(TransmissionUnit unit) {
 bool IsLineBusy(TransmissionUnit unit) {
     return false;
 }
+
+/*************************
+   Power Manager Methods
+ *************************/
+
+bool TogglePowerSwitch() {
+    
+    if (!isSending) {
+        
+        TransmitPreamble(powerPackagePreamble);
+                
+        uint8_t powerPackage[10] = {0x01, commandBoardPowerSwitch, 
+                                    0x02, temperaturePowerSwitch, 
+                                    0x03, langmuirMagPowerSwitch,
+                                    0x04, gpsPowerSwitch,
+                                    0x05, duplexPowerSwitch};
+                
+        int i;
+        for (i=0; i < 35; i++) {
+            if (i < 10) { Send(powerPackage[i], SimplexOnly); }
+            else { Send(0, SimplexOnly); }
+        }
+        
+        return ReadACKForUnit(SimplexOnly);
+    }
+    
+    return false;
+}
+
+bool PowerOffDuplex() {
+    
+    duplexPowerSwitch = 0x00;
+
+    return TogglePowerSwitch();
+}
+
+bool PowerOnDuplex() {
+    
+    duplexPowerSwitch = 0xFF;
+
+    return TogglePowerSwitch();
+}
+

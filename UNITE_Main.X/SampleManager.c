@@ -1,6 +1,7 @@
 #include <stdint.h>        /* Includes uint16_t definition                    */
 #include <stdbool.h>       /* Includes true/false definition                  */
 #include <stdio.h>
+#include <stdlib.h>
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp */
 #include "CommandParser.h"
@@ -13,6 +14,7 @@
 #include "mcc_generated_files/tmr2.h"
 #include "mcc_generated_files/tmr3.h"
 #include "mcc_generated_files/tmr4.h"
+#include "mcc_generated_files/spi1.h"
 
 
 /*****************************
@@ -23,7 +25,7 @@ int langmuirProbeResults[16];
 int magnetometerResults[16];
 int temperatureResults[16];
 
-uint8_t langmuirProbeBuffer[200];
+uint8_t langmuirProbeBuffer[600];
 uint8_t magnetometerBuffer[600];
 uint8_t temperatureBuffer[32];
 uint8_t gpsBuffer[20];
@@ -33,7 +35,7 @@ int currentMagnetometerBufferIndex = 0;
 int currentTemperatureBufferIndex = 0;
 int currentGPSBufferIndex = 0;
 
-const uint16_t LP_BUFFER_SIZE = 200;
+const uint16_t LP_BUFFER_SIZE = 600;
 const uint16_t MAG_BUFFER_SIZE = 600;
 const uint16_t TMP_BUFFER_SIZE = 32;
 const uint16_t GPS_BUFFER_SIZE = 20;
@@ -53,13 +55,16 @@ int currentMagnetometerSweepProgress = 0;
 bool isLangmuirProbeSweeping = false;
 bool isMagnetometerSweeping = false;
 
+bool isLangmuirProbeSweepPositive = true;
+int currentLangmuirProbeSweepPosition = 0; //0x1000 : -32767
+
 /**************************
   Sampling Configurations
  **************************/
 
 ADCSampleConfig lpADCConfig = {
-    0,   // adc channel to start at   
-    0    // number of adc channels to sample
+    0x0038,      // AN3, 4, 5                   // adc channel select   
+    3                                           // number of adc channels to sample
 };
 
 ADCSampleConfig magADCConfig = {
@@ -81,8 +86,8 @@ ADCSampleConfig tmpADCConfig = {
 
 void BeginLangmuirProbeSampling() {
     // Sample Plasma Probe Data and store in buffer
-    isLangmuirProbeSweeping = true;
-    TMR2_Start();
+//    isLangmuirProbeSweeping = true;
+//    TMR2_Start();
 }
 
 void BeginMagnetometerSampling() {
@@ -120,7 +125,7 @@ void EndMagnetometerSampling() {
     currentMagnetometerSweepProgress = 0;
     isMagnetometerSweeping = false;
     
-    PackageData(MAG, GetDayTimeInMin(totalTime), magnetometerBuffer, MAG_BUFFER_SIZE);
+//    PackageData(MAG, GetDayTimeInMin(totalTime), magnetometerBuffer, MAG_BUFFER_SIZE);
     currentMagnetometerBufferIndex = 0;
     currentMagnetometerWait = 0;
     _LATE3 = LED_OFF;
@@ -144,7 +149,7 @@ void EndGPSSampling() {
 void ManageSweepingProgress() {
     
     if (isLangmuirProbeSweeping) {
-        if (++currentLangmuirProbeSweepProgress++ > GetSweepDuration(&LangmuirProbe)) {
+        if (++currentLangmuirProbeSweepProgress > GetSweepDuration(&LangmuirProbe)) {
             EndLangmuirProbeSampling();
         }
     }
@@ -161,11 +166,22 @@ void ManageSweepingProgress() {
 
 void TakeProbeSample() {
     Clear(langmuirProbeResults, RESULTS_SIZE, 0);
+    
+    // Sweeping Algorithm
+    int voltageAdjustment = isLangmuirProbeSweepPositive ? 655 : -655;
+    currentLangmuirProbeSweepPosition = max(-32767, min(32767, currentLangmuirProbeSweepPosition + voltageAdjustment));
+    
+    if (currentLangmuirProbeSweepPosition == 32767) isLangmuirProbeSweepPositive = false;
+    else if (currentLangmuirProbeSweepPosition == -32767) isLangmuirProbeSweepPositive = true;
+    
+    SPI1_Exchange16bit(currentLangmuirProbeSweepPosition & 0xFFFF);
+    
+    // Sample Probe from ADC
     ADC1_GetResultFromChannels(langmuirProbeResults, lpADCConfig.channelSelect, lpADCConfig.channelCount);
     
+    // Manipulate Data Here
     
-    
-    int probeResultSize = 1;
+    int probeResultSize = 3;
     if (currentLangmuirProbeBufferIndex < LP_BUFFER_SIZE) {
         Copy(langmuirProbeResults, langmuirProbeBuffer, 0, currentLangmuirProbeBufferIndex, probeResultSize);
         currentLangmuirProbeBufferIndex = currentLangmuirProbeBufferIndex + probeResultSize;
@@ -217,4 +233,19 @@ void TakeGPSSample() {
 }
 
 
+uint8_t spiTesting = 0x00;
+uint16_t spi16Testing = 0x8000;
 
+void TestDACSPI() {
+    
+    _RG9 = 0;
+    
+//    SPI1_Exchange8bit(spiTesting++);
+    SPI1_Exchange16bit(spi16Testing);
+//    SPI1_Exchange16bit(currentLangmuirProbeSweepPosition);
+    
+    currentLangmuirProbeSweepPosition = currentLangmuirProbeSweepPosition + 655;
+    
+    _RG9 = 1;
+}
+    

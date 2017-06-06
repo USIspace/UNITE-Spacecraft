@@ -55,7 +55,7 @@
 #pragma config POSCMOD = NONE             // Primary Oscillator Select (HS oscillator mode selected)
 #pragma config IOL1WAY = ON    // IOLOCK One-Way Set Enable bit->Write RP Registers Once
 #pragma config OSCIOFNC = OFF    // Primary Oscillator Output Function->OSCO functions as CLKO (FOSC/2)
-#pragma config FCKSM = CSDCMD    // Clock Switching and Monitor->Both Clock Switching and Fail-safe Clock Monitor are disabled
+#pragma config FCKSM = CSECMD    // Clock Switching and Monitor->Both Clock Switching and Fail-safe Clock Monitor are disabled
 #pragma config FNOSC = FRCPLL              // Oscillator Select (Primary oscillator (XT, HS, EC))
 #pragma config IESO = ON    // Internal External Switch Over Mode->IESO mode (Two-speed start-up) enabled
 
@@ -102,9 +102,10 @@ void SYSTEM_Initialize(void)
 
 void OSCILLATOR_Initialize(void)
 {
+    
     // NOSC FRCPLL; SOSCEN disabled; OSWEN Switch is Complete;
-//    __builtin_write_OSCCONH((uint8_t) (0x12));
-    __builtin_write_OSCCONL((uint8_t) (0x00)); //(0x0100 & 0x00FF));
+    __builtin_write_OSCCONL((uint8_t) (0x0100 & 0x00FF));
+    
     // RCDIV FRC/1; DOZE 1:1; DOZEN disabled; ROI disabled; 
         
     CLKDIV = 0x0000;

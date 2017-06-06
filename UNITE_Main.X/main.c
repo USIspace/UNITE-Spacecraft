@@ -41,12 +41,14 @@ void StartWaitTimer() {
     TMR1_Initialize();
     TMR1_Start();
     
-    // Initialize Debug light to off
+    // Initialize Debug light to on
    _LATE1 = LED_ON;
    
    _LATE2 = LED_OFF;
    _LATE3 = LED_OFF;
    _LATE4 = LED_OFF;
+   
+   _RG9 = 1;                   //Slave select 1
 }
 
 /******************************************************************************/
@@ -58,10 +60,12 @@ int16_t main(void) {
     SYSTEM_Initialize();
     /* Initialize IO ports and peripherals */
     InitApp();
+    
+//    ConfigureOscillator();
 
     StartWaitTimer();
 
-    while (1) {};
+    while (1);
 }
 
 

@@ -30,7 +30,15 @@ void TransmitQueue();
 void SaveData(uint8_t *, uint16_t);
 uint16_t PackageData(System, uint16_t, uint8_t *, uint16_t);
 void SendData(uint8_t *, int);
-bool ReadACKForMode(TransmissionUnit unit);
+bool ReadACKForUnit(TransmissionUnit unit);
 void Send(uint8_t byte, TransmissionUnit unit);
 uint8_t Read(TransmissionUnit unit);
 bool IsLineBusy(TransmissionUnit unit);
+
+
+/****************
+  Power Methods
+ ****************/
+
+bool PowerOnDuplex();
+bool PowerOffDuplex();

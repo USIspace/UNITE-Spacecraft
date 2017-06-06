@@ -59,3 +59,5 @@ void TakeTemperatureSample();
 void TakeGPSSample();
 void TakeMagnetometerSample();
 void TakeProbeSample();
+
+void TestDACSPI();
