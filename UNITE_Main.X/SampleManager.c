@@ -35,10 +35,10 @@ int currentMagnetometerBufferIndex = 0;
 int currentTemperatureBufferIndex = 0;
 int currentGPSBufferIndex = 0;
 
-const uint16_t LP_BUFFER_SIZE = 600;
-const uint16_t MAG_BUFFER_SIZE = 600;
-const uint16_t TMP_BUFFER_SIZE = 32;
-const uint16_t GPS_BUFFER_SIZE = 20;
+uint16_t LP_BUFFER_SIZE = 600;
+uint16_t MAG_BUFFER_SIZE = 600;
+uint16_t TMP_BUFFER_SIZE = 32;
+uint16_t GPS_BUFFER_SIZE = 20;
 
 /******************************
   Instrument Timer Properties
@@ -48,6 +48,9 @@ int currentLangmuirProbeWait = 0;
 int currentMagnetometerWait = 0;
 int currentTemperatureWait = 0;
 int currentGPSWait = 0;
+
+int langmuirProbeCallbackCount = 0;
+int magnetometerCallbackCount = 0;
 
 int currentLangmuirProbeSweepProgress = 0;
 int currentMagnetometerSweepProgress = 0;
@@ -118,6 +121,8 @@ void EndLangmuirProbeSampling() {
 //    PackageData(LP, GetDayTimeInMin(totalTime), langmuirProbeBuffer, LP_BUFFER_SIZE);
     currentLangmuirProbeBufferIndex = 0;
     currentLangmuirProbeWait = 0;
+    LP_BUFFER_SIZE = (GetSweepDuration(&LangmuirProbe) * convertTime(Sec, MilSec))/(GetSweepRate(&LangmuirProbe) * 5) * 3;
+    
 }
 
 void EndMagnetometerSampling() {
@@ -128,6 +133,8 @@ void EndMagnetometerSampling() {
 //    PackageData(MAG, GetDayTimeInMin(totalTime), magnetometerBuffer, MAG_BUFFER_SIZE);
     currentMagnetometerBufferIndex = 0;
     currentMagnetometerWait = 0;
+    MAG_BUFFER_SIZE = (GetSweepDuration(&Magnetometer) * convertTime(Sec, MilSec))/(GetSweepRate(&Magnetometer) * 100) * 3;
+
     _LATE3 = LED_OFF;
 }
 

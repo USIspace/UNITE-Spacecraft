@@ -117,16 +117,15 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _T2Interrupt (  )
 
     
     //***User Area Begin
-    static volatile unsigned int CountCallBack = 0;
-
+    
     // callback function - called every 3th pass
-    if (++CountCallBack >= GetSweepRate(&LangmuirProbe))
+    if (++currentLangmuirProbeSweepProgress >= GetSweepRate(&LangmuirProbe))
     {
         // ticker function call
         TMR2_CallBack();
 
         // reset ticker counter
-        CountCallBack = 0;
+        currentLangmuirProbeSweepProgress = 0;
     }
 
     //***User Area End

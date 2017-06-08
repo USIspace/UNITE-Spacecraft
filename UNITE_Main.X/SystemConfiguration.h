@@ -22,9 +22,9 @@ extern "C" {
 #endif	/* SYSTEMCONFIGURATION_H */
 
 typedef struct {
-    unsigned long sampleRate; // Seconds between each sample
-    unsigned long sweepRate;  // Rate in tmr ticks between sweep samples
-    uint16_t sweepDuration;   // Length of sweep in seconds
+    int sampleRate; // Seconds between each sample
+    int sweepRate;  // Rate in tmr ticks between sweep samples
+    int sweepDuration;   // Length of sweep in seconds
 } Properties;
 
 typedef struct {
@@ -34,23 +34,33 @@ typedef struct {
 } Instrument;
 
 typedef enum {
-    SimplexOnly,
-    DuplexOnly,
-    Simplex_DuplexMix
+    SimplexUnit,
+    DuplexUnit,
+    SimplexOrDuplex
 } TransmissionUnit;
+
+
+typedef struct {
+    TransmissionUnit interim;
+    TransmissionUnit science;
+    TransmissionUnit reentry;
+    
+} TransmissionMode;
 
 extern Instrument LangmuirProbe;
 extern Instrument TemperatureSensors;
 extern Instrument Magnetometer;
 extern Instrument GPSUnit;
 
-extern TransmissionUnit currentTransmissionUnit;
+extern TransmissionMode TransmissionUnitForMode;
 
-uint16_t GetSampleRate(Instrument *);
-uint16_t GetSweepRate(Instrument *);
-uint16_t GetSweepDuration(Instrument *);
+int GetSampleRate(Instrument *);
+int GetSweepRate(Instrument *);
+int GetSweepDuration(Instrument *);
 
 // Transmission Methods
 uint8_t GetSystemHeaderID(System);
 uint16_t GetDayTimeInMin(unsigned long);
 uint8_t GetTransmissionPackageLength(TransmissionUnit);
+
+TransmissionUnit GetTransmissionUnitForMode();

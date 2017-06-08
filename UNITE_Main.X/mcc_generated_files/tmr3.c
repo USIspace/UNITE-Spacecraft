@@ -114,16 +114,15 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _T3Interrupt (  )
     /* Check if the Timer Interrupt/Status is set */
 
     //***User Area Begin
-    static volatile unsigned int CountCallBack = 0;
 
     // callback function - called every pass
-    if (++CountCallBack >= GetSweepRate(&Magnetometer))
+    if (++magnetometerCallbackCount >= GetSweepRate(&Magnetometer))
     {
         // ticker function call
         TMR3_CallBack();
 
         // reset ticker counter
-        CountCallBack = 0;
+        magnetometerCallbackCount = 0;
     }
 
     //***User Area End

@@ -73,13 +73,6 @@ typedef enum {
     Global
 } Mode;
 
-void PerformCommands();
-void EndMessage();
-uint8_t GetNextByte();
-void ParseByte(uint8_t, CommandByteIndex);
+void PerformCommands(uint8_t *, uint16_t);
 
-void addValueByte(uint8_t);
-uint16_t convertHexToDecimal(uint8_t *);
-unsigned long convertTime(Unit,Unit);
-void RunCommand(System, Mode, Property, Unit, unsigned long);
-
+unsigned long convertTime(Unit current, Unit final);

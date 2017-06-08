@@ -26,15 +26,17 @@ typedef struct {
     int channelCount;
 } ADCSampleConfig;
 
-//extern ADCSampleConfig lpADCConfig;
-//extern ADCSampleConfig magADCConfig;
-//extern ADCSampleConfig tmpADCConfig;
+extern uint16_t LP_BUFFER_SIZE;
+extern uint16_t MAG_BUFFER_SIZE;
 
 // State Variables
 extern int currentLangmuirProbeWait;
 extern int currentMagnetometerWait;
 extern int currentTemperatureWait;
 extern int currentGPSWait;
+
+extern int langmuirProbeCallbackCount;
+extern int magnetometerCallbackCount;
 
 extern int currentLangmuirProbeSweepProgress;
 extern int currentMagnetometerSweepProgress;

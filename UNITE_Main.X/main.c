@@ -19,11 +19,12 @@
 #include <stdbool.h>       /* Includes true/false definition                  */
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp              */
-#include "mcc_generated_files/uart1.h"
 #include "mcc_generated_files/mcc.h"
-#include "mcc_generated_files/pin_manager.h"
-#include "adc1.h"
-#include "mcc_generated_files/interrupt_manager.h"
+#include "CommandParser.h"
+#include "SystemConfiguration.h"
+#include "SampleManager.h"
+#include "SatelliteMode.h"
+#include "TransmitManager.h"
 
 /******************************************************************************/
 /* Global Variable Declaration                                                */
@@ -63,6 +64,8 @@ int16_t main(void) {
     
 //    ConfigureOscillator();
 
+    TogglePowerSwitches();
+    
     StartWaitTimer();
 
     while (1);

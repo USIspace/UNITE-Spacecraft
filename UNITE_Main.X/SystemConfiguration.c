@@ -8,7 +8,12 @@
 #include "SatelliteMode.h"
 #include "TransmitManager.h"
 
-TransmissionUnit currentTransmissionUnit = SimplexOnly;
+TransmissionMode TransmissionUnitForMode = {
+    
+    SimplexOrDuplex,
+    SimplexOrDuplex,
+    SimplexUnit
+};
 
 Instrument LangmuirProbe = {
     
@@ -35,7 +40,7 @@ Instrument GPSUnit = {
     { 15, 0, 0 }
 };
 
-uint16_t GetSampleRate(Instrument *instrument) {
+int GetSampleRate(Instrument *instrument) {
     
     switch (currentMode) {
         case interim: return instrument->Interim.sampleRate;
@@ -44,7 +49,7 @@ uint16_t GetSampleRate(Instrument *instrument) {
         default: return 0;
     }
 }
-uint16_t GetSweepRate(Instrument *instrument) {
+int GetSweepRate(Instrument *instrument) {
     
     switch (currentMode) {
         case interim: return instrument->Interim.sweepRate;
@@ -53,7 +58,7 @@ uint16_t GetSweepRate(Instrument *instrument) {
         default: return 0;
     }
 }
-uint16_t GetSweepDuration(Instrument *instrument) {
+int GetSweepDuration(Instrument *instrument) {
     
     switch (currentMode) {
         case interim: return instrument->Interim.sweepDuration;
@@ -79,10 +84,18 @@ uint16_t GetDayTimeInMin(unsigned long totalMissionTimeInSec) {
 
 uint8_t GetTransmissionPackageLength(TransmissionUnit unit) {
     switch(unit) {
-        case SimplexOnly: return 35;
-        case DuplexOnly: return 56;
+        case SimplexUnit: return 35;
+        case DuplexUnit: return 56;
         default: return 0;
     }
 }
 
 
+TransmissionUnit GetTransmissionUnitForMode() {
+    switch (currentMode) {
+        case interim: return TransmissionUnitForMode.interim;
+        case science: return TransmissionUnitForMode.science;
+        case reentry: return TransmissionUnitForMode.reentry;
+        default: return SimplexOrDuplex;
+    }
+}
