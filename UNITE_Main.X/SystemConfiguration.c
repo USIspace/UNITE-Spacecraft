@@ -17,9 +17,9 @@ TransmissionMode TransmissionUnitForMode = {
 
 Instrument LangmuirProbe = {
     
-    { 120, 0, 0 },
-    { 30, 0, 0 },
-    { 15, 0, 0 }
+    { 120, 1, 1 },
+    { 30, 1, 1 },
+    { 15, 1, 1 }
 };
 
 Instrument TemperatureSensors = {
