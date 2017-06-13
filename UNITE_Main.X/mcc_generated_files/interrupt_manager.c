@@ -53,6 +53,9 @@
 */
 void INTERRUPT_Initialize (void)
 {
+    //    SPI1: SPI1 - SPI1 Transfer Done
+    //    Priority 1
+        IPC2bits.SPI1IP = 1;
     //    ADI: ADC1 - A/D Converter 1
     //    Priority: 1
         IPC3bits.AD1IP = 1;

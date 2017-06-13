@@ -30,22 +30,16 @@ typedef enum {
 
 
 typedef struct {
-    int sampleRateInSec; // Time in minutes between each sample of sensors
     int startAltitudeInKm; // Altitude to begin sampling in this mode 
     int endAltitudeInKm; // Altitude to end sampling and switch to new mode
 } SatelliteMode;
 
 
+
+extern UNITEMode currentMode;
+extern unsigned long totalTime;
+
 void Satellite_Initialize(void);
-void GetTempData(uint8_t *buffer, int bufferSize);
-void GetGPSData(int *buffer, int bufferSize);
-void GetMagnetometerData(int *buffer, int bufferSize);
-void GetProbeData(int *buffer, int bufferSize);
-void SaveData(int *package, int packageSize);
-void PackageData(int *package, int stringLength, int *temps, int *gps, int *mags, int *densities);
-void SendData(uint8_t *dataString, int stringLength);
-
 UNITEMode UpdateMode(void);
-unsigned int DelayForMode(void);
 
-void BeginSample(void);
+void TakeSample(void);

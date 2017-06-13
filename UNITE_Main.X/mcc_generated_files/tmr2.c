@@ -49,8 +49,13 @@
 */
 
 #include <xc.h>
+#include <stdint.h>        /* Includes uint16_t definition                    */
+#include <stdbool.h>       /* Includes true/false definition                  */
 #include "tmr2.h"
 #include "time.h"
+#include "../CommandParser.h"
+#include "../SystemConfiguration.h"
+#include "../SampleManager.h"
 #include "../SatelliteMode.h"
 #include "../system.h"
 
@@ -91,10 +96,10 @@ void TMR2_Initialize (void)
 {
     //TMR2 0; 
     TMR2 = 0x0000;
-    //Period = 1 s; Frequency = 16000000 Hz; PR2 62500; 
-    PR2 = 0xF424;
-    //TCKPS 1:256; T32 16 Bit; TON enabled; TSIDL disabled; TCS FOSC/2; TGATE disabled; 
-    T2CON = 0x8030;
+    //Period = 5 ms; Frequency = 16000000 Hz; PR2 10000; 
+    PR2 = 2710;
+    //TCKPS 1:8; T32 16 Bit; TON enabled; TSIDL disabled; TCS FOSC/2; TGATE disabled; 
+    T2CON = 0x8010;
 
     
     IFS0bits.T2IF = false;
@@ -112,16 +117,15 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _T2Interrupt (  )
 
     
     //***User Area Begin
-    static volatile unsigned int CountCallBack = 0;
-
+    
     // callback function - called every 3th pass
-    if (++CountCallBack >= TMR2_INTERRUPT_TICKER_FACTOR)
+    if (++currentLangmuirProbeSweepProgress >= GetSweepRate(&LangmuirProbe))
     {
         // ticker function call
         TMR2_CallBack();
 
         // reset ticker counter
-        CountCallBack = 0;
+        currentLangmuirProbeSweepProgress = 0;
     }
 
     //***User Area End
@@ -161,9 +165,7 @@ uint16_t TMR2_Counter16BitGet( void )
 
 void __attribute__ ((weak)) TMR2_CallBack(void)
 {
- 
-    Satellite_Initialize(); 
- 
+    TakeProbeSample();
 }
 
 void TMR2_Start( void )

@@ -52,11 +52,11 @@
 #pragma config WPEND = WPENDMEM    // Segment Write Protection End Page Select bit->Write Protect from WPFP to the last page of memory
 
 // CONFIG2
-#pragma config POSCMOD = NONE    // Primary Oscillator Select->Primary oscillator disabled
+#pragma config POSCMOD = NONE             // Primary Oscillator Select (HS oscillator mode selected)
 #pragma config IOL1WAY = ON    // IOLOCK One-Way Set Enable bit->Write RP Registers Once
 #pragma config OSCIOFNC = OFF    // Primary Oscillator Output Function->OSCO functions as CLKO (FOSC/2)
-#pragma config FCKSM = CSDCMD    // Clock Switching and Monitor->Both Clock Switching and Fail-safe Clock Monitor are disabled
-#pragma config FNOSC = FRCPLL    // Oscillator Select->Fast RC oscillator with Postscaler and PLL module (FRCPLL)
+#pragma config FCKSM = CSECMD    // Clock Switching and Monitor->Both Clock Switching and Fail-safe Clock Monitor are disabled
+#pragma config FNOSC = FRCPLL              // Oscillator Select (Primary oscillator (XT, HS, EC))
 #pragma config IESO = ON    // Internal External Switch Over Mode->IESO mode (Two-speed start-up) enabled
 
 // CONFIG1
@@ -90,16 +90,22 @@ void SYSTEM_Initialize(void)
     
     //Timer Initialization 
     //TMR1_Initialize();
-    //TMR2_Initialize();
-    //TMR3_Initialize();
-    //TMR4_Initialize();
+    TMR2_Initialize();
+    TMR3_Initialize();
+    TMR4_Initialize();
     //TMR5_Initialize();
+    
+    TMR2_Stop();
+    TMR3_Stop();
+    TMR4_Stop();
 }
 
 void OSCILLATOR_Initialize(void)
 {
-    // NOSC FRCPLL; SOSCEN disabled; OSWEN Switch is Complete; 
+    
+    // NOSC FRCPLL; SOSCEN disabled; OSWEN Switch is Complete;
     __builtin_write_OSCCONL((uint8_t) (0x0100 & 0x00FF));
+    
     // RCDIV FRC/1; DOZE 1:1; DOZEN disabled; ROI disabled; 
         
     CLKDIV = 0x0000;

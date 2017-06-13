@@ -50,6 +50,9 @@
 
 #include <xc.h>
 #include "tmr4.h"
+#include "../CommandParser.h"
+#include "../SystemConfiguration.h"
+#include "../SampleManager.h"
 #include "../SatelliteMode.h"
 #include "../system.h"
 
@@ -156,21 +159,8 @@ uint16_t TMR4_Counter16BitGet( void )
     return( TMR4 );
 }
 
-bool isLightOn4 = false;
 void __attribute__ ((weak)) TMR4_CallBack(void)
 {
-    // Add your custom callback code here
-    BeginSample();                                  //User timer to call sampling function
-
-    if (isLightOn4) { 
-        _LATE1 = LED_OFF;
-        isLightOn4 = false;
-    }
-    else { 
-        _LATE1 = LED_ON;
-        isLightOn4 = true;
-    }
-
 }
 
 void TMR4_Start( void )

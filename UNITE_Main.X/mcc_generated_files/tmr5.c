@@ -50,6 +50,9 @@
 
 #include <xc.h>
 #include "tmr5.h"
+#include "../CommandParser.h"
+#include "../SystemConfiguration.h"
+#include "../SampleManager.h"
 #include "../SatelliteMode.h"
 #include "../system.h"
 
@@ -81,6 +84,7 @@ typedef struct _TMR_OBJ_STRUCT
 
 static TMR_OBJ tmr5_obj;
 
+int TMR5_INTERRUPT_TICKER_FACTOR = 1;  // Begin in interim
 /**
   Section: Driver Interface
 */
@@ -112,6 +116,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _T5Interrupt (  )
     //***User Area Begin
     static volatile unsigned int CountCallBack = 0;
 
+    if (_LATE1 == LED_ON) { _LATE1 = LED_OFF; }
     // callback function - called every 1140th pass
     if (++CountCallBack >= TMR5_INTERRUPT_TICKER_FACTOR)
     {
@@ -160,7 +165,7 @@ bool isLightOn5 = false;
 void __attribute__ ((weak)) TMR5_CallBack(void)
 {
     // Add your custom callback code here
-    BeginSample();                                  //User timer to call sampling function
+    TakeSample();                                  //User timer to call sampling function
 
     if (isLightOn5) { 
         _LATE1 = LED_OFF;

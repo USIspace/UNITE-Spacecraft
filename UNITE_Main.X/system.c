@@ -33,7 +33,7 @@
 /* Refer to the device Family Reference Manual Oscillator section for
 information about available oscillator configurations.  Typically
 this would involve configuring the oscillator tuning register or clock
-switching useing the compiler's __builtin_write_OSCCON functions.
+switching using the compiler's __builtin_write_OSCCON functions.
 Refer to the C Compiler for PIC24 MCUs and dsPIC DSCs User Guide in the
 compiler installation directory /doc folder for documentation on the
 __builtin functions. */
@@ -42,19 +42,28 @@ __builtin functions. */
 void ConfigureOscillator(void)
 {
 
+    
+    __builtin_write_OSCCONH(0b010);
+    __builtin_write_OSCCONL(OSCCON | 0x01);
+    while (OSCCONbits.COSC != 0b010 || OSCCONbits.OSWEN == 1);
+    
 #if 0
 
-        /* Disable Watch Dog Timer */
-        RCONbits.SWDTEN = 0;
+    /* Disable Watch Dog Timer */
+    RCONbits.SWDTEN = 0;
 
-        /* When clock switch occurs switch to Prim Osc (HS, XT, EC)with PLL */
-        __builtin_write_OSCCONH(0x03);  /* Set OSCCONH for clock switch */
-        __builtin_write_OSCCONL(0x01);  /* Start clock switching */
-        while(OSCCONbits.COSC != 0b011);
+    __builtin_write_OSCCONH(0x02); // Initiate Clock Switch to FRC with PLL (NOSC=0b001)
+    
+    if (_OSWEN == 0) { // Check clock switch is not in progress
+        __builtin_write_OSCCONL(0x01); // Start clock switching
+        while (OSCCONbits.COSC != 0b010); // Wait for Clock switch to occur
+    }//end if
+    
+    
 
-        /* Wait for Clock switch to occur */
-        /* Wait for PLL to lock, if PLL is used */
-        /* while(OSCCONbits.LOCK != 1); */
+    /* Wait for Clock switch to occur */
+    /* Wait for PLL to lock, if PLL is used */
+    /*while(OSCCONbits.LOCK != 1); */
 
 #endif
         
@@ -88,8 +97,38 @@ void wait_sec(unsigned long seconds)
 void wait_for(unsigned long something) {
     
     unsigned long wait = something * 1000;
-    int i;
+    uint16_t i;
     for (i = 0; i < wait; i++);
 }
 
+uint16_t Pow(int base, int exponent) {
+  uint16_t returnValue = 1;
+  int i;
+  for (i = 0; i < exponent; i++) {
+      returnValue = returnValue * base;
+  }
+  
+  return returnValue;
+}
 
+void ClearQueue(uint8_t *buffer, int size, int startIndex) {
+    int i;
+    for (i = 0; i < size; i++) {
+        buffer[i + startIndex] = 0;
+    }
+}
+
+void Clear(int *buffer, int size, int startIndex) {
+    int i;
+    for (i = 0; i < size; i++) {
+        buffer[i + startIndex] = 0;
+    }
+}
+
+void Copy(int *source, uint8_t *destination, int sourceStart, int destStart, int numberOfItems) {
+    
+    int i;
+    for (i = sourceStart; i < numberOfItems; i++) {
+        destination[i + destStart] = source[i];
+    }
+}

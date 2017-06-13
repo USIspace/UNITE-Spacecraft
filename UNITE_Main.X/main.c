@@ -19,12 +19,12 @@
 #include <stdbool.h>       /* Includes true/false definition                  */
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp              */
-#include "mcc_generated_files/uart1.h"
 #include "mcc_generated_files/mcc.h"
-#include "mcc_generated_files/pin_manager.h"
-#include "adc1.h"
-#include "mcc_generated_files/interrupt_manager.h"
+#include "CommandParser.h"
+#include "SystemConfiguration.h"
+#include "SampleManager.h"
 #include "SatelliteMode.h"
+#include "TransmitManager.h"
 
 /******************************************************************************/
 /* Global Variable Declaration                                                */
@@ -39,15 +39,17 @@
 void StartWaitTimer() {
     
     // Begins wait timer
-    TMR2_Initialize();
-    TMR2_Start();
+    TMR1_Initialize();
+    TMR1_Start();
     
-    // Initialize Debug light to off
+    // Initialize Debug light to on
    _LATE1 = LED_ON;
    
    _LATE2 = LED_OFF;
    _LATE3 = LED_OFF;
    _LATE4 = LED_OFF;
+   
+   _RG9 = 1;                   //Slave select 1
 }
 
 /******************************************************************************/
@@ -59,10 +61,14 @@ int16_t main(void) {
     SYSTEM_Initialize();
     /* Initialize IO ports and peripherals */
     InitApp();
+    
+//    ConfigureOscillator();
 
+    TogglePowerSwitches();
+    
     StartWaitTimer();
 
-    while (1) {};
+    while (1);
 }
 
 

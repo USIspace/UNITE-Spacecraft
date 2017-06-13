@@ -204,7 +204,7 @@ void SPI1_Initialize (void);
     Refer to SPI1_Initialize() for an example	
 */
         
-uint8_t SPI1_Exchange8bit( uint8_t data );
+uint16_t SPI1_Exchange16bit( uint16_t data );
 
 /**
   @Summary
@@ -237,8 +237,7 @@ uint8_t SPI1_Exchange8bit( uint8_t data );
  
 */
 
-uint16_t SPI1_Exchange8bitBuffer(uint8_t *dataTransmitted, uint16_t byteCount, uint8_t *dataReceived);
-
+uint16_t SPI1_Exchange16bitBuffer(uint16_t *dataTransmitted, uint16_t byteCount, uint16_t *dataReceived);
 /**
   @Summary
     Returns the value of the status register of SPI instance : 1
@@ -273,3 +272,5 @@ SPI1_STATUS SPI1_StatusGet(void);
 /*******************************************************************************
  End of File
 */
+
+uint8_t SPI1_Exchange8bit( uint8_t data );

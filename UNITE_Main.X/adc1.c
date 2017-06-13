@@ -43,50 +43,74 @@ void InitializeADC1(void) {
 
     
     /*AD1CON1 Register*/
-    AD1CON1 = 0;            // Don't enable ADC on initialize
+    AD1CON1 = 0x20E0;            // Don't enable ADC on initialize
     
-    /*
     AD1CON1bits.DONE = 0;   // Allows conversion to begin
     AD1CON1bits.FORM = 0;   // Data Output as integer form
-    AD1CON1bits.SSRC = 0;   // Begin conversion once SAMP is set to 0; For auto-convert set to (7)
+    AD1CON1bits.SSRC = 7;   // Begin conversion once SAMP is set to 0; For auto-convert set to (7)
     AD1CON1bits.ASAM = 0;   // Auto sampling disabled
-    */
+    
     
     /*AD1CON2 Register*/
-    AD1CON2 = 0x00F0;
-    /*
+    AD1CON2 = 0x0000;
+    
+    AD1CON2bits.CSCNA = 1;
     AD1CON2bits.VCFG = 0;   // VR+ = VDD, VR- = VSS
-    AD1CON2bits.SMPI = 0;   // Interrupt after every sample
+    //AD1CON2bits.SMPI = 8;   // Set interrupt freq before each sample
     AD1CON2bits.BUFM = 0;   // One 16-word buffer
     AD1CON2bits.ALTS = 0;   // Always use MUX A input
-    */
+    
     
     /*AD1CON3 Register*/
-    AD1CON3 = 0x0002;       // Manual Sample; Tad = 3Tcy    
-    /*
+    AD1CON3 = 0x0000;       // Manual Sample; Tad = 3Tcy    
+    
     AD1CON3bits.ADRC = 0;   // ADC clock uses system clock
     AD1CON3bits.SAMC = 31;  // Sample time = 31 Tad
-    AD1CON3bits.ADCS = 5;   // Tad = 5Tc
-    */
+    AD1CON3bits.ADCS = 5;   // Tad = 5Tcy
     
-    AD1PCFG = 0x00FF;       // Sets AN8 - AN15 as analog inputs (Must set to 0 for analog input)
-    AD1CSSL = 0;            
+    
+    //AD1PCFG = 0x00FF;       // Sets AN8 - AN15 as analog inputs (Must set to 0 for analog input)
     
 
 }
 
 /* Not functioning yet...needs to be updated to return an array of buffer values*/
-uint16_t ADC1_ResultGet(uint16_t *buffer)
+void ADC1_GetResultFromChannels(int *results, uint16_t channelSelect, int channelCount)
 {
-    int count;
+    AD1CSSL = channelSelect;
+    AD1CON2bits.SMPI = channelCount - 1;
+    AD1CON1bits.ADON = 1;
     
-    for (count = 8; count < ADC_MAX_CHANNEL_COUNT; count++) {
+    _ASAM = 1;
     
-        buffer[count - 8] = ADC1_ResultGetFromChannel(count);
+    while (_DONE==0);
+    
+    _ASAM = 0;
+    
+//    AD1CON1bits.ADON = 0;
+    wait_for(1);
+    
+    results[0] = ADC1BUF0;
+    results[1] = ADC1BUF1;
+    results[2] = ADC1BUF2;
+    results[3] = ADC1BUF3;
+    
+    results[4] = ADC1BUF4;
+    results[5] = ADC1BUF5;
+    results[6] = ADC1BUF6;
+    results[7] = ADC1BUF7;
 
-    }
+    results[8] = ADC1BUF8;
+    results[9] = ADC1BUF9;
+    results[10] = ADC1BUFA;
+    results[11] = ADC1BUFB;
+
+    results[12] = ADC1BUFC;
+    results[13] = ADC1BUFD;
+    results[14] = ADC1BUFE;
+    results[15] = ADC1BUFF;
     
-    return count;
+    AD1CON1bits.ADON = 0;
 }
 
 uint8_t ADC1_ResultGetFromChannel(int channel) {
@@ -94,15 +118,20 @@ uint8_t ADC1_ResultGetFromChannel(int channel) {
     unsigned int bufferValue;               // Return value
 
     AD1CHS = ADC_CHANNEL_MAP[channel];      // Sets ADC Channel
-    
+        
     AD1CON1bits.ADON = 1;                   // Enables ADC (turned on/off to reset buffer)
     
-    wait_for(100);
+    wait_for(10);
     
-    ADC1_ManualSampleForSec(500);             // Sample ADC for 1s [*needs refining*]
-    
-    wait_for(100);                          // Wait for conversion to finish (5s) [*needs refining*]
+    // Auto convert section
+    _SAMP = 1;
+        
 
+    ADC1_ManualSampleForSec(10);             // Sample ADC for 1s [*needs refining*]
+    
+    wait_for(10);                          // Wait for conversion to finish (5s) [*needs refining*]
+    
+    
     bufferValue = ADC1BUF0;                  // Get conversion value from buffer
     
     AD1CON1bits.ADON = 0;                   // Disable ADC to reset buffer
