@@ -12,6 +12,7 @@
 #include "mcc_generated_files/uart1.h"
 #include "mcc_generated_files/uart2.h"
 #include "mcc_generated_files/uart3.h"
+#include "mcc_generated_files/uart4.h"
 
 
 /***********************
@@ -49,6 +50,7 @@ const int DUP_RES_LENGTH = 11;
   Power Switch Properties
  *************************/
 
+uint8_t epsEcho[39] = { NULL };
 const int POWER_ECHO_LENGTH = 35;
 uint8_t powerPackagePreamble[4] = {0x50, 0x50, 0x50, 0x0B}; // 0x50 0x50 0x50 0x0B
 uint8_t commandBoardPowerSwitch = 0xFF;         // SW1
@@ -147,6 +149,7 @@ void Send(uint8_t byte, TransmissionUnit unit) {
     switch (unit) {
         case SimplexUnit: UART3_Write(byte); break;
         case DuplexUnit: UART2_Write(byte); break;
+        case DiagUnit: UART4_Write(byte); break;
         default: break;
     }
 }
@@ -159,6 +162,7 @@ uint8_t Read(TransmissionUnit unit) {
             case SimplexUnit: return UART3_Read();
             case DuplexUnit: return UART2_Read();
             case GPSUnit: return UART1_Read();
+            case DiagUnit: return UART4_Read();
             default: return 0xFF;
         }
     }
@@ -488,6 +492,16 @@ void ReadPowerSwitches() {
     }
     
     _LATE4 = LED_OFF;
+}
+
+int ReadEcho(int index) {
+    
+    uint8_t next = Read(SimplexUnit);
+    epsEcho[index++] = next;
+    
+//    if (index == sizeof(epsEcho)) IEC1bits = 0;
+    
+    return index;
 }
 
 void SetLangmuirProbePower(bool on) {

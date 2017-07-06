@@ -39,7 +39,7 @@ typedef struct {
 
 extern UNITEMode currentMode;
 extern unsigned long totalTime;
-extern uint16_t timeInMin;
+extern double timeInMin;
 extern bool isDuplexConnected;
 extern unsigned long lastAltitude;
 
@@ -48,5 +48,5 @@ UNITEMode UpdateMode(void);
 
 void TakeSample(void);
 
-void SetTime(void *, int);
-void SetAltitude(void *, int);
+void SetTime(uint8_t *, int);
+void SetAltitude(uint8_t *, int);

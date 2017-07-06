@@ -12,8 +12,8 @@
 
 TransmissionMode TransmissionUnitForMode = {
     
-    SimplexUnit, // SimplexOrDuplex
-    SimplexUnit, // SimplexOrDuplex
+    SimplexOrDuplex, // SimplexOrDuplex
+    DuplexUnit, // SimplexOrDuplex
     SimplexUnit
 };
 
@@ -31,13 +31,13 @@ Instrument TemperatureSensors = {
 };
 
 Instrument Magnetometer = {
-    { 20, 1, 20 },
+    { 6, 1, 20 },
     { 10, 1, 20 },
     { 5, 1, 20 }
 };
 
 Instrument GPS = {
-    { 9, 0, 0 },
+    { 3, 0, 0 },
     { 6, 0, 0 },
     { 3, 0, 0 }
 };

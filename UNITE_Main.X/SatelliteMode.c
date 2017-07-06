@@ -87,14 +87,16 @@ void Satellite_Initialize() {
     // Initialize Analog/Digital Converter
     InitializeADC1();
     
-    // Initialize Main Mode Timer
-    TMR5_Initialize();
-    
     // Initialize main variables
     SatelliteProperties_Initialize();
     
+    // Initialize Main Mode Timer
+    TMR5_Initialize();
+    TMR1_Initialize();
+    
     // Start Main Timer
     TMR5_Start();
+    TMR1_Start();
 }
 
 /********************
@@ -159,6 +161,8 @@ UNITEMode UpdateMode() {
                 return interim;
         }
     }
+    
+    return currentMode;
 }
 
 /*******************
@@ -222,6 +226,7 @@ void TakeSample() {
     totalTime += TMR5_INTERRUPT_TICKER_FACTOR;
     timeInMin += (double)TMR5_INTERRUPT_TICKER_FACTOR / 60.0;
     
+    // Update SatelliteMode
     currentMode = UpdateMode();
     
     TogglePowerSwitches();
@@ -229,42 +234,39 @@ void TakeSample() {
 }
 
 
-void SetTime(void *timeArray, int arrayLength) {
+void SetTime(uint8_t *time, int arrayLength) {
 
-    uint8_t hours = 0;
-    uint8_t mins = 0;
+    int hours = 0;
+    int mins = 0;
     
-    // Convert string to int
-    uint8_t *alt = (uint8_t **)timeArray;
-    
+    // Convert string to int    
     int i;
     for (i = 0; i < arrayLength; i++) {
         switch (i) {
             case 0: 
-                hours += alt[i] & 0x0F;
-                hours += ((alt[i] & 0xF0) >> 4) * 10;
+                hours += time[i] & 0x0F;
+                hours += ((time[i] & 0xF0) >> 4) * 10;
                 break;
             case 1: 
-                mins += alt[i] & 0x0F;
-                mins += ((alt[i] & 0xF0) >> 4) * 10;
+                mins += time[i] & 0x0F;
+                mins += ((time[i] & 0xF0) >> 4) * 10;
                 break;
             default: break;
         }
     }
     
-    timeInMin = (hours * 60) + min;
+    timeInMin = ((hours * 60) + mins);
 }
 
-void SetAltitude(void *altitudeArray, int arrayLength) {
+void SetAltitude(uint8_t *alt, int arrayLength) {
     
     unsigned long convertedAltitude = 0;
 
-    char *altString = (char *)altitudeArray;
+    char *altString = (char *)alt;
     char *decimal = strrchr(altString, '.');
-    int decimals = (int)&altitudeArray - (int)&decimal;
+    int decimals = (int)&alt - (int)&decimal;
     
     // Convert string to int
-    uint8_t *alt = (uint8_t **)altitudeArray;
     int altIntLength = (arrayLength- decimals);
     
     int i;

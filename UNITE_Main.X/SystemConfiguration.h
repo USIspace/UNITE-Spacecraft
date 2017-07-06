@@ -27,8 +27,8 @@ extern "C" {
 
 typedef struct {
     int sampleRate; // Seconds between each sample
-    int sweepRate;  // Rate in tmr ticks between sweep samples
-    int sweepDuration;   // Length of sweep in seconds
+    int sweepRate; // Rate in tmr ticks between sweep samples
+    int sweepDuration; // Length of sweep in seconds
 } Properties;
 
 typedef struct {
@@ -41,15 +41,15 @@ typedef enum {
     SimplexUnit,
     DuplexUnit,
     SimplexOrDuplex,
-    GPSUnit
+    GPSUnit,
+    DiagUnit
 } TransmissionUnit;
-
 
 typedef struct {
     TransmissionUnit interim;
     TransmissionUnit science;
     TransmissionUnit reentry;
-    
+
 } TransmissionMode;
 
 extern Instrument LangmuirProbe;

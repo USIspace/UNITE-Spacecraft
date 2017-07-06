@@ -78,10 +78,10 @@ void SYSTEM_Initialize(void)
     PIN_MANAGER_Initialize();
     OSCILLATOR_Initialize();
     INTERRUPT_Initialize();
+    
     UART1_Initialize();
-    UART3_Initialize();
-   
     UART2_Initialize();
+    UART3_Initialize();
     UART4_Initialize();
     
     SPI1_Initialize();  // DAC
@@ -89,7 +89,7 @@ void SYSTEM_Initialize(void)
     //ADC1_Initialize(); //If using custom class, comment this line
     
     //Timer Initialization 
-    //TMR1_Initialize();
+//    TMR1_Initialize();
     TMR2_Initialize();
     TMR3_Initialize();
     TMR4_Initialize();
