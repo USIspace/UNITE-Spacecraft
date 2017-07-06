@@ -21,6 +21,21 @@ extern "C" {
 
 #endif	/* SAMPLEMANAGER_H */
 
+typedef enum {
+    Header,
+    Time,
+    Latitude,
+    LatDirection,
+    Longitude,
+    LongDirection,
+    Fix,
+    Satellites,
+    Elevation,
+    Altitude,
+    AltUnit,
+    Done
+} GPSDataIndex;
+
 typedef struct {
     uint16_t channelSelect;
     int channelCount;
@@ -43,6 +58,7 @@ extern int currentMagnetometerSweepProgress;
 
 extern bool isLangmuirProbeSweeping;
 extern bool isMagnetometerSweeping;
+extern bool shouldMagnetometerSample;
 
 // Sampling Functions
 void BeginTemperatureSampling();
@@ -57,9 +73,13 @@ void EndGPSSampling();
 
 void ManageSweepingProgress();
 
-void TakeTemperatureSample();
-void TakeGPSSample();
-void TakeMagnetometerSample();
 void TakeProbeSample();
+void TakeMagnetometerSample();
+void TakeTemperatureSample();
+int TakeGPSSample(int);
 
+void ParseGPSSample();
+
+// Testing Functions
+void TransmitTestString();
 void TestDACSPI();

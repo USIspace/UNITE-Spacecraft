@@ -48,6 +48,8 @@
 */
 
 #include "uart1.h"
+#include "../SampleManager.h"
+
 
 /**
   Section: Data Type Definitions
@@ -134,7 +136,7 @@ void UART1_Initialize (void)
    // BaudRate = 9600; Frequency = 16000000 Hz; BRG 416; 
    U1BRG = 0x01A0;
 
-   IEC0bits.U1RXIE = 1;
+   IEC0bits.U1RXIE = 0;
 
     //Make sure to set LAT bit corresponding to TxPin as high before UART initialization
    U1MODEbits.UARTEN = 1;  // enabling UART ON bit
@@ -216,7 +218,14 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U1RXInterrupt( void )
         }
         
     }
-
+    
+    if (U1STAbits.OERR == 1) U1STAbits.OERR = 0;
+    else {
+        static volatile int GPSDataPos = -1;
+    
+        GPSDataPos = TakeGPSSample(GPSDataPos);
+    }
+    
     IFS0bits.U1RXIF = false;
    
 }
@@ -241,7 +250,7 @@ uint8_t UART1_Read( void)
     uint8_t data = 0;
 
     data = *uart1_obj.rxHead;
-
+    
     uart1_obj.rxHead++;
 
     if (uart1_obj.rxHead == (uart1_rxByteQ + UART1_CONFIG_RX_BYTEQ_LENGTH))

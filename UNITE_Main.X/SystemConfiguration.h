@@ -21,6 +21,10 @@ extern "C" {
 
 #endif	/* SYSTEMCONFIGURATION_H */
 
+#define IS_DEBUG false
+
+#define ORBIT_DUR_MIN 93
+
 typedef struct {
     int sampleRate; // Seconds between each sample
     int sweepRate;  // Rate in tmr ticks between sweep samples
@@ -36,7 +40,8 @@ typedef struct {
 typedef enum {
     SimplexUnit,
     DuplexUnit,
-    SimplexOrDuplex
+    SimplexOrDuplex,
+    GPSUnit
 } TransmissionUnit;
 
 
@@ -50,7 +55,7 @@ typedef struct {
 extern Instrument LangmuirProbe;
 extern Instrument TemperatureSensors;
 extern Instrument Magnetometer;
-extern Instrument GPSUnit;
+extern Instrument GPS;
 
 extern TransmissionMode TransmissionUnitForMode;
 

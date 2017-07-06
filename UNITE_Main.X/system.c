@@ -17,7 +17,7 @@
 
 #include <stdint.h>          /* For uint32_t definition */
 #include <stdbool.h>         /* For true/false definition */
-
+#include <string.h>
 #include "system.h"          /* variables/params used by system.c */
 #include "time.h"
 
@@ -118,10 +118,13 @@ void ClearQueue(uint8_t *buffer, int size, int startIndex) {
     }
 }
 
-void Clear(int *buffer, int size, int startIndex) {
+void Clear(void *buffer, int size, int startIndex) {
+    
     int i;
+    uint8_t **clearBuffer = (uint8_t **)buffer;
+    
     for (i = 0; i < size; i++) {
-        buffer[i + startIndex] = 0;
+        clearBuffer[i + startIndex] = NULL;
     }
 }
 

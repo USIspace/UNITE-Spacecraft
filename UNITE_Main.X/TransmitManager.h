@@ -29,13 +29,25 @@ extern bool isSending;
  **********************/
 
 void TransmitQueue();
-
+uint8_t Read(TransmissionUnit unit);
+void Send(uint8_t byte, TransmissionUnit unit);
 uint16_t PackageData(System, uint16_t, uint8_t *, uint16_t);
+bool IsLineBusy();
 
 /****************
   Power Methods
  ****************/
 
-bool TogglePowerSwitches();
-bool PowerOnDuplex();
-bool PowerOffDuplex();
+void TogglePowerSwitches();
+void ReadPowerSwitches();
+
+void SetLangmuirProbePower(bool);
+void SetMagnetometerPower(bool);
+void SetTemperaturePower(bool);
+void SetGPSPower(bool);
+
+bool isLangmuirProbeOn(void);
+bool isMagnetometerOn(void);
+bool isTemperatureOn(void);
+bool isGPSOn(void);
+bool isDuplexOn(void);

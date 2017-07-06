@@ -114,18 +114,18 @@ void RunCommand(System system, Mode mode, Property property, Unit unit, uint16_t
         case Transmission: transMode = &TransmissionUnitForMode;
             isTransmission = true;
             break;
-        case LP: instrument = &LangmuirProbe;
+        case LPSubSys: instrument = &LangmuirProbe;
             isInstrument = true;
             break;
-        case TMP: instrument = &TemperatureSensors;
+        case TMPSubSys: instrument = &TemperatureSensors;
             isInstrument = true;
             break;
-        case MAG: instrument = &Magnetometer;
+        case MAGSubSys: instrument = &Magnetometer;
             isInstrument = true;
             break;
-        case CDH: break;
-        case EPS: break;
-        case GPS: instrument = &GPSUnit;
+        case CDHSubSys: break;
+        case EPSSubSys: break;
+        case GPSSubSys: instrument = &GPS;
             isInstrument = true;
             break;
         case Housekeeping: break;
@@ -180,13 +180,13 @@ void RunCommand(System system, Mode mode, Property property, Unit unit, uint16_t
                 // Update wait timers so that the new wait time occurs only once
                 int changeInWait = modeProperties->sampleRate - (value * convertTime(unit, Min));
                 switch (system) {
-                    case LP: currentLangmuirProbeWait = currentLangmuirProbeWait + changeInWait;
+                    case LPSubSys: currentLangmuirProbeWait = currentLangmuirProbeWait + changeInWait;
                         break;
-                    case MAG: currentMagnetometerWait = currentMagnetometerWait + changeInWait;
+                    case MAGSubSys: currentMagnetometerWait = currentMagnetometerWait + changeInWait;
                         break;
-                    case TMP: currentTemperatureWait = currentTemperatureWait + changeInWait;
+                    case TMPSubSys: currentTemperatureWait = currentTemperatureWait + changeInWait;
                         break;
-                    case GPS: currentGPSWait = currentGPSWait + changeInWait;
+                    case GPSSubSys: currentGPSWait = currentGPSWait + changeInWait;
                         break;
                     default: break;
                 }
@@ -195,10 +195,10 @@ void RunCommand(System system, Mode mode, Property property, Unit unit, uint16_t
         case SweepRate:
             
             switch (system) {
-                case LP: unitConversion = convertTime(unit, MilSec) / 5;
+                case LPSubSys: unitConversion = convertTime(unit, MilSec) / 5;
                     LP_BUFFER_SIZE = (modeProperties->sweepDuration * convertTime(Sec, MilSec))/(value * unitConversion * 5);
                     break;
-                case MAG: unitConversion = convertTime(unit, MilSec) / 100; 
+                case MAGSubSys: unitConversion = convertTime(unit, MilSec) / 100; 
                     MAG_BUFFER_SIZE = (modeProperties->sweepDuration * convertTime(Sec, MilSec))/(value * unitConversion * 100);
                     break;
                 default: break;
@@ -212,9 +212,9 @@ void RunCommand(System system, Mode mode, Property property, Unit unit, uint16_t
                 
                 int changeInRate = modeProperties->sweepRate - (value * unitConversion);
                 switch (system) {
-                    case LP: langmuirProbeCallbackCount = langmuirProbeCallbackCount + changeInRate;
+                    case LPSubSys: langmuirProbeCallbackCount = langmuirProbeCallbackCount + changeInRate;
                         break;
-                    case MAG: magnetometerCallbackCount = magnetometerCallbackCount + changeInRate;
+                    case MAGSubSys: magnetometerCallbackCount = magnetometerCallbackCount + changeInRate;
                         break;
                     default: break;
                 }
@@ -231,9 +231,9 @@ void RunCommand(System system, Mode mode, Property property, Unit unit, uint16_t
                 
                 int changeInDuration = modeProperties->sweepDuration - (value * convertTime(unit, Sec));
                 switch (system) {
-                    case LP: currentLangmuirProbeSweepProgress = currentLangmuirProbeSweepProgress + changeInDuration;
+                    case LPSubSys: currentLangmuirProbeSweepProgress = currentLangmuirProbeSweepProgress + changeInDuration;
                         break;
-                    case MAG: currentMagnetometerSweepProgress = currentMagnetometerSweepProgress + changeInDuration;
+                    case MAGSubSys: currentMagnetometerSweepProgress = currentMagnetometerSweepProgress + changeInDuration;
                         break;
                     default: break;
                 }

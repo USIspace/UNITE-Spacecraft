@@ -2,6 +2,7 @@
 #include <stdbool.h>       /* Includes true/false definition                  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp */
 #include "CommandParser.h"
@@ -22,13 +23,16 @@
 // Will be used as a switch for the satellite to change modes
 UNITEMode currentMode = safe;
 bool shouldChangeMode = false;
-
+unsigned long lastAltitude = 400000;
 unsigned long totalTime = 0; // Keeps track of overall mission clock
+double timeInMin = 0.0;      // Time in Min since 00:00
+
+bool isDuplexConnected;
 
 // CONSTANTS
-uint16_t INTERIM_STOP_TIME = 1800; // 30 mins in
-uint16_t SCIENCE_STOP_TIME = 3600; // 60 mins in
-uint16_t REENTRY_STOP_TIME = 10800; // 3 hrs in
+uint16_t INTERIM_STOP_TIME = 21600; // 1800; // 30 mins in
+uint16_t SCIENCE_STOP_TIME = 43200; //3600;  // 60 mins in
+uint16_t REENTRY_STOP_TIME = 52000; //10800n // 3 hrs in
 
 /*******************************
   Satellite Mode Configurations
@@ -37,16 +41,19 @@ uint16_t REENTRY_STOP_TIME = 10800; // 3 hrs in
 SatelliteMode InterimMode = {
     400, // Altitude to begin sampling in this mode 
     300, // Altitude to end sampling and switch to new mode
+    380, // Days until needs to switch mode
 };
 
 SatelliteMode ScienceMode = {
     300,
-    200,
+    225,
+    420
 };
 
 SatelliteMode ReEntryMode = {
-    200,
+    225,
     0,
+    500
 };
 
 SatelliteMode SafeMode = {
@@ -60,8 +67,18 @@ SatelliteMode SafeMode = {
 
 void SatelliteProperties_Initialize() {
     // Set Current Mode to interim on start
-    currentMode = interim;
+    currentMode = UpdateMode();
     TMR1_INTERRUPT_TICKER_FACTOR = 1;
+    
+    // Initialize Debug light to on
+   _LATE1 = LED_ON;
+   _LATE2 = LED_ON;
+   
+   _LATE3 = LED_OFF;
+   _LATE4 = LED_OFF;
+   
+   //Slave select 1
+   _RG9 = 1;            
 }
 
  
@@ -78,9 +95,6 @@ void Satellite_Initialize() {
     
     // Start Main Timer
     TMR5_Start();
-        
-    // Debug light
-    _LATE2 = LED_ON;
 }
 
 /********************
@@ -89,61 +103,61 @@ void Satellite_Initialize() {
 
 // Description: Handler for switching satellite modes
 
-UNITEMode UpdateMode() {
-    // Determine which mode should be active
-    // Return value of mode
-    int i;
-    for (i = 0; i < 8; i++) {
-        UART3_Write(255); //Will tell us it is in interim mode 
-        UART3_Write(0);
-    }    
-    switch (currentMode) {
-        case interim:
-
-            // Switch Timers
-            _LATE2 = LED_OFF;
-            _LATE3 = LED_ON;
-
-            return science;
-        case science:
-
-            _LATE3 = LED_OFF;
-            _LATE4 = LED_ON;
-
-            return reentry;
-        case reentry:
-
-            _LATE4 = LED_OFF;
-
-            TMR5_Stop();
-
-            return safe;
-            
-        default:
-
-            return safe;
-    }
-}
-
-bool ShouldUpdateMode(unsigned long time) {
+bool ShouldUpdateMode(unsigned long time, unsigned long altitude) {
 
     // Check current altitude
+    switch (currentMode) {
+        case safe: return true;
+        case interim:
+            if (time > InterimMode.stopTime) return true;
+            else if ((altitude / 1000) <= InterimMode.endAltitudeInKm) return true;
+        case science:
+            if (time > ScienceMode.stopTime) return true;
+            else if ((altitude / 1000) <= ScienceMode.endAltitudeInKm) return true;
+        case reentry:
+            if (time > ReEntryMode.stopTime) return true;
+            else if ((altitude / 1000) <= ReEntryMode.endAltitudeInKm) return true;
+    }
+    return false;
+}
 
-    
-    // After 30 min switch from interim to science mode
-    if ((time == INTERIM_STOP_TIME) || ((currentMode == interim) && (time > INTERIM_STOP_TIME))) {
-        return true;
+UNITEMode UpdateMode() {
+    // Determine which mode should be active
 
-    // After 105 min switch from science to reentry mode
-    } else if ((time == SCIENCE_STOP_TIME) || ((currentMode == science) && (time > SCIENCE_STOP_TIME))) {
-        return true;
-
-    // After 165 min switch from reentry to safe mode and end loop
-    } else if ((time == REENTRY_STOP_TIME) || ((currentMode == reentry) && (time > REENTRY_STOP_TIME))) {
-        return true;
+    if (ShouldUpdateMode(totalTime, lastAltitude)) {
         
-    } else {
-        return false;
+        /*
+        int i;
+        for (i = 0; i < 8; i++) {
+            UART3_Write(255); 
+            UART3_Write(0);
+        }*/
+        
+        switch (currentMode) {
+            case interim:
+
+                _LATE2 = LED_OFF;
+                _LATE3 = LED_ON;
+
+                return science;
+            case science:
+
+                _LATE3 = LED_OFF;
+                _LATE4 = LED_ON;
+
+                return reentry;
+            case reentry:
+
+                _LATE4 = LED_OFF;
+
+                TMR5_Stop();
+
+                return safe;
+
+            case safe:
+
+                return interim;
+        }
     }
 }
 
@@ -152,41 +166,113 @@ bool ShouldUpdateMode(unsigned long time) {
  *******************/
 
 void TakeSample() {
-
+    
     // Langmuir Probe
     if (!isLangmuirProbeSweeping) {
         if (++currentLangmuirProbeWait >= GetSampleRate(&LangmuirProbe)) {
-            BeginLangmuirProbeSampling();
-            currentLangmuirProbeWait = 0;
-        }
-    }
+
+            if (isLangmuirProbeOn()) {
+                BeginLangmuirProbeSampling();
+                currentLangmuirProbeWait = 0;
+            } else {
+                SetLangmuirProbePower(1);
+            }
+        } // Wait to check MAG before turning switch off
+    } 
     
     // Magnetometer
-    if (!isMagnetometerSweeping) {
-        if (++currentMagnetometerWait >= GetSampleRate(&Magnetometer)) {
+    if ((++currentMagnetometerWait >= GetSampleRate(&Magnetometer)) || shouldMagnetometerSample) {
+        
+        if (isMagnetometerOn()) {
             BeginMagnetometerSampling();
             currentMagnetometerWait = 0;
+        } else {
+            SetMagnetometerPower(1);
         }
-    }
+    } else SetMagnetometerPower(0);
+    
     
     // Temperature Sensors
     if (++currentTemperatureWait >= GetSampleRate(&TemperatureSensors)) {
-        BeginTemperatureSampling();
-        currentTemperatureWait = 0;
-    }
+        
+        if (isTemperatureOn()) {
+            BeginTemperatureSampling();
+            currentTemperatureWait = 0;
+        } else {
+            SetTemperaturePower(1);
+        }
+    } else SetTemperaturePower(0);
     
     // GPS
-    if (++currentGPSWait >= GetSampleRate(&GPSUnit)) {
-        BeginGPSSampling();
-        currentGPSWait = 0;
-    }
+    if (++currentGPSWait >= GetSampleRate(&GPS)) {
+        
+        if (isGPSOn()) {
+            BeginGPSSampling();
+            currentGPSWait = 0;
+        } else {
+            SetGPSPower(1);
+        }
+        
+    } else SetGPSPower(0);
     
+    // Transmission
     TransmitQueue();
  
-    // Mode Update Test    
-    if (ShouldUpdateMode(++totalTime)) {
-        currentMode = UpdateMode();
-    }
-
+    // Update Time    
+    totalTime += TMR5_INTERRUPT_TICKER_FACTOR;
+    timeInMin += (double)TMR5_INTERRUPT_TICKER_FACTOR / 60.0;
+    
+    currentMode = UpdateMode();
+    
+    TogglePowerSwitches();
 //    TestDACSPI();
+}
+
+
+void SetTime(void *timeArray, int arrayLength) {
+
+    uint8_t hours = 0;
+    uint8_t mins = 0;
+    
+    // Convert string to int
+    uint8_t *alt = (uint8_t **)timeArray;
+    
+    int i;
+    for (i = 0; i < arrayLength; i++) {
+        switch (i) {
+            case 0: 
+                hours += alt[i] & 0x0F;
+                hours += ((alt[i] & 0xF0) >> 4) * 10;
+                break;
+            case 1: 
+                mins += alt[i] & 0x0F;
+                mins += ((alt[i] & 0xF0) >> 4) * 10;
+                break;
+            default: break;
+        }
+    }
+    
+    timeInMin = (hours * 60) + min;
+}
+
+void SetAltitude(void *altitudeArray, int arrayLength) {
+    
+    unsigned long convertedAltitude = 0;
+
+    char *altString = (char *)altitudeArray;
+    char *decimal = strrchr(altString, '.');
+    int decimals = (int)&altitudeArray - (int)&decimal;
+    
+    // Convert string to int
+    uint8_t *alt = (uint8_t **)altitudeArray;
+    int altIntLength = (arrayLength- decimals);
+    
+    int i;
+    for (i = 0; i < altIntLength; i++) {
+        int exp = ((altIntLength) - (i * 2));
+        convertedAltitude += (alt[i] & 0x0F) * Pow(10, exp);
+        convertedAltitude += ((alt[i] & 0xF0) >> 4) * 10 * Pow(10,exp);
+    }
+    
+    lastAltitude = convertedAltitude;
 }

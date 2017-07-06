@@ -35,12 +35,12 @@ typedef enum {
 typedef enum {
     Break,
     Transmission,
-    LP,
-    TMP,
-    MAG,
-    CDH,
-    EPS,
-    GPS,
+    LPSubSys,
+    TMPSubSys,
+    MAGSubSys,
+    CDHSubSys,
+    EPSSubSys,
+    GPSSubSys,
     Housekeeping,
     Beacon
 

@@ -41,15 +41,6 @@ void StartWaitTimer() {
     // Begins wait timer
     TMR1_Initialize();
     TMR1_Start();
-    
-    // Initialize Debug light to on
-   _LATE1 = LED_ON;
-   
-   _LATE2 = LED_OFF;
-   _LATE3 = LED_OFF;
-   _LATE4 = LED_OFF;
-   
-   _RG9 = 1;                   //Slave select 1
 }
 
 /******************************************************************************/
@@ -63,10 +54,11 @@ int16_t main(void) {
     InitApp();
     
 //    ConfigureOscillator();
-
-    TogglePowerSwitches();
+    while(IsLineBusy(SimplexUnit));
     
-    StartWaitTimer();
+    Satellite_Initialize();
+     
+//    StartWaitTimer();
 
     while (1);
 }

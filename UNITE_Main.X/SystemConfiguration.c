@@ -8,36 +8,38 @@
 #include "SatelliteMode.h"
 #include "TransmitManager.h"
 
+
+
 TransmissionMode TransmissionUnitForMode = {
     
-    SimplexOrDuplex,
-    SimplexOrDuplex,
+    SimplexUnit, // SimplexOrDuplex
+    SimplexUnit, // SimplexOrDuplex
     SimplexUnit
 };
 
 Instrument LangmuirProbe = {
     
-    { 120, 1, 1 },
+    { 60, 1, 1 },
     { 30, 1, 1 },
     { 15, 1, 1 }
 };
 
 Instrument TemperatureSensors = {
-    { 2, 0, 0 },
-    { 1, 0, 0 },
-    { 1, 0, 0 }
+    { 8, 0, 0 },
+    { 6, 0, 0 },
+    { 4, 0, 0 }
 };
 
 Instrument Magnetometer = {
-    { 25, 1, 20 },
     { 20, 1, 20 },
-    { 15, 1, 20 }
+    { 10, 1, 20 },
+    { 5, 1, 20 }
 };
 
-Instrument GPSUnit = {
-    { 120, 0, 0 },
-    { 30, 0, 0 },
-    { 15, 0, 0 }
+Instrument GPS = {
+    { 9, 0, 0 },
+    { 6, 0, 0 },
+    { 3, 0, 0 }
 };
 
 int GetSampleRate(Instrument *instrument) {
@@ -70,10 +72,10 @@ int GetSweepDuration(Instrument *instrument) {
 
 uint8_t GetSystemHeaderID(System system) {
     switch (system) {
-        case LP: return 0x10;
-        case MAG: return 0x20;
-        case TMP: return 0x30;
-        case GPS: return 0x40;
+        case LPSubSys: return 0x10;
+        case MAGSubSys: return 0x20;
+        case TMPSubSys: return 0x30;
+        case GPSSubSys: return 0x40;
         default: return 0;
     }
 }

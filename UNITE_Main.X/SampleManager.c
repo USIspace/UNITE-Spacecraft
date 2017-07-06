@@ -2,6 +2,7 @@
 #include <stdbool.h>       /* Includes true/false definition                  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp */
 #include "CommandParser.h"
@@ -26,9 +27,23 @@ int magnetometerResults[16];
 int temperatureResults[16];
 
 uint8_t langmuirProbeBuffer[600];
-uint8_t magnetometerBuffer[600];
+uint8_t magnetometerBuffer[33];
 uint8_t temperatureBuffer[32];
-uint8_t gpsBuffer[20];
+uint8_t gpsBuffer[33];
+
+char myFunString[29] = "Hey, World! UNITE Rules Now!";
+
+// GPS Properties
+bool isGPSReading = false;
+GPSDataIndex gpsIndex = 0;
+char unparsedGPSBuffer[74] = { NULL };
+char gpsTimeBuffer[10];
+char gpsLatitudeBuffer[20];
+char gpsLatDirection[1];
+char gpsLongitudeBuffer[20];
+char gpsLongDirection[1];
+char gpsAltitudeBuffer[10];
+char gpsAltUnit[1];
 
 int currentLangmuirProbeBufferIndex = 0;
 int currentMagnetometerBufferIndex = 0;
@@ -36,9 +51,9 @@ int currentTemperatureBufferIndex = 0;
 int currentGPSBufferIndex = 0;
 
 uint16_t LP_BUFFER_SIZE = 600;
-uint16_t MAG_BUFFER_SIZE = 600;
+uint16_t MAG_BUFFER_SIZE = 33;
 uint16_t TMP_BUFFER_SIZE = 32;
-uint16_t GPS_BUFFER_SIZE = 20;
+uint16_t GPS_BUFFER_SIZE = 33;
 
 /******************************
   Instrument Timer Properties
@@ -55,8 +70,11 @@ int magnetometerCallbackCount = 0;
 int currentLangmuirProbeSweepProgress = 0;
 int currentMagnetometerSweepProgress = 0;
 
+int currentMagnetometerOrbitProgress = 0;
+
 bool isLangmuirProbeSweeping = false;
 bool isMagnetometerSweeping = false;
+bool shouldMagnetometerSample = false;
 
 bool isLangmuirProbeSweepPositive = true;
 int currentLangmuirProbeSweepPosition = 0; //0x1000 : -32767
@@ -95,20 +113,36 @@ void BeginLangmuirProbeSampling() {
 
 void BeginMagnetometerSampling() {
     // Sample Magnetometer Data and store in buffer
-    _LATE3 = LED_ON;
 
-    isMagnetometerSweeping = true;
-    TMR3_Start();                           // TMR3 samples every 100 ms and stores in results
+    /* 
+     * Magnetometer Sweeping Algorithm
+     */
+//    isMagnetometerSweeping = true;
+//    TMR3_Start();                           // TMR3 samples every 100 ms and stores in results
+    
+    /*
+     * Magnetometer Orbit Sampling
+     */
+    shouldMagnetometerSample = true;
+    TakeMagnetometerSample();
 }
 
 void BeginTemperatureSampling() {
-    _LATE4 = LED_ON;
     TakeTemperatureSample();
-    _LATE4 = LED_OFF;
 }
 
 void BeginGPSSampling() {
     // Sample GPS Data and store in buffer
+
+    _LATE3 = LED_ON;
+    
+    // Clear out GPS Buffer
+    memset(gpsBuffer, 0, sizeof(gpsBuffer));
+//    Clear(gpsBuffer, GPS_BUFFER_SIZE, 0);
+    
+    // Turn on GPS Interrupt
+    IEC0bits.U1RXIE = 1;
+    
 }
 
 // MARK: End Methods
@@ -118,7 +152,7 @@ void EndLangmuirProbeSampling() {
     currentLangmuirProbeSweepProgress = 0;
     isLangmuirProbeSweeping = false;
     
-//    PackageData(LP, GetDayTimeInMin(totalTime), langmuirProbeBuffer, LP_BUFFER_SIZE);
+//    PackageData(LPSubSys, GetDayTimeInMin((uint16_t)timeInMin), langmuirProbeBuffer, LP_BUFFER_SIZE);
     currentLangmuirProbeBufferIndex = 0;
     currentLangmuirProbeWait = 0;
     LP_BUFFER_SIZE = (GetSweepDuration(&LangmuirProbe) * convertTime(Sec, MilSec))/(GetSweepRate(&LangmuirProbe) * 5) * 3;
@@ -129,24 +163,41 @@ void EndMagnetometerSampling() {
     TMR3_Stop();
     currentMagnetometerSweepProgress = 0;
     isMagnetometerSweeping = false;
-    
-//    PackageData(MAG, GetDayTimeInMin(totalTime), magnetometerBuffer, MAG_BUFFER_SIZE);
+
+    PackageData(MAGSubSys, GetDayTimeInMin((uint16_t)timeInMin), magnetometerBuffer, MAG_BUFFER_SIZE);
     currentMagnetometerBufferIndex = 0;
     currentMagnetometerWait = 0;
-    MAG_BUFFER_SIZE = (GetSweepDuration(&Magnetometer) * convertTime(Sec, MilSec))/(GetSweepRate(&Magnetometer) * 100) * 3;
+//    MAG_BUFFER_SIZE = (GetSweepDuration(&Magnetometer) * convertTime(Sec, MilSec))/(GetSweepRate(&Magnetometer) * 100) * 3;
 
-    _LATE3 = LED_OFF;
 }
 
 void EndTemperatureSensorSampling() {
-    PackageData(TMP, GetDayTimeInMin(totalTime), temperatureBuffer, TMP_BUFFER_SIZE);
+    PackageData(TMPSubSys, GetDayTimeInMin((uint16_t)timeInMin), temperatureBuffer, TMP_BUFFER_SIZE);
     currentTemperatureBufferIndex = 0;
     currentTemperatureWait = 0;
-    _LATE4 = LED_OFF;
 }
 
 void EndGPSSampling() {
     
+    // Turn off GPS interrupt
+    IEC0bits.U1RXIE = 0;
+    
+    // Parse GPS sentence
+    ParseGPSSample(unparsedGPSBuffer);
+    
+    //Only package and send if GPS is locked
+    if (currentGPSBufferIndex > 20) 
+        PackageData(GPSSubSys, GetDayTimeInMin((uint16_t)timeInMin), gpsBuffer, GPS_BUFFER_SIZE);
+    currentGPSBufferIndex = 0;
+    currentGPSWait = 0;
+    gpsIndex = 0;
+    
+    _LATE3 = LED_OFF;
+}
+
+void TransmitTestString() {
+    
+    PackageData(LPSubSys, GetDayTimeInMin(totalTime), myFunString, 28);
 }
 
 /***************************
@@ -161,11 +212,12 @@ void ManageSweepingProgress() {
         }
     }
     
+    /*
     if (isMagnetometerSweeping) {
         if (++currentMagnetometerSweepProgress > GetSweepDuration(&Magnetometer)) {
             EndMagnetometerSampling();
         }
-    }
+    }*/
 }
 /***********************
   Single Sample Methods
@@ -176,10 +228,10 @@ void TakeProbeSample() {
     
     // Sweeping Algorithm
     int voltageAdjustment = isLangmuirProbeSweepPositive ? 655 : -655;
-    currentLangmuirProbeSweepPosition = max(-32767, min(32767, currentLangmuirProbeSweepPosition + voltageAdjustment));
+    currentLangmuirProbeSweepPosition = max(0x8000, min(0x7FFF, currentLangmuirProbeSweepPosition + voltageAdjustment));
     
-    if (currentLangmuirProbeSweepPosition == 32767) isLangmuirProbeSweepPositive = false;
-    else if (currentLangmuirProbeSweepPosition == -32767) isLangmuirProbeSweepPositive = true;
+    if (currentLangmuirProbeSweepPosition == 0x7FFF) isLangmuirProbeSweepPositive = false;
+    else if (currentLangmuirProbeSweepPosition == 0x8000) isLangmuirProbeSweepPositive = true;
     
     SPI1_Exchange16bit(currentLangmuirProbeSweepPosition & 0xFFFF);
     
@@ -189,10 +241,10 @@ void TakeProbeSample() {
     // Manipulate Data Here
     
     int probeResultSize = 3;
-    if (currentLangmuirProbeBufferIndex < LP_BUFFER_SIZE) {
-        Copy(langmuirProbeResults, langmuirProbeBuffer, 0, currentLangmuirProbeBufferIndex, probeResultSize);
-        currentLangmuirProbeBufferIndex = currentLangmuirProbeBufferIndex + probeResultSize;
-    } else {
+    Copy(langmuirProbeResults, langmuirProbeBuffer, 0, currentLangmuirProbeBufferIndex, probeResultSize);
+    currentLangmuirProbeBufferIndex += probeResultSize;
+    
+    if (currentLangmuirProbeBufferIndex >= LP_BUFFER_SIZE) {
         EndLangmuirProbeSampling();
     }
 }
@@ -206,13 +258,18 @@ void TakeMagnetometerSample() {
     for (i=0; i < RESULTS_SIZE; i++) {
         magnetometerResults[i] = (magnetometerResults[i] - 520) / 2;
     }
-    
+
     int magnetometerResultSize = 3;
-    if (currentMagnetometerBufferIndex < MAG_BUFFER_SIZE) {
-        Copy(magnetometerResults, magnetometerBuffer, 0, currentMagnetometerBufferIndex, magnetometerResultSize);
-        currentMagnetometerBufferIndex = currentMagnetometerBufferIndex + magnetometerResultSize;
-    } else {
+    Copy(magnetometerResults, magnetometerBuffer, 0, currentMagnetometerBufferIndex, magnetometerResultSize);
+    currentMagnetometerBufferIndex += magnetometerResultSize;
+
+    if (currentMagnetometerBufferIndex >= MAG_BUFFER_SIZE) {
         EndMagnetometerSampling();
+    }
+    
+    if (currentMagnetometerOrbitProgress++ > (ORBIT_DUR_MIN / 33)) {
+        shouldMagnetometerSample = false;
+        currentMagnetometerOrbitProgress = 0;
     }
 }
 
@@ -227,16 +284,233 @@ void TakeTemperatureSample() {
     }
     
     int temperatureResultSize = 8;
-    if (currentTemperatureBufferIndex < TMP_BUFFER_SIZE) {
         Copy(temperatureResults, temperatureBuffer, 0, currentTemperatureBufferIndex, temperatureResultSize);
-        currentTemperatureBufferIndex = currentTemperatureBufferIndex + temperatureResultSize;
-    } else {
+        currentTemperatureBufferIndex += temperatureResultSize;
+    
+    if (currentTemperatureBufferIndex >= TMP_BUFFER_SIZE) {
         EndTemperatureSensorSampling();
     }
 }
 
-void TakeGPSSample() {
+/**********************
+  GPS Sampling Methods
+ **********************/
 
+// Adds a parsed GPS sentence element to sending buffer
+// uint8_t *buffer -> parsed GPS buffer
+// int bufferSize -> length of buffer
+void AppendToGPSBuffer(uint8_t *buffer, int bufferSize) {
+    
+    int i;
+    for (i = 0; i < bufferSize; i++) {
+        // Makes sure that the data doesn't overrun the buffer
+        if ((currentGPSBufferIndex + i) < GPS_BUFFER_SIZE) 
+            gpsBuffer[(currentGPSBufferIndex + i)] = buffer[i];
+    }
+    
+    currentGPSBufferIndex += i;
+}
+
+// Reads GPS sentence one byte at a time starting from '$'
+// int samplePos -> index variable to store in unparsed GPS buffer
+int TakeGPSSample(int samplePos) {
+    
+    char nextChar = Read(GPSUnit);
+    
+    if (samplePos == -1) {
+        
+        if ('$' == nextChar) {
+            samplePos++;
+            unparsedGPSBuffer[samplePos++] = nextChar;
+        }
+        
+    } else {
+        
+        if ('$' == nextChar) samplePos = 0;
+        else 
+            if (('\n' == nextChar) || (samplePos == 74)) {
+            samplePos = -2;
+            isGPSReading = false;
+            EndGPSSampling();
+        }
+
+        unparsedGPSBuffer[samplePos++] = nextChar;
+        
+    }
+    
+    return samplePos;
+}
+
+// GPS ASCII compression algorithm
+// char *string -> ASCII decimal string (without decimal point)
+// int startIndex -> index to start at in string
+// int size -> length of string
+// bool addTrailing -> true: append a trailing zero, false: append a leading zero
+int CompressAscii(char *string, int startIndex, int size, bool addTrailing) {
+    
+    int k = 0; 
+    int parsedIndex = 0;
+    
+    // Even size string
+    if ((size % 2) == 0) {
+        while (k < size) {
+            
+            if ((k % 2) == 0) {
+                string[startIndex + parsedIndex] = string[startIndex + k] << 4;
+            } else {
+                string[startIndex + parsedIndex++] += (string[startIndex + k] & 0x0F);
+            }
+            
+            k++;
+        }
+        
+        return parsedIndex;
+        
+    } else {
+        
+        while (k < size) {
+            
+            if (addTrailing) {
+                if ((k % 2) == 0) {
+                    string[startIndex + parsedIndex] = string[startIndex + k] << 4;
+                } else {
+                    string[startIndex + parsedIndex++] += (string[startIndex + k] & 0x0F);
+                }
+            } else {
+                if (k == 0) {
+                    string[startIndex + parsedIndex++] &= 0x0F;
+                } else if ((k % 2) != 0) {
+                    string[startIndex + parsedIndex] = string[startIndex + k] << 4;
+                } else {
+                    string[startIndex + parsedIndex++] += (string[startIndex + k] & 0x0F);
+                }
+            }
+            
+            k++;
+        }
+        
+        return parsedIndex;
+    }
+}
+
+// Custom GPS decimal parser
+// char *originalString -> original ascii decimal string to parse (must be comma separated)
+// int startIndex -> index to start parsing from
+// GPSDataIndex dataType -> checks what kind of decimal 
+uint8_t ParseDecimal(char *originalString, int startIndex, GPSDataIndex dataType) {
+    char semiparsedSentence[20] = {NULL};
+    bool isDecimal = false;
+    int parseProgress = 0;
+    int copiedIndex = 0;
+    int decPos = 0;
+    
+    while (originalString[startIndex + parseProgress] != ',') {
+        if (originalString[startIndex + parseProgress] == '.') {
+            decPos = CompressAscii(semiparsedSentence, decPos, parseProgress, isDecimal);
+            copiedIndex = decPos;
+            isDecimal = true;
+        }
+
+        semiparsedSentence[isDecimal ? copiedIndex++ : parseProgress] = originalString[startIndex + parseProgress];
+        parseProgress++;
+    }
+    
+    copiedIndex = CompressAscii(semiparsedSentence, (decPos + 1), (copiedIndex) - decPos, isDecimal) + decPos;
+    
+    AppendToGPSBuffer(semiparsedSentence, ++copiedIndex);
+    
+    switch (dataType) {
+        case Time: SetTime(semiparsedSentence, copiedIndex); break;
+        case Altitude: SetAltitude(semiparsedSentence, copiedIndex); break;
+        default: break;
+    }
+    return (parseProgress - 1);
+}
+
+// Main GPS parsing method
+// char *unparsedSentence -> ASCII GPS sentence to parse (GPGGA)
+void ParseGPSSample(char *unparsedSentence) {
+
+    int i,j;
+    char unit[1] = {','};
+    char header[] = "$GPGGA";
+    char *sentenceHeader;
+                    
+    for (i = 0; i < 74; i++) {
+        if (unparsedSentence[i] == ',') {
+            gpsIndex++;
+        }
+        else {
+                        
+            switch (gpsIndex) {
+
+                case Header:
+                    
+                    // Check if correct header
+                    sentenceHeader = strstr(unparsedSentence, header);
+                    if (sentenceHeader == NULL) i = 74;
+                    else i += (strlen(header) - 1);
+                    
+                    break;
+                    
+                case Time:
+                    
+                    i += ParseDecimal(unparsedSentence, i, gpsIndex);
+                    
+                    AppendToGPSBuffer(unit, 1);
+                    break;
+                    
+                case Latitude:
+                    
+                    i += ParseDecimal(unparsedSentence, i, gpsIndex);
+                    
+                    AppendToGPSBuffer(unit, 1);
+                    break;
+
+                case LatDirection:
+
+                    unit[0] = unparsedSentence[i];
+                    AppendToGPSBuffer(unit, 1);
+                    
+                    unit[0] = ',';
+                    AppendToGPSBuffer(unit, 1);
+                    break;
+                    
+                case Longitude:
+                    
+                    i += ParseDecimal(unparsedSentence, i, gpsIndex);
+                    
+                    unit[0] = ',';
+                    AppendToGPSBuffer(unit, 1);
+                    break;
+                    
+                case LongDirection:
+                    
+                    unit[0] = unparsedSentence[i];
+                    AppendToGPSBuffer(unit, 1);
+                    
+                    unit[0] = ',';
+                    AppendToGPSBuffer(unit, 1);
+                    break;
+                    
+                case Altitude:
+                    
+                    i += ParseDecimal(unparsedSentence, i, gpsIndex);
+                    
+                    unit[0] = ',';
+                    AppendToGPSBuffer(unit, 1);
+                    break;
+                    
+                case AltUnit:
+                    
+                    unit[0] = unparsedSentence[i];
+                    AppendToGPSBuffer(unit, 1);
+                    break;
+
+                default: break;
+            }
+        }
+    }
 }
 
 
