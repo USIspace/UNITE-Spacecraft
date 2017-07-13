@@ -47,6 +47,11 @@
   Section: Included Files
 */
 #include "uart3.h"
+#include "../CommandParser.h"
+#include "../SystemConfiguration.h"
+#include "../SampleManager.h"
+#include "../SatelliteMode.h"
+#include "../TransmitManager.h"
 
 /**
   Section: UART3 APIs
@@ -73,7 +78,7 @@ void UART3_Initialize(void)
 
 uint8_t UART3_Read(void)
 {
-    while(!(U3STAbits.URXDA == 1))
+    while(!(U3STAbits.URXDA == 1) || (simplexTimeout >= SIMPLEX_RES_TIMEOUT))
     {
         
     }

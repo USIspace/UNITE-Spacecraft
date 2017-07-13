@@ -25,7 +25,8 @@ void wait_for(unsigned long);
 uint16_t Pow(int, int);
 void ClearQueue(uint8_t *,int,int);
 void Clear(void *,int,int);
-void Copy(int *source, uint8_t *destination, int, int, int);
+int CopyIntToByte(int *source, uint8_t *destination, int sourceStart, int destStart, int numberOfItems);
+int CopyBytes(uint8_t *source, uint8_t *destination, int sourceStart, int destStart, int numberOfItems);
 int add_sec(unsigned long *);
 
 //void wait_ms(unsigned long);

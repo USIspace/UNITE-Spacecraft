@@ -23,6 +23,7 @@
         <itemPath>mcc_generated_files/tmr1.h</itemPath>
         <itemPath>mcc_generated_files/spi1.h</itemPath>
         <itemPath>mcc_generated_files/spi2.h</itemPath>
+        <itemPath>mcc_generated_files/crc16.h</itemPath>
       </logicalFolder>
       <itemPath>system.h</itemPath>
       <itemPath>user.h</itemPath>
@@ -59,6 +60,7 @@
         <itemPath>mcc_generated_files/tmr1.c</itemPath>
         <itemPath>mcc_generated_files/spi1.c</itemPath>
         <itemPath>mcc_generated_files/spi2.c</itemPath>
+        <itemPath>mcc_generated_files/crc16.c</itemPath>
       </logicalFolder>
       <itemPath>configuration_bits.c</itemPath>
       <itemPath>interrupts.c</itemPath>

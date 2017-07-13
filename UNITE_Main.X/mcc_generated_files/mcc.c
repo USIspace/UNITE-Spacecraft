@@ -79,6 +79,8 @@ void SYSTEM_Initialize(void)
     OSCILLATOR_Initialize();
     INTERRUPT_Initialize();
     
+    CRC16_Initialize();
+    
     UART1_Initialize();
     UART2_Initialize();
     UART3_Initialize();

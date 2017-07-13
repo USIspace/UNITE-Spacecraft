@@ -50,6 +50,7 @@
 
 #include <xc.h>
 #include "tmr5.h"
+#include "pin_manager.h"
 #include "../CommandParser.h"
 #include "../SystemConfiguration.h"
 #include "../SampleManager.h"
@@ -84,7 +85,7 @@ typedef struct _TMR_OBJ_STRUCT
 
 static TMR_OBJ tmr5_obj;
 
-int TMR5_INTERRUPT_TICKER_FACTOR = 30;  // Begin in interim
+int TMR5_INTERRUPT_TICKER_FACTOR = 10;  // Begin in interim
 /**
   Section: Driver Interface
 */
@@ -167,14 +168,7 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
     // Add your custom callback code here
     TakeSample();                                  //User timer to call sampling function
 
-    if (isLightOn5) { 
-        _LATE1 = LED_OFF;
-        isLightOn5 = false;
-    }
-    else { 
-        _LATE1 = LED_ON;
-        isLightOn5 = true;
-    }
+    IO_RE1_Toggle();
 }
 
 void TMR5_Start( void )

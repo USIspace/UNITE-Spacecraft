@@ -47,7 +47,11 @@
   Section: Included Files
 */
 #include "uart2.h"
-
+#include "../CommandParser.h"
+#include "../SystemConfiguration.h"
+#include "../SampleManager.h"
+#include "../SatelliteMode.h"
+#include "../TransmitManager.h"
 /**
   Section: UART2 APIs
 */
@@ -63,7 +67,7 @@ void UART2_Initialize(void)
     // UTXISEL0 TX_ONE_CHAR; UTXINV disabled; OERR NO_ERROR_cleared; URXISEL RX_ONE_CHAR; UTXBRK COMPLETED; UTXEN disabled; ADDEN disabled; 
     U2STA = 0x0000;
     // BaudRate = 9600; Frequency = 16000000 Hz; BRG 416; 
-    U2BRG = 0x01A0;
+    U2BRG = 0x0067;
     
     U2MODEbits.UARTEN = 1;  // enabling UARTEN bit
     U2STAbits.UTXEN = 1; 
@@ -73,7 +77,7 @@ void UART2_Initialize(void)
 
 uint8_t UART2_Read(void)
 {
-    while(!(U2STAbits.URXDA == 1))
+    while(!(U2STAbits.URXDA == 1) || (duplexTimeout >= DUPLEX_RES_TIMEOUT))
     {
         
     }

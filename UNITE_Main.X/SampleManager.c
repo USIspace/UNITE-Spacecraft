@@ -128,6 +128,7 @@ void BeginMagnetometerSampling() {
 }
 
 void BeginTemperatureSampling() {
+    
     TakeTemperatureSample();
 }
 
@@ -248,7 +249,7 @@ void TakeProbeSample() {
 
 
     int probeResultSize = 3;
-    Copy(langmuirProbeResults, langmuirProbeBuffer, 0, currentLangmuirProbeBufferIndex, probeResultSize);
+    CopyIntToByte(langmuirProbeResults, langmuirProbeBuffer, 0, currentLangmuirProbeBufferIndex, probeResultSize);
     currentLangmuirProbeBufferIndex += probeResultSize;
 
     if (currentLangmuirProbeBufferIndex >= LP_BUFFER_SIZE) {
@@ -267,7 +268,7 @@ void TakeMagnetometerSample() {
     }
 
     int magnetometerResultSize = 3;
-    Copy(magnetometerResults, magnetometerBuffer, 0, currentMagnetometerBufferIndex, magnetometerResultSize);
+    CopyIntToByte(magnetometerResults, magnetometerBuffer, 0, currentMagnetometerBufferIndex, magnetometerResultSize);
     currentMagnetometerBufferIndex += magnetometerResultSize;
 
     if (currentMagnetometerBufferIndex >= MAG_BUFFER_SIZE) {
@@ -293,7 +294,7 @@ void TakeTemperatureSample() {
     }
 
     int temperatureResultSize = 8;
-    Copy(temperatureResults, temperatureBuffer, 0, currentTemperatureBufferIndex, temperatureResultSize);
+    CopyIntToByte(temperatureResults, temperatureBuffer, 0, currentTemperatureBufferIndex, temperatureResultSize);
     currentTemperatureBufferIndex += temperatureResultSize;
 
     if (currentTemperatureBufferIndex >= TMP_BUFFER_SIZE) {

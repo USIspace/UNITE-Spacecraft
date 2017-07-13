@@ -14,7 +14,7 @@ TransmissionMode TransmissionUnitForMode = {
     
     SimplexOrDuplex, // SimplexOrDuplex
     DuplexUnit, // SimplexOrDuplex
-    SimplexUnit
+    SimplexOrDuplex
 };
 
 Instrument LangmuirProbe = {
@@ -25,7 +25,7 @@ Instrument LangmuirProbe = {
 };
 
 Instrument TemperatureSensors = {
-    { 8, 0, 0 },
+    { 1, 0, 0 },
     { 6, 0, 0 },
     { 4, 0, 0 }
 };
@@ -37,7 +37,7 @@ Instrument Magnetometer = {
 };
 
 Instrument GPS = {
-    { 3, 0, 0 },
+    { 4, 0, 0 },
     { 6, 0, 0 },
     { 3, 0, 0 }
 };

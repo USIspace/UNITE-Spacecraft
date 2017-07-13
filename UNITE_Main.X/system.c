@@ -114,7 +114,7 @@ uint16_t Pow(int base, int exponent) {
 void ClearQueue(uint8_t *buffer, int size, int startIndex) {
     int i;
     for (i = 0; i < size; i++) {
-        buffer[i + startIndex] = 0;
+        buffer[(i + startIndex) % sizeof(buffer)] = 0;
     }
 }
 
@@ -128,10 +128,26 @@ void Clear(void *buffer, int size, int startIndex) {
     }
 }
 
-void Copy(int *source, uint8_t *destination, int sourceStart, int destStart, int numberOfItems) {
+int CopyIntToByte(int *source, uint8_t *destination, int sourceStart, int destStart, int numberOfItems) {
     
     int i;
-    for (i = sourceStart; i < numberOfItems; i++) {
-        destination[i + destStart] = source[i];
+//    uint16_t **castedSource = (uint16_t **)source;
+    
+    for (i = 0; i < numberOfItems; i++) {
+        destination[i + destStart] = (source[i + sourceStart]);
     }
+    
+    return numberOfItems;
+}
+
+int CopyBytes(uint8_t *source, uint8_t *destination, int sourceStart, int destStart, int numberOfItems) {
+    
+    int i;
+//    uint16_t **castedSource = (uint16_t **)source;
+    
+    for (i = 0; i < numberOfItems; i++) {
+        destination[i + destStart] = source[(i + sourceStart) % 2000];
+    }
+    
+    return numberOfItems;
 }

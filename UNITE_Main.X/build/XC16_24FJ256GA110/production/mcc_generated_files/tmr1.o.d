@@ -5,4 +5,5 @@ mcc_generated_files/tmr1.h  \
  mcc_generated_files/../SystemConfiguration.h  \
  mcc_generated_files/../SampleManager.h  \
  mcc_generated_files/../SatelliteMode.h  \
+ mcc_generated_files/../TransmitManager.h  \
 mcc_generated_files/../system.h 

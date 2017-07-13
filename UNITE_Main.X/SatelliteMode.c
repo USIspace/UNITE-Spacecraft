@@ -27,7 +27,7 @@ unsigned long lastAltitude = 400000;
 unsigned long totalTime = 0; // Keeps track of overall mission clock
 double timeInMin = 0.0;      // Time in Min since 00:00
 
-bool isDuplexConnected;
+bool isDuplexConnected = true;
 
 // CONSTANTS
 uint16_t INTERIM_STOP_TIME = 21600; // 1800; // 30 mins in
@@ -116,7 +116,7 @@ bool ShouldUpdateMode(unsigned long time, unsigned long altitude) {
         case science:
             if (time > ScienceMode.stopTime) return true;
             else if ((altitude / 1000) <= ScienceMode.endAltitudeInKm) return true;
-        case reentry:
+        case reentry: break;
             if (time > ReEntryMode.stopTime) return true;
             else if ((altitude / 1000) <= ReEntryMode.endAltitudeInKm) return true;
     }
@@ -219,6 +219,9 @@ void TakeSample() {
         
     } else SetGPSPower(0);
     
+    
+    TogglePowerSwitches();
+        
     // Transmission
     TransmitQueue();
  
@@ -229,7 +232,6 @@ void TakeSample() {
     // Update SatelliteMode
     currentMode = UpdateMode();
     
-    TogglePowerSwitches();
 //    TestDACSPI();
 }
 
@@ -276,5 +278,5 @@ void SetAltitude(uint8_t *alt, int arrayLength) {
         convertedAltitude += ((alt[i] & 0xF0) >> 4) * 10 * Pow(10,exp);
     }
     
-    lastAltitude = convertedAltitude;
+    if (convertedAltitude > 0) lastAltitude = convertedAltitude;
 }

@@ -2,6 +2,7 @@
 #include <stdbool.h>       /* Includes true/false definition                  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp */
 #include "CommandParser.h"
@@ -13,6 +14,7 @@
 #include "mcc_generated_files/uart2.h"
 #include "mcc_generated_files/uart3.h"
 #include "mcc_generated_files/uart4.h"
+#include "mcc_generated_files/crc16.h"
 
 
 /***********************
@@ -29,6 +31,8 @@ const uint16_t QUEUE_SIZE = 2000;
 const int PREAMBLE_LENGTH = 4;
 uint8_t simplexPackagePreamble[] = {0x50, 0x50, 0x50, 0x0C}; // 0x50 0x50 0x50 0x0C
 const int SIM_RES_LENGTH = 3;
+bool isSimplexWaiting = false;
+int simplexTimeout = 0;
 
 // Duplex Comm Configs
 const int DUPLEX_SYNC_LENGTH = 2;
@@ -40,8 +44,23 @@ const char duplexDownlinkFilePoll[] = "PP333";
 const char duplexDownlinkFileReady[] = "RP333";
 const char duplexHousekeepingFilePoll[] = "PC401";
 const char duplexWaitingFilesPoll[] = "PC403";
+
+// Instrument file names
+const int FILE_COUNT_INDEX = 7;
+char langmuirProbeFileName[] = "LMPData";
+char magnetometerFileName[] = "MAGData";
+char temperatureFileName[] = "TMPData";
+char gpsFileName[] = "GPSData";
+int langmuirProbeFileCount = 1;
+int magnetometerFileCount = 1;
+int temperatureFileCount = 1;
+int gpsFileCount = 1;
+
+
 int currentDuplexConnectionWait = 0;
 const int DUPLEX_TIMEOUT = 3;
+bool isDuplexWaiting = false;
+int duplexTimeout = 0;
 
 
 const int DUP_RES_LENGTH = 11;
@@ -54,16 +73,16 @@ uint8_t epsEcho[39] = { NULL };
 const int POWER_ECHO_LENGTH = 35;
 uint8_t powerPackagePreamble[4] = {0x50, 0x50, 0x50, 0x0B}; // 0x50 0x50 0x50 0x0B
 uint8_t commandBoardPowerSwitch = 0xFF;         // SW1
-uint8_t temperaturePowerSwitch = 0;          // SW2
-uint8_t langmuirMagPowerSwitch = 0;          // SW3
-uint8_t gpsPowerSwitch = 0;                  // SW4
-uint8_t duplexPowerSwitch = 0;               // SW5
+uint8_t temperaturePowerSwitch = 0x00;          // SW2
+uint8_t langmuirMagPowerSwitch = 0x00;          // SW3
+uint8_t gpsPowerSwitch = 0x00;                  // SW4
+uint8_t duplexPowerSwitch = 0x00;               // SW5
 
-bool isLangmuirProbeOn() { return langmuirMagPowerSwitch > 0; }
-bool isMagnetometerOn() { return langmuirMagPowerSwitch > 0; }
-bool isTemperatureOn() { return temperaturePowerSwitch > 0; }
-bool isGPSOn() { return gpsPowerSwitch > 0; }
-bool isDuplexOn() { return duplexPowerSwitch > 0; } 
+bool isLangmuirProbeOn() { return langmuirMagPowerSwitch == 0xFF; }
+bool isMagnetometerOn() { return langmuirMagPowerSwitch == 0xFF; }
+bool isTemperatureOn() { return temperaturePowerSwitch == 0xFF; }
+bool isGPSOn() { return gpsPowerSwitch == 0xFF; }
+bool isDuplexOn() { return true; }//duplexPowerSwitch == 0xFF; } 
 
 /********************
  Data Manager Methods
@@ -76,6 +95,7 @@ void TransmitInstrumentDataToSimplex(uint8_t *queue, uint8_t headerByte1, uint8_
 bool TransmitInstrumentDataToDuplex(uint8_t *queue, uint8_t headerByte1, uint8_t headerByte2, uint16_t dataLength);
 void PollDuplex(const char *pollCode, uint16_t taggedDataLength);
 bool ReadACKForUnit(TransmissionUnit unit);
+size_t CreateFileHeader(char *formattedString,uint8_t instrument, uint16_t dataLength);
 uint16_t GetWaitingFilesCount();
 void GetCommandFile();
 
@@ -159,8 +179,36 @@ uint8_t Read(TransmissionUnit unit) {
     if (!IS_DEBUG) {
         // Might not need to check if line is busy
         switch (unit) {
-            case SimplexUnit: return UART3_Read();
-            case DuplexUnit: return UART2_Read();
+            case SimplexUnit: 
+                
+                // Reset Timeout
+                simplexTimeout = 0;
+
+                isSimplexWaiting = true;
+                uint8_t simData = UART3_Read();
+                isSimplexWaiting = false;
+                
+                if (simplexTimeout < SIMPLEX_RES_TIMEOUT) {
+                    return simData;
+                } else {
+                    return 0;
+                }
+                
+            case DuplexUnit: 
+                
+                // Reset Timeout
+                duplexTimeout = 0;
+
+                isDuplexWaiting = true;
+                uint8_t dupData = UART2_Read();
+                isDuplexWaiting = false;
+                
+                if (duplexTimeout < DUPLEX_RES_TIMEOUT) {
+                    return dupData;
+                } else {
+                    return 0;
+                }
+                
             case GPSUnit: return UART1_Read();
             case DiagUnit: return UART4_Read();
             default: return 0xFF;
@@ -309,46 +357,70 @@ void TransmitInstrumentDataToSimplex(uint8_t *queue, uint8_t headerByte1, uint8_
 
 bool TransmitInstrumentDataToDuplex(uint8_t *queue, uint8_t headerByte1, uint8_t headerByte2, uint16_t dataLength) {
 
-    int i = 0;
-    int duplexTimeoutCounter = 0;
-    
-    while (i < dataLength) {
+    int i;
+
+    while (IsLineBusy());
+
+    PollDuplex(duplexDownlinkFilePoll, 0);
+
+    if (ReadACKForUnit(DuplexUnit)) {
+
+        // One package transmission
+        uint8_t duplexFormattedSendString[1000] = { NULL };
+        char duplexFileHeader[50] = { NULL };
+        int duplexFileSize = dataLength + 5;
         
-        while(IsLineBusy());
+        uint16_t duplexFileLength = 4 + // 4 byte uint
+                               strlen(duplexDownlinkFileReady) + // duplex poll code
+                               CreateFileHeader(duplexFileHeader,headerByte1 & 0xF0, duplexFileSize) + // file header
+                               duplexFileSize + // file size
+                               2; // crc-16 word
+        if (duplexFileLength % 2 != 0) duplexFileLength += 1;
+        
+        int formatIndex = 0;
+        // 4-byte File Length
+        duplexFormattedSendString[formatIndex++] = 0;                           
+        duplexFormattedSendString[formatIndex++] = 0;
+        duplexFormattedSendString[formatIndex++] = duplexFileLength >> 8;
+        duplexFormattedSendString[formatIndex++] = duplexFileLength & 0xFF;
+        
+        // Duplex Poll Code
+        formatIndex += CopyBytes(duplexDownlinkFileReady, duplexFormattedSendString, 0, formatIndex, 5);
+        
+        // Duplex ESN, File name length, File size, File name
+        formatIndex += CopyBytes(duplexFileHeader, duplexFormattedSendString, 0, formatIndex, strlen(duplexFileHeader));
+        
+        // File Data
+        formatIndex += CopyBytes(queue, duplexFormattedSendString, transmitQueueStartIndex, formatIndex, duplexFileSize);
+        
+        // Make file an even number of bytes
+        if (formatIndex % 2 != 0) duplexFormattedSendString[formatIndex++] = 0;
+        
+        // Get the CRC-16 code for the sent string
+        uint16_t crc16Code = CRC16SendBytes(duplexFormattedSendString, formatIndex, 0);
+        
+        // Send the two sync bytes
+        Send(duplexSyncBytes[0], DuplexUnit);
+        Send(duplexSyncBytes[1], DuplexUnit);
+        
+        // Sends enough data for a package
+        for (i = 0; i < formatIndex; i++) {
 
-        PollDuplex(duplexDownlinkFilePoll, 0);
-
+            // Send next data byte
+            Send(duplexFormattedSendString[i], DuplexUnit);
+        }
+        
+        // Send the trailing CRC-16 Code
+        Send((crc16Code >> 8), DuplexUnit);
+        Send(crc16Code & 0x00FF, DuplexUnit);
+                
         if (ReadACKForUnit(DuplexUnit)) {
-
-            // One package transmission
-            PollDuplex(duplexDownlinkFileReady, GetTransmissionPackageLength(DuplexUnit));
-            
-            int j;
-            uint16_t packageLength;
-
-            Send(headerByte1, DuplexUnit);
-            Send(headerByte2, DuplexUnit);
-            packageLength = GetTransmissionPackageLength(DuplexUnit) - 2;
-            
-
-            // Sends enough data for a package
-            for (j = 0; j < packageLength; j++) {
-
-                // If package space exceeds data buffer, fill with 0
-                if (j >= dataLength - i) Send(0, DuplexUnit);
-                // Send next data byte 
-                else Send(queue[(transmitQueueStartIndex + j) % QUEUE_SIZE], DuplexUnit);
-            }
-
-            if (ReadACKForUnit(DuplexUnit)) {
-                ClearQueue(transmitQueue, min(packageLength, dataLength - i), transmitQueueStartIndex);
-                transmitQueueStartIndex = (transmitQueueStartIndex + min(j, dataLength - i)) % QUEUE_SIZE;
-                transmitQueueLength = max(transmitQueueLength - j, 0);
-                i = i + j;
-            }
-        } 
+            ClearQueue(transmitQueue, duplexFileSize, transmitQueueStartIndex);
+            transmitQueueStartIndex = (transmitQueueStartIndex + duplexFileSize) % QUEUE_SIZE;
+            transmitQueueLength = max(transmitQueueLength - duplexFileSize, 0);
+        }
     }
-    
+
     return true;
 }
 
@@ -360,23 +432,30 @@ bool ReadACKForUnit(TransmissionUnit unit) {
     
     int i;
     bool isACK = true;
-
-    _LATE4 = LED_ON;
     
     if (!IS_DEBUG) {
         switch (unit) {
             case SimplexUnit:
-                while (Read(unit) != 0xAA);
-                while (Read(unit) != 0x05);
+                
+                while (Read(unit) != 0xAA) {
+                    if (simplexTimeout >= SIMPLEX_RES_TIMEOUT) return true;
+                }
+                while (Read(unit) != 0x05) {
+                    if (simplexTimeout >= SIMPLEX_RES_TIMEOUT) return true;
+                }
                 
                 isACK = (Read(unit) == 0);
                 break;
             case DuplexUnit:
                 for (i = 0; i < DUP_RES_LENGTH; i++) {
                     switch (i) {
-                        case 6: isACK = (Read(unit) == 6);
+                        case 6: 
+                            isACK = (Read(unit) == 6);
+                            if (duplexTimeout >= DUPLEX_RES_TIMEOUT) return true;
                             break;
-                        default: Read(unit);
+                        default: 
+                            Read(unit);
+                            if (duplexTimeout >= DUPLEX_RES_TIMEOUT) return true;  
                             break;
                     }
                 }
@@ -384,14 +463,45 @@ bool ReadACKForUnit(TransmissionUnit unit) {
             default: break;
         }
     }
-    
-    _LATE4 = LED_OFF;
-    
+        
     return isACK;
 }
 
 bool IsLineBusy() {
     return (_RD10 > 0);
+}
+
+/****************************
+  Duplex Interfacing Methods
+ ****************************/
+
+size_t CreateFileHeader(char *formattedString,uint8_t instrument, uint16_t dataLength) {
+    
+    char esn[] = "0-453221";
+    char fileName[20] = { NULL };
+
+    // Parse filename from instrument byte
+    switch (instrument) {
+        case 0x10:             
+            sprintf(fileName,"%s%i.txt",langmuirProbeFileName,langmuirProbeFileCount++);
+            break;
+        case 0x20:             
+            sprintf(fileName,"%s%i.txt",magnetometerFileName,magnetometerFileCount++);
+            break;
+        case 0x30:             
+            sprintf(fileName,"%s%i.txt",temperatureFileName,temperatureFileCount++);
+            break;
+        case 0x40:            
+            sprintf(fileName,"%s%i.txt",gpsFileName,gpsFileCount++);
+            break;
+        default:
+            strcpy(fileName, "Data0000.txt");
+            break;     
+    }
+    
+    uint8_t nameLen = strlen(fileName);
+        
+    return sprintf(formattedString,"%s%03i%06i%s",esn,nameLen,dataLength,fileName); 
 }
 
 uint16_t GetWaitingFilesCount() {
@@ -446,8 +556,9 @@ void GetCommandFile() {
  *************************/
 
 void TogglePowerSwitches() {
-        
-    if (!isSending && !IsLineBusy()) {
+           
+    while(IsLineBusy());
+    if (!isSending) {
         
         TransmitPreamble(powerPackagePreamble);
                 
@@ -464,13 +575,13 @@ void TogglePowerSwitches() {
         }
         
         ReadPowerSwitches();
+    } else {
+        
     }
 }
 
 void ReadPowerSwitches() {
-    
-    _LATE4 = LED_ON;
-        
+         
     while(Read(SimplexUnit) != 0x50);
     while(Read(SimplexUnit) != 0x50);
     while(Read(SimplexUnit) != 0x50);
@@ -485,23 +596,11 @@ void ReadPowerSwitches() {
                 case 5: langmuirMagPowerSwitch = Read(SimplexUnit); break;
                 case 7: gpsPowerSwitch = Read(SimplexUnit); break;
                 case 9: duplexPowerSwitch = Read(SimplexUnit); break;
-                case 10: isDuplexConnected = Read(SimplexUnit) > 0;
+//                case 10: isDuplexConnected = Read(SimplexUnit) > 0;
                 default: Read(SimplexUnit); break;
             }
         }
     }
-    
-    _LATE4 = LED_OFF;
-}
-
-int ReadEcho(int index) {
-    
-    uint8_t next = Read(SimplexUnit);
-    epsEcho[index++] = next;
-    
-//    if (index == sizeof(epsEcho)) IEC1bits = 0;
-    
-    return index;
 }
 
 void SetLangmuirProbePower(bool on) {
