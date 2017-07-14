@@ -46,6 +46,7 @@
 /**
   Section: Included Files
 */
+#include <time.h>
 #include "uart2.h"
 #include "../CommandParser.h"
 #include "../SystemConfiguration.h"
@@ -77,17 +78,20 @@ void UART2_Initialize(void)
 
 uint8_t UART2_Read(void)
 {
-    while(!(U2STAbits.URXDA == 1) || (duplexTimeout >= DUPLEX_RES_TIMEOUT))
+    time_t current = time(NULL);
+    time_t endWait = current + DUPLEX_RES_TIMEOUT;
+    
+    while(!(U2STAbits.URXDA == 1) && !duplexTimeoutFlag)
     {
-        
+        // Duplex read timeout
+        current = time(NULL);
+        if (current >= endWait) duplexTimeoutFlag = 1;
     }
 
     if ((U2STAbits.OERR == 1))
     {
         U2STAbits.OERR = 0;
     }
-
-    
 
     return U2RXREG;
 }

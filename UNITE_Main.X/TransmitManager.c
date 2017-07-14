@@ -31,15 +31,14 @@ const uint16_t QUEUE_SIZE = 2000;
 const int PREAMBLE_LENGTH = 4;
 uint8_t simplexPackagePreamble[] = {0x50, 0x50, 0x50, 0x0C}; // 0x50 0x50 0x50 0x0C
 const int SIM_RES_LENGTH = 3;
-bool isSimplexWaiting = false;
-int simplexTimeout = 0;
+bool simplexTimeoutFlag = 0;
 
 // Duplex Comm Configs
 const int DUPLEX_SYNC_LENGTH = 2;
 const uint8_t duplexSyncBytes[2] = {71, 85}; // 0x47, 0x55
 const int DUPLEX_PACK_BYTE_LENGTH = 4;
-const char duplexUplinkFilePoll[] = "PR222";
-const char duplexUplinkFileReady[] = "RR222";
+const char duplexUplinkSMSPoll[] = "PR111";
+const char duplexUplinkSMSReady[] = "RR111";
 const char duplexDownlinkFilePoll[] = "PP333";
 const char duplexDownlinkFileReady[] = "RP333";
 const char duplexHousekeepingFilePoll[] = "PC401";
@@ -47,7 +46,7 @@ const char duplexWaitingFilesPoll[] = "PC403";
 
 // Instrument file names
 const int FILE_COUNT_INDEX = 7;
-char langmuirProbeFileName[] = "LMPData";
+char langmuirProbeFileName[] = "LAPData";
 char magnetometerFileName[] = "MAGData";
 char temperatureFileName[] = "TMPData";
 char gpsFileName[] = "GPSData";
@@ -59,8 +58,7 @@ int gpsFileCount = 1;
 
 int currentDuplexConnectionWait = 0;
 const int DUPLEX_TIMEOUT = 3;
-bool isDuplexWaiting = false;
-int duplexTimeout = 0;
+bool duplexTimeoutFlag = 0;
 
 
 const int DUP_RES_LENGTH = 11;
@@ -70,7 +68,7 @@ const int DUP_RES_LENGTH = 11;
  *************************/
 
 uint8_t epsEcho[39] = { NULL };
-const int POWER_ECHO_LENGTH = 35;
+const int POWER_ECHO_LENGTH = 39;
 uint8_t powerPackagePreamble[4] = {0x50, 0x50, 0x50, 0x0B}; // 0x50 0x50 0x50 0x0B
 uint8_t commandBoardPowerSwitch = 0xFF;         // SW1
 uint8_t temperaturePowerSwitch = 0x00;          // SW2
@@ -182,32 +180,22 @@ uint8_t Read(TransmissionUnit unit) {
             case SimplexUnit: 
                 
                 // Reset Timeout
-                simplexTimeout = 0;
-
-                isSimplexWaiting = true;
-                uint8_t simData = UART3_Read();
-                isSimplexWaiting = false;
+                simplexTimeoutFlag = false;
                 
-                if (simplexTimeout < SIMPLEX_RES_TIMEOUT) {
-                    return simData;
-                } else {
-                    return 0;
-                }
+                uint8_t simData = UART3_Read();
+                
+                if (!simplexTimeoutFlag) return simData;
+                else return 0;
                 
             case DuplexUnit: 
                 
                 // Reset Timeout
-                duplexTimeout = 0;
-
-                isDuplexWaiting = true;
-                uint8_t dupData = UART2_Read();
-                isDuplexWaiting = false;
+                duplexTimeoutFlag = false;
                 
-                if (duplexTimeout < DUPLEX_RES_TIMEOUT) {
-                    return dupData;
-                } else {
-                    return 0;
-                }
+                uint8_t dupData = UART2_Read();
+                
+                if (!duplexTimeoutFlag) return dupData;
+                else return 0;
                 
             case GPSUnit: return UART1_Read();
             case DiagUnit: return UART4_Read();
@@ -437,11 +425,11 @@ bool ReadACKForUnit(TransmissionUnit unit) {
         switch (unit) {
             case SimplexUnit:
                 
-                while (Read(unit) != 0xAA) {
-                    if (simplexTimeout >= SIMPLEX_RES_TIMEOUT) return true;
+                while (Read(unit) != 0xAA ) {
+                    if (simplexTimeoutFlag) return true;
                 }
                 while (Read(unit) != 0x05) {
-                    if (simplexTimeout >= SIMPLEX_RES_TIMEOUT) return true;
+                    if (simplexTimeoutFlag) return true;
                 }
                 
                 isACK = (Read(unit) == 0);
@@ -451,11 +439,11 @@ bool ReadACKForUnit(TransmissionUnit unit) {
                     switch (i) {
                         case 6: 
                             isACK = (Read(unit) == 6);
-                            if (duplexTimeout >= DUPLEX_RES_TIMEOUT) return true;
+                            if (duplexTimeoutFlag) return true;
                             break;
                         default: 
                             Read(unit);
-                            if (duplexTimeout >= DUPLEX_RES_TIMEOUT) return true;  
+                            if (duplexTimeoutFlag) return true;  
                             break;
                     }
                 }
@@ -532,22 +520,60 @@ uint16_t GetWaitingFilesCount() {
 
 void GetCommandFile() {
     
-    PollDuplex(duplexUplinkFilePoll, 0);
+    PollDuplex(duplexUplinkSMSPoll, 0);
     
     if (ReadACKForUnit(DuplexUnit)) {
         
         // Need to make sure that the command string is a set number of bytes
-        int i;
-        int fileResponseLength = 65;
+        int i,messageLength;
+        char smsHeader[] = "SMS";
         
-        uint8_t commandString[56];
-        for (i = 0; i < fileResponseLength; i++) {
+        // Read Duplex Sync Bytes & Header
+        while (!Read(DuplexUnit) != 0x47) if (duplexTimeoutFlag) return;
+        while (!Read(DuplexUnit) != 0x55) if (duplexTimeoutFlag) return;
+        while (!Read(DuplexUnit) == 0x00) if (duplexTimeoutFlag) return;
+        while (!Read(DuplexUnit) == 0x00) if (duplexTimeoutFlag) return;
+        while (!Read(DuplexUnit) == 0x00) if (duplexTimeoutFlag) return;
+        
+        // Calculate SMS message length
+        // 5: Duplex Poll
+        // 3: SMS Header
+        // 14: SMS Message Length Byte Count
+        // 5: UNITE Message Header
+        // 2: CRC-16 Code
+        messageLength = Read(DuplexUnit) - 5 - 3 - 14 - 5- 2;
+        
+        // Read Duplex Poll Code
+        while (!Read(DuplexUnit) != duplexUplinkSMSReady[0]) if (duplexTimeoutFlag) return;
+        while (!Read(DuplexUnit) != duplexUplinkSMSReady[1]) if (duplexTimeoutFlag) return;
+        while (!Read(DuplexUnit) != duplexUplinkSMSReady[2]) if (duplexTimeoutFlag) return;
+        while (!Read(DuplexUnit) != duplexUplinkSMSReady[3]) if (duplexTimeoutFlag) return;
+        while (!Read(DuplexUnit) != duplexUplinkSMSReady[4]) if (duplexTimeoutFlag) return;
+        
+        // Read SMS Header
+        while (!Read(DuplexUnit) != smsHeader[0]) if (duplexTimeoutFlag) return;
+        while (!Read(DuplexUnit) != smsHeader[1]) if (duplexTimeoutFlag) return;
+        while (!Read(DuplexUnit) != smsHeader[2]) if (duplexTimeoutFlag) return;
+        
+        // Read SMS Header Message Length
+        for (i = 0; i < 14; i++) Read(DuplexUnit);
+        
+        // Read UNITE Message Header else throw away
+        if (Read(DuplexUnit) != 'U') return;
+        if (Read(DuplexUnit) != 'N') return;
+        if (Read(DuplexUnit) != 'I') return;
+        if (Read(DuplexUnit) != 'T') return;
+        if (Read(DuplexUnit) != 'E') return;
+        
+        // Read actual command
+        uint8_t commandString[messageLength];
+        for (i = 0; i < messageLength; i++) {
             
-            if (i >= DUP_RES_LENGTH) { commandString[i - DUP_RES_LENGTH] = Read(DuplexUnit); }
-            else Read(DuplexUnit);
+            char asciiNum = Read(DuplexUnit);
+            commandString[i] = asciiNum & 0x0F;
         }
         
-        PerformCommands(commandString, 56);
+        PerformCommands(commandString, messageLength);
     }
 }   
 
@@ -582,10 +608,10 @@ void TogglePowerSwitches() {
 
 void ReadPowerSwitches() {
          
-    while(Read(SimplexUnit) != 0x50);
-    while(Read(SimplexUnit) != 0x50);
-    while(Read(SimplexUnit) != 0x50);
-    while(Read(SimplexUnit) != 0x0B);
+    while(Read(SimplexUnit) != 0x50 && !simplexTimeoutFlag);
+    while(Read(SimplexUnit) != 0x50 && !simplexTimeoutFlag);
+    while(Read(SimplexUnit) != 0x50 && !simplexTimeoutFlag);
+    while(Read(SimplexUnit) != 0x0B && !simplexTimeoutFlag);
     
     if (!IsLineBusy(SimplexUnit)) {
         int i;
@@ -596,7 +622,35 @@ void ReadPowerSwitches() {
                 case 5: langmuirMagPowerSwitch = Read(SimplexUnit); break;
                 case 7: gpsPowerSwitch = Read(SimplexUnit); break;
                 case 9: duplexPowerSwitch = Read(SimplexUnit); break;
-//                case 10: isDuplexConnected = Read(SimplexUnit) > 0;
+                case 10: break; // Battery 1 Charge High
+                case 11: break; // Battery 1 Charge Low
+                case 12: break; // Battery 2 Charge High
+                case 13: break; // Battery 2 Charge Low
+                case 14: break; // Battery 1 Voltage High
+                case 15: break; // Battery 1 Voltage Low
+                case 16: break; // Battery 2 Voltage High
+                case 17: break; // Battery 2 Voltage Low
+                case 18: break; // Battery 1 Current High
+                case 19: break; // Battery 1 Current Low
+                case 20: break; // Battery 2 Current High
+                case 21: break; // Battery 2 Current Low
+                case 22: break; // Buss+ Voltage High
+                case 23: break; // Buss+ Voltage Low
+                case 24: break; // Solar Panel 1 Voltage High
+                case 25: break; // Solar Panel 1 Voltage Low 
+                case 26: break; // Solar Panel 2 Voltage High
+                case 27: break; // Solar Panel 2 Voltage Low
+                case 28: break; // Solar Panel 3 Voltage High
+                case 29: break; // Solar Panel 3 Voltage Low
+                case 30: break; // Solar Panel 4 Voltage High
+                case 31: break; // Solar Panel 4 Voltage Low
+                case 32: break; // Simplex Temp High
+                case 33: break; // Simplex Temp Low
+                case 34: break; // Duplex Temp High
+                case 35: break; // Duplex Temp Low
+                case 36: break; // EPS Temp High
+                case 37: break; // EPS Temp Low
+                case 38: isDuplexConnected = Read(SimplexUnit) > 0; break;
                 default: Read(SimplexUnit); break;
             }
         }

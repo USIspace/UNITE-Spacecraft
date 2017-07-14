@@ -56,7 +56,7 @@ extern int magnetometerCallbackCount;
 extern int currentLangmuirProbeSweepProgress;
 extern int currentMagnetometerSweepProgress;
 
-extern bool isLangmuirProbeSweeping;
+extern bool isLangmuirProbeSampling;
 extern bool isMagnetometerSweeping;
 extern bool shouldMagnetometerSample;
 

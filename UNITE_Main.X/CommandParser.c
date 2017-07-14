@@ -18,12 +18,17 @@ Unit unit;
 bool isOverride = false;
 bool isReset = false;
 
+// Command Sequence #
+uint8_t seqByte1 = 0;
+uint8_t seqByte2 = 0;
+uint8_t seqByte3 = 0;
+
 // Value properties
 const int VALUE_ARRAY_SIZE = 2;
 uint8_t value[2];
 int nextValueIndex = 0;
 
-
+// Boolean on/off for end of command
 bool isEndOfMessage = false;
 
 /*****************
@@ -33,6 +38,7 @@ bool isEndOfMessage = false;
 void EndMessage();
 void ParseByte(uint8_t, CommandByteIndex);
 
+bool IsNextCommand(uint8_t *sequenceNumber, int seqLength);
 void addValueByte(uint8_t);
 uint16_t convertHexToDecimal(uint8_t *);
 unsigned long convertTime(Unit, Unit);
@@ -46,14 +52,25 @@ void PerformCommands(uint8_t *commandString, uint16_t CMD_Length) {
 
     int i = 0;
     while (i < CMD_Length) {
-        while (!isEndOfMessage) {
-            ParseByte(commandString[i++], byteIndex++);
-        }
+        
+        // Sequence Checking Algorithm
+        if (IsNextCommand(commandString, 3)) {
+            
+            i += 3;
+            
+            while (!isEndOfMessage) {
+                ParseByte(commandString[i++], byteIndex++);
+            }
 
-        if (system != Break) {
-            uint16_t convertedValue = (value[0] << 8) | value[1];
-            RunCommand(system, mode, property, unit, convertedValue);
-        }
+            if (system != Break) {
+
+                // Convert value array into 2 byte unsigned integer
+                uint16_t convertedValue = (value[0] << 8) | value[1];
+
+                // Run Command
+                RunCommand(system, mode, property, unit, convertedValue);
+            }
+        } 
     }
 }
 
@@ -266,6 +283,40 @@ void RunCommand(System system, Mode mode, Property property, Unit unit, uint16_t
 /****************
   Helper Methods
  ****************/
+
+bool IsNextCommand(uint8_t *sequenceNumber, int seqLength) {
+    
+    int i;
+    for (i = 0; i < seqLength; i++) {
+        switch (i) {
+            case 0:
+                if (sequenceNumber[i] > seqByte1) {
+                    seqByte1 = sequenceNumber[i];
+                    i += 3;
+                }
+                else if (sequenceNumber[i] == seqByte1) i++;
+                else return false;
+                break;
+            case 1:
+                if (sequenceNumber[i] > seqByte2) {
+                    seqByte2 = sequenceNumber[i];
+                    i += 2;
+                } else if (sequenceNumber[i] == seqByte2) i++;
+                else return false;
+                break;
+            case 2:
+                if (sequenceNumber[i] > seqByte3) {
+                    seqByte3 = sequenceNumber[i];
+                    i++;
+                } else return false;
+                break;
+            default: i++;
+                break;
+        }
+    }
+    
+    return true;
+}
 
 void addValueByte(uint8_t byte) {
 

@@ -46,6 +46,7 @@
 /**
   Section: Included Files
 */
+#include <time.h>
 #include "uart3.h"
 #include "../CommandParser.h"
 #include "../SystemConfiguration.h"
@@ -78,9 +79,14 @@ void UART3_Initialize(void)
 
 uint8_t UART3_Read(void)
 {
-    while(!(U3STAbits.URXDA == 1) || (simplexTimeout >= SIMPLEX_RES_TIMEOUT))
+    time_t current = time(NULL);
+    time_t endWait = current + SIMPLEX_RES_TIMEOUT;
+    
+    while(!(U3STAbits.URXDA == 1) && !simplexTimeoutFlag)
     {
-        
+        // Simplex read timeout
+        current = time(NULL);
+        if (current >= endWait) simplexTimeoutFlag = 1;
     }
 
     if ((U3STAbits.OERR == 1))

@@ -169,16 +169,6 @@ void __attribute__ ((weak)) TMR1_CallBack(void)
         Satellite_Initialize();
     } else {
         ManageSweepingProgress();
-        
-        // Count up simple timeout
-        if (isSimplexWaiting) {
-            simplexTimeout++;
-        }
-        
-        // Count up duplex timeout
-        if (isDuplexWaiting) {
-            duplexTimeout++;
-        }
     }
 }
 

@@ -21,15 +21,13 @@ extern "C" {
 
 #endif	/* TRANSMITMANAGER_H */
 
-#define SIMPLEX_RES_TIMEOUT 5
-#define DUPLEX_RES_TIMEOUT 3
+#define SIMPLEX_RES_TIMEOUT 1000
+#define DUPLEX_RES_TIMEOUT 10000
 
 
 extern bool isSending;
-extern bool isSimplexWaiting;
-extern bool isDuplexWaiting;
-extern int simplexTimeout;
-extern int duplexTimeout;
+extern bool simplexTimeoutFlag;
+extern bool duplexTimeoutFlag;
 
 extern uint8_t temperaturePowerSwitch;
 /**********************

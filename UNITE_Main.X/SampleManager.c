@@ -26,7 +26,7 @@ int langmuirProbeResults[16];
 int magnetometerResults[16];
 int temperatureResults[16];
 
-uint8_t langmuirProbeBuffer[600] = { NULL };
+uint8_t langmuirProbeBuffer[300] = { NULL };
 uint8_t magnetometerBuffer[33] = { NULL };
 uint8_t temperatureBuffer[32] = { NULL };
 uint8_t gpsBuffer[33] = { NULL };
@@ -50,7 +50,7 @@ int currentMagnetometerBufferIndex = 0;
 int currentTemperatureBufferIndex = 0;
 int currentGPSBufferIndex = 0;
 
-uint16_t LP_BUFFER_SIZE = 600;
+uint16_t LP_BUFFER_SIZE = 300;
 uint16_t MAG_BUFFER_SIZE = 33;
 uint16_t TMP_BUFFER_SIZE = 32;
 uint16_t GPS_BUFFER_SIZE = 33;
@@ -72,12 +72,19 @@ int currentMagnetometerSweepProgress = 0;
 
 int currentMagnetometerOrbitProgress = 0;
 
+bool isLangmuirProbeSampling = false;
 bool isLangmuirProbeSweeping = false;
+
 bool isMagnetometerSweeping = false;
 bool shouldMagnetometerSample = false;
 
-bool isLangmuirProbeSweepPositive = true;
-int currentLangmuirProbeSweepPosition = 0; //0x1000 : -32767
+bool isProbeVoltagePositive = true;
+bool isProbeSweepPositive = true;       // Initialize to true to correctly sweep probe halfway through
+const int electronVoltage = 0x6665;     // 26213 = 4V
+const int ionVoltage = 0x999B;          // -26213 = -4V
+const int maxSweepVoltage = 0x7332;     // 29490 = 4.5V
+const int minSweepVoltage = 0x8CCE;     // -29490 = -4.5V
+int currentLangmuirProbeVoltage = 0; //0x8000 : -32767
 
 /**************************
   Sampling Configurations
@@ -107,8 +114,7 @@ ADCSampleConfig tmpADCConfig = {
 
 void BeginLangmuirProbeSampling() {
     // Sample Plasma Probe Data and store in buffer
-    //    isLangmuirProbeSweeping = true;
-    //    TMR2_Start();
+        isLangmuirProbeSampling = true;
 }
 
 void BeginMagnetometerSampling() {
@@ -148,15 +154,17 @@ void BeginGPSSampling() {
 // MARK: End Methods
 
 void EndLangmuirProbeSampling() {
-    TMR2_Stop();
     currentLangmuirProbeSweepProgress = 0;
-    isLangmuirProbeSweeping = false;
-
+    isLangmuirProbeSampling = false;
+    isProbeVoltagePositive = false;
+    
     //    PackageData(LPSubSys, (int)timeInMin, langmuirProbeBuffer, LP_BUFFER_SIZE);
     memset(langmuirProbeBuffer, 0, sizeof(langmuirProbeBuffer));
     currentLangmuirProbeBufferIndex = 0;
     currentLangmuirProbeWait = 0;
-    LP_BUFFER_SIZE = (GetSweepDuration(&LangmuirProbe) * convertTime(Sec, MilSec)) / (GetSweepRate(&LangmuirProbe) * 5) * 3;
+    
+    // Resize LP Buffer based on sampling duration: Temperature sweep point # + Density sample point #
+    LP_BUFFER_SIZE = (convertTime(Sec, MilSec)) / (GetSweepRate(&LangmuirProbe) * 5) + GetSweepDuration(&LangmuirProbe);
 
 }
 
@@ -210,8 +218,27 @@ void TransmitTestString() {
 
 void ManageSweepingProgress() {
 
-    if (isLangmuirProbeSweeping) {
-        if (++currentLangmuirProbeSweepProgress > GetSweepDuration(&LangmuirProbe)) {
+    if (isLangmuirProbeSampling) {
+        
+        // Reset sweeping
+        isLangmuirProbeSweeping = false;
+        TMR2_Stop();
+        
+        // Set correct voltage for sample
+        currentLangmuirProbeVoltage = isProbeVoltagePositive ? electronVoltage : ionVoltage;
+        isProbeVoltagePositive = !isProbeVoltagePositive;
+        
+        // Take one sample
+        TakeProbeSample();
+        
+        // Take a sweep when halfway through the sample
+        if (++currentLangmuirProbeSweepProgress == GetSweepDuration(&LangmuirProbe) / 2) {
+            isLangmuirProbeSweeping = true;
+            currentLangmuirProbeVoltage = minSweepVoltage;
+            TMR2_Start();
+        }
+        
+        if (currentLangmuirProbeSweepProgress >= GetSweepDuration(&LangmuirProbe)) {
             EndLangmuirProbeSampling();
         }
     }
@@ -230,16 +257,9 @@ void ManageSweepingProgress() {
 
 void TakeProbeSample() {
     Clear(langmuirProbeResults, RESULTS_SIZE, 0);
-
-    // Sweeping Algorithm
-    int voltageAdjustment = isLangmuirProbeSweepPositive ? 655 : -655;
-    currentLangmuirProbeSweepPosition = max(0x8000, min(0x7FFF, currentLangmuirProbeSweepPosition + voltageAdjustment));
-
-    if (currentLangmuirProbeSweepPosition == 0x7FFF) isLangmuirProbeSweepPositive = false;
-    else if (currentLangmuirProbeSweepPosition == 0x8000) isLangmuirProbeSweepPositive = true;
-
+    
     _RG9 = 0;
-    SPI1_Exchange16bit(currentLangmuirProbeSweepPosition & 0xFFFF);
+    SPI1_Exchange16bit(currentLangmuirProbeVoltage & 0xFFFF);
     _RG9 = 1;
 
     // Sample Probe from ADC
@@ -252,8 +272,24 @@ void TakeProbeSample() {
     CopyIntToByte(langmuirProbeResults, langmuirProbeBuffer, 0, currentLangmuirProbeBufferIndex, probeResultSize);
     currentLangmuirProbeBufferIndex += probeResultSize;
 
-    if (currentLangmuirProbeBufferIndex >= LP_BUFFER_SIZE) {
-        EndLangmuirProbeSampling();
+    // Sweeping Algorithm
+    if (isLangmuirProbeSweeping) {
+        
+        // Calculation for the voltage adjustment needed to sweep from min voltage to max voltage
+        // ~590 for a 1s sweep from -4.5 -> 4.5 -> -4.5
+        int voltageAdjustment = maxSweepVoltage * 4 / 
+                                    (convertTime(Sec,MilSec) / 
+                                        GetSweepRate(&LangmuirProbe) / 5) + 1; 
+        
+        // Applies the voltage adjustment within range(minSweepVoltage, maxSweepVoltage)
+        currentLangmuirProbeVoltage = max(minSweepVoltage, 
+                                          min(maxSweepVoltage, 
+                                                currentLangmuirProbeVoltage + 
+                                                isProbeSweepPositive ? voltageAdjustment : -voltageAdjustment));
+
+        // Checks if the sweep should change from positive to negative
+        if (currentLangmuirProbeVoltage == maxSweepVoltage) isProbeSweepPositive = false;
+        else if (currentLangmuirProbeVoltage == minSweepVoltage) isProbeSweepPositive = true;
     }
 }
 
@@ -541,7 +577,7 @@ void TestDACSPI() {
     SPI1_Exchange16bit(spi16Testing);
     //    SPI1_Exchange16bit(currentLangmuirProbeSweepPosition);
 
-    currentLangmuirProbeSweepPosition = currentLangmuirProbeSweepPosition + 655;
+    currentLangmuirProbeVoltage = currentLangmuirProbeVoltage + 655;
 
     _RG9 = 1;
 }

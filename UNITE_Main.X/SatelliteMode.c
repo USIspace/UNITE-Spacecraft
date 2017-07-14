@@ -172,7 +172,7 @@ UNITEMode UpdateMode() {
 void TakeSample() {
     
     // Langmuir Probe
-    if (!isLangmuirProbeSweeping) {
+    if (!isLangmuirProbeSampling) {
         if (++currentLangmuirProbeWait >= GetSampleRate(&LangmuirProbe)) {
 
             if (isLangmuirProbeOn()) {
