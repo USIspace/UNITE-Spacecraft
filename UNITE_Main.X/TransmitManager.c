@@ -39,6 +39,7 @@ const uint8_t duplexSyncBytes[2] = {71, 85}; // 0x47, 0x55
 const int DUPLEX_PACK_BYTE_LENGTH = 4;
 const char duplexUplinkSMSPoll[] = "PR111";
 const char duplexUplinkSMSReady[] = "RR111";
+const char duplexCmdReceived[] = { 6, 'R', '1', '1', '1'};
 const char duplexDownlinkFilePoll[] = "PP333";
 const char duplexDownlinkFileReady[] = "RP333";
 const char duplexHousekeepingFilePoll[] = "PC401";
@@ -95,7 +96,7 @@ void PollDuplex(const char *pollCode, uint16_t taggedDataLength);
 bool ReadACKForUnit(TransmissionUnit unit);
 size_t CreateFileHeader(char *formattedString,uint8_t instrument, uint16_t dataLength);
 uint16_t GetWaitingFilesCount();
-void GetCommandFile();
+void HandleCommand();
 
 // Description: Saves data to a transmission queue for sending later
 // *package => ready-to-send package
@@ -425,29 +426,32 @@ bool ReadACKForUnit(TransmissionUnit unit) {
         switch (unit) {
             case SimplexUnit:
                 
-                while (Read(unit) != 0xAA ) {
-                    if (simplexTimeoutFlag) return true;
-                }
-                while (Read(unit) != 0x05) {
-                    if (simplexTimeoutFlag) return true;
-                }
+                while (Read(unit) != 0xAA ) if (simplexTimeoutFlag) return true;
+                while (Read(unit) != 0x05) if (simplexTimeoutFlag) return true;
                 
                 isACK = (Read(unit) == 0);
                 break;
+                
             case DuplexUnit:
-                for (i = 0; i < DUP_RES_LENGTH; i++) {
+                
+                while (Read(unit) != 0x47) if (duplexTimeoutFlag) return false;
+                while (Read(unit) != 0x55) if (duplexTimeoutFlag) return false;
+                
+                for (i = 0; i < DUP_RES_LENGTH - DUPLEX_SYNC_LENGTH; i++) {
                     switch (i) {
-                        case 6: 
+                        case 4: 
                             isACK = (Read(unit) == 6);
-                            if (duplexTimeoutFlag) return true;
                             break;
                         default: 
                             Read(unit);
-                            if (duplexTimeoutFlag) return true;  
                             break;
                     }
                 }
+                
+                if (duplexTimeoutFlag) return false;
                 break;
+                
+                
             default: break;
         }
     }
@@ -518,63 +522,83 @@ uint16_t GetWaitingFilesCount() {
     return -1;
 }
 
-void GetCommandFile() {
+void HandleCommand() {
+
+    // Need to make sure that the command string is a set number of bytes
+    int i, messageLength;
+    char smsHeader[] = "SMS";
+    bool isError = false;
     
-    PollDuplex(duplexUplinkSMSPoll, 0);
-    
-    if (ReadACKForUnit(DuplexUnit)) {
-        
-        // Need to make sure that the command string is a set number of bytes
-        int i,messageLength;
-        char smsHeader[] = "SMS";
-        
-        // Read Duplex Sync Bytes & Header
-        while (!Read(DuplexUnit) != 0x47) if (duplexTimeoutFlag) return;
-        while (!Read(DuplexUnit) != 0x55) if (duplexTimeoutFlag) return;
-        while (!Read(DuplexUnit) == 0x00) if (duplexTimeoutFlag) return;
-        while (!Read(DuplexUnit) == 0x00) if (duplexTimeoutFlag) return;
-        while (!Read(DuplexUnit) == 0x00) if (duplexTimeoutFlag) return;
-        
-        // Calculate SMS message length
-        // 5: Duplex Poll
-        // 3: SMS Header
-        // 14: SMS Message Length Byte Count
-        // 5: UNITE Message Header
-        // 2: CRC-16 Code
-        messageLength = Read(DuplexUnit) - 5 - 3 - 14 - 5- 2;
-        
-        // Read Duplex Poll Code
-        while (!Read(DuplexUnit) != duplexUplinkSMSReady[0]) if (duplexTimeoutFlag) return;
-        while (!Read(DuplexUnit) != duplexUplinkSMSReady[1]) if (duplexTimeoutFlag) return;
-        while (!Read(DuplexUnit) != duplexUplinkSMSReady[2]) if (duplexTimeoutFlag) return;
-        while (!Read(DuplexUnit) != duplexUplinkSMSReady[3]) if (duplexTimeoutFlag) return;
-        while (!Read(DuplexUnit) != duplexUplinkSMSReady[4]) if (duplexTimeoutFlag) return;
-        
-        // Read SMS Header
-        while (!Read(DuplexUnit) != smsHeader[0]) if (duplexTimeoutFlag) return;
-        while (!Read(DuplexUnit) != smsHeader[1]) if (duplexTimeoutFlag) return;
-        while (!Read(DuplexUnit) != smsHeader[2]) if (duplexTimeoutFlag) return;
-        
-        // Read SMS Header Message Length
-        for (i = 0; i < 14; i++) Read(DuplexUnit);
-        
-        // Read UNITE Message Header else throw away
-        if (Read(DuplexUnit) != 'U') return;
-        if (Read(DuplexUnit) != 'N') return;
-        if (Read(DuplexUnit) != 'I') return;
-        if (Read(DuplexUnit) != 'T') return;
-        if (Read(DuplexUnit) != 'E') return;
-        
-        // Read actual command
-        uint8_t commandString[messageLength];
-        for (i = 0; i < messageLength; i++) {
+    if (isDuplexOn() && !isSending) {
+
+        PollDuplex(duplexUplinkSMSPoll, 0);
+
+        if (ReadACKForUnit(DuplexUnit)) {
             
-            char asciiNum = Read(DuplexUnit);
-            commandString[i] = asciiNum & 0x0F;
+//            char string[67];
+//            for (i = 0; i < 67; i++) string[i] = Read(DuplexUnit);
+//            while (1);
+//            return;
+            
+            // Read Duplex Sync Bytes & Header
+            while (Read(DuplexUnit) != 0x47) if (duplexTimeoutFlag) { return; }
+            while (Read(DuplexUnit) != 0x55) if (duplexTimeoutFlag) { return; }
+            while (Read(DuplexUnit) != 0x00) if (duplexTimeoutFlag) { return; }
+            while (Read(DuplexUnit) != 0x00) if (duplexTimeoutFlag) { return; }
+            while (Read(DuplexUnit) != 0x00) if (duplexTimeoutFlag) { return; }
+
+            // Calculate SMS message length
+            // 4: 4 byte message length
+            // 5: Duplex Poll
+            // 8: 8 byte ESN
+            // 9: 9 byte COMM Header
+            // 3: SMS Header
+            // 14: SMS Message Length Byte Count
+            // 5: UNITE Message Header
+            // 2: CRC-16 Code
+            messageLength = Read(DuplexUnit) - 4 - 5 - 8 - 9 - 3 - 14 - 5;
+            
+            // Read Duplex Poll Code
+            while (Read(DuplexUnit) != duplexUplinkSMSReady[0]) if (duplexTimeoutFlag) { return; }
+            while (Read(DuplexUnit) != duplexUplinkSMSReady[1]) if (duplexTimeoutFlag) { return; }
+            while (Read(DuplexUnit) != duplexUplinkSMSReady[2]) if (duplexTimeoutFlag) { return; }
+            while (Read(DuplexUnit) != duplexUplinkSMSReady[3]) if (duplexTimeoutFlag) { return; }
+            while (Read(DuplexUnit) != duplexUplinkSMSReady[4]) if (duplexTimeoutFlag) { return; }
+            
+            // ESN & COMM Header
+            for (i = 0; i < 17; i++) Read(DuplexUnit);
+            
+            // Read SMS Header
+            while (Read(DuplexUnit) != smsHeader[0]) if (duplexTimeoutFlag) { return; }
+            while (Read(DuplexUnit) != smsHeader[1]) if (duplexTimeoutFlag) { return; } 
+            while (Read(DuplexUnit) != smsHeader[2]) if (duplexTimeoutFlag) { return; }
+            
+            // Read SMS Header Message Length
+            for (i = 0; i < 14; i++) Read(DuplexUnit);
+
+            // Read UNITE Message Header else throw away
+            if (Read(DuplexUnit) != 'U') isError = true;
+            if (Read(DuplexUnit) != 'N') isError = true;
+            if (Read(DuplexUnit) != 'I') isError = true;
+            if (Read(DuplexUnit) != 'T') isError = true;
+            if (Read(DuplexUnit) != 'E') isError = true;
+
+            // Read actual command
+            uint8_t commandString[messageLength];
+            for (i = 0; i < messageLength; i++) {
+
+                char asciiNum = Read(DuplexUnit);
+                commandString[i] = asciiNum & 0x0F;
+            }
+            
+//            PollDuplex(duplexCmdReceived, 0);
+            
+            if (!isError) PerformCommands(commandString, messageLength);
+            
         }
-        
-        PerformCommands(commandString, messageLength);
     }
+    
+    return;
 }   
 
 /*************************

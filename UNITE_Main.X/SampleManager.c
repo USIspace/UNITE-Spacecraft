@@ -80,11 +80,11 @@ bool shouldMagnetometerSample = false;
 
 bool isProbeVoltagePositive = true;
 bool isProbeSweepPositive = true;       // Initialize to true to correctly sweep probe halfway through
-const int electronVoltage = 0x6665;     // 26213 = 4V
-const int ionVoltage = 0x999B;          // -26213 = -4V
-const int maxSweepVoltage = 0x7332;     // 29490 = 4.5V
-const int minSweepVoltage = 0x8CCE;     // -29490 = -4.5V
-int currentLangmuirProbeVoltage = 0; //0x8000 : -32767
+const uint16_t electronVoltage = 0xE666;     // 58982 = 4V
+const uint16_t ionVoltage = 0x1999;          // 6553 = -4V
+const uint16_t maxSweepVoltage = 0xF333;     // 62259 = 4.5V
+const uint16_t minSweepVoltage = 0x0CCC;     // 3276 = -4.5V
+int currentLangmuirProbeVoltage = 0;
 
 /**************************
   Sampling Configurations

@@ -85,7 +85,7 @@ uint8_t UART2_Read(void)
     {
         // Duplex read timeout
         current = time(NULL);
-        if (current >= endWait) duplexTimeoutFlag = 1;
+//        if (current >= endWait) duplexTimeoutFlag = 1;
     }
 
     if ((U2STAbits.OERR == 1))

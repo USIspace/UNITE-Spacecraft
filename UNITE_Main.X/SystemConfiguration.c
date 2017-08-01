@@ -12,9 +12,9 @@
 
 TransmissionMode TransmissionUnitForMode = {
     
-    SimplexOrDuplex, // SimplexOrDuplex
+    SimplexUnit, // SimplexOrDuplex
     DuplexUnit, // SimplexOrDuplex
-    SimplexOrDuplex
+    SimplexUnit
 };
 
 Instrument LangmuirProbe = {

@@ -233,6 +233,9 @@ void TakeSample() {
     currentMode = UpdateMode();
     
 //    TestDACSPI();
+    
+    // Commanding
+    HandleCommand();
 }
 
 

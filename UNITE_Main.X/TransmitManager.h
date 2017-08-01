@@ -21,8 +21,8 @@ extern "C" {
 
 #endif	/* TRANSMITMANAGER_H */
 
-#define SIMPLEX_RES_TIMEOUT 1000
-#define DUPLEX_RES_TIMEOUT 10000
+#define SIMPLEX_RES_TIMEOUT     1000
+#define DUPLEX_RES_TIMEOUT      100000
 
 
 extern bool isSending;
@@ -39,6 +39,8 @@ uint8_t Read(TransmissionUnit unit);
 void Send(uint8_t byte, TransmissionUnit unit);
 uint16_t PackageData(System, uint16_t, uint8_t *, uint16_t);
 bool IsLineBusy();
+
+void HandleCommand();
 
 /****************
   Power Methods

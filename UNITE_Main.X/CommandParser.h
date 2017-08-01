@@ -21,8 +21,28 @@ extern "C" {
 
 #endif	/* COMMANDPARSER_H */
 
+/*
+ * COMMAND MESSAGE FORMAT
+ * 
+ * UNITEXXXYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
+ * 
+ * UNITE: Command call-sign
+ * XXX: 3 Digit Sequence Number
+ * Y...Y: 34 Digit Command
+ * 
+ * * SMPUORVVVV
+ * * 
+ * * S: System to Alter => Transmission, LP, TMP, MAG, C&DH, EPS, GPS, Housekeeping
+ * * M: Satellite Mode to Alter => Interim, Science, Reentry, All
+ * * P: Property to Alter => Sampling Rate, Sweeping Rate, Sweeping Duration, Transmission Unit
+ * * U: Time Unit for Value => Milliseconds, Seconds, Minute, Hour, Day, Sample
+ * * O: Is Value the new default => Yes, No
+ * * R: Does a System reset need to occur => Yes, No
+ * * VVVV: 4 Digit Value 
+ */
+
 typedef enum {
-    SystemFlag,
+    SystemFlag = 0,
     ModeFlag,
     PropertyFlag,
     UnitFlag,
@@ -33,7 +53,7 @@ typedef enum {
 } CommandByteIndex;
 
 typedef enum {
-    Break,
+    Break = 0,
     Transmission,
     LPSubSys,
     TMPSubSys,
@@ -56,7 +76,7 @@ typedef enum {
 } Property;
 
 typedef enum {
-    None,
+    None = 0,
     MilSec,
     Sec,
     Min,

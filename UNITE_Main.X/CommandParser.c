@@ -24,8 +24,8 @@ uint8_t seqByte2 = 0;
 uint8_t seqByte3 = 0;
 
 // Value properties
-const int VALUE_ARRAY_SIZE = 2;
-uint8_t value[2];
+const int VALUE_ARRAY_SIZE = 4;
+uint8_t value[4];
 int nextValueIndex = 0;
 
 // Boolean on/off for end of command
@@ -58,20 +58,27 @@ void PerformCommands(uint8_t *commandString, uint16_t CMD_Length) {
             
             i += 3;
             
-            while (!isEndOfMessage) {
+            while (!isEndOfMessage && i < CMD_Length) {
                 ParseByte(commandString[i++], byteIndex++);
+                
             }
 
             if (system != Break) {
 
                 // Convert value array into 2 byte unsigned integer
-                uint16_t convertedValue = (value[0] << 8) | value[1];
+                uint16_t convertedValue = (value[0] * 1000) + (value[1] * 100) + (value[2] * 10) + value[3];
 
                 // Run Command
                 RunCommand(system, mode, property, unit, convertedValue);
             }
+            
+        } else {
+            
+            i = CMD_Length;
         } 
     }
+    
+    return;
 }
 
 void EndMessage() {
@@ -94,16 +101,13 @@ void ParseByte(uint8_t byte, CommandByteIndex index) {
             property = byte;
             break;
         case UnitFlag:
-            // Transmission doesn't have a unit byte
-            if (system == Transmission) ParseByte(byte, byteIndex++); // Skip unit byte if command is for tranmission
-            else unit = byte;
+            unit = byte;
             break;
         case OverrideFlag:
             isOverride = byte > 0;
             break;
         case ResetFlag:
             isReset = byte > 0;
-            if (system == Transmission) EndMessage();
             break;
         default:
             addValueByte(byte);
@@ -278,6 +282,7 @@ void RunCommand(System system, Mode mode, Property property, Unit unit, uint16_t
             break;
     }
 
+    return;
 }
 
 /****************
@@ -294,14 +299,14 @@ bool IsNextCommand(uint8_t *sequenceNumber, int seqLength) {
                     seqByte1 = sequenceNumber[i];
                     i += 3;
                 }
-                else if (sequenceNumber[i] == seqByte1) i++;
+                else if (sequenceNumber[i] == seqByte1);
                 else return false;
                 break;
             case 1:
                 if (sequenceNumber[i] > seqByte2) {
                     seqByte2 = sequenceNumber[i];
                     i += 2;
-                } else if (sequenceNumber[i] == seqByte2) i++;
+                } else if (sequenceNumber[i] == seqByte2);
                 else return false;
                 break;
             case 2:
@@ -310,7 +315,7 @@ bool IsNextCommand(uint8_t *sequenceNumber, int seqLength) {
                     i++;
                 } else return false;
                 break;
-            default: i++;
+            default:
                 break;
         }
     }
