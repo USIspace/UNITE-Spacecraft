@@ -166,7 +166,7 @@ bool isLightOn5 = false;
 void __attribute__ ((weak)) TMR5_CallBack(void)
 {
     // Add your custom callback code here
-    TakeSample();                                  //User timer to call sampling function
+    MainLoop();                                  //User timer to call sampling function
 
     IO_RE1_Toggle();
 }

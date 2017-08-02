@@ -169,7 +169,7 @@ UNITEMode UpdateMode() {
   Controller Method
  *******************/
 
-void TakeSample() {
+void MainLoop() {
     
     // Langmuir Probe
     if (!isLangmuirProbeSampling) {

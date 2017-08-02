@@ -46,7 +46,7 @@ extern unsigned long lastAltitude;
 void Satellite_Initialize(void);
 UNITEMode UpdateMode(void);
 
-void TakeSample(void);
+void MainLoop(void);
 
 void SetTime(uint8_t *, int);
 void SetAltitude(uint8_t *, int);

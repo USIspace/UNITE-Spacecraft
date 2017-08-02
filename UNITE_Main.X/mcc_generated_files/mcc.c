@@ -75,28 +75,32 @@
 
 void SYSTEM_Initialize(void)
 {
+    // Initialize pin layouts
     PIN_MANAGER_Initialize();
+    // Initialize device oscillator
     OSCILLATOR_Initialize();
+    // Initialize device interrupts
     INTERRUPT_Initialize();
     
+    // Initialize CRC module
     CRC16_Initialize();
     
+    // Initialize UART communication protocol modules
     UART1_Initialize();
     UART2_Initialize();
     UART3_Initialize();
     UART4_Initialize();
     
+    // Initialize SPI communication protocol modules
     SPI1_Initialize();  // DAC
     SPI2_Initialize();  // SD Card
-    //ADC1_Initialize(); //If using custom class, comment this line
     
-    //Timer Initialization 
-//    TMR1_Initialize();
+    //Initialize supplemental Timer modules 
     TMR2_Initialize();
     TMR3_Initialize();
     TMR4_Initialize();
-    //TMR5_Initialize();
     
+    // Stop any supplemental Timer modules that may have started
     TMR2_Stop();
     TMR3_Stop();
     TMR4_Stop();
