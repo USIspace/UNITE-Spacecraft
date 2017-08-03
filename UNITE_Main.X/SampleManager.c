@@ -125,7 +125,7 @@ void BeginMagnetometerSampling() {
      * Magnetometer Sweeping Algorithm
      */
     //    isMagnetometerSweeping = true;
-    //    TMR3_Start();                           // TMR3 samples every 100 ms and stores in results
+    //    TMR3_Start();                  // TMR3 samples every 100 ms and stores in results
 
     /*
      * Magnetometer Orbit Sampling
@@ -135,7 +135,7 @@ void BeginMagnetometerSampling() {
 }
 
 void BeginTemperatureSampling() {
-    
+    // Sample Temperature Sensor Data and store in buffer
     TakeTemperatureSample();
 }
 
@@ -354,9 +354,9 @@ void AppendToGPSBuffer(uint8_t *buffer, int bufferSize) {
     currentGPSBufferIndex += i;
 }
 
-// Reads GPS sentence one byte at a time starting from '$'
+// Description: Reads GPS sentence one byte at a time starting from '$'
 // int samplePos -> index variable to store in unparsed GPS buffer
-
+// Return: Next index
 int TakeGPSSample(int samplePos) {
 
     char nextChar = Read(GPSUnit);
