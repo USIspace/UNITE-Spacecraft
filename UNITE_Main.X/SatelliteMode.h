@@ -22,6 +22,7 @@ extern "C" {
 #endif	/* INTERIMMODE_H */
 
 typedef enum {
+    startup,
     interim,
     science,
     reentry,

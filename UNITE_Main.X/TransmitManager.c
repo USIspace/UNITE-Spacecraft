@@ -337,7 +337,6 @@ void TransmitInstrumentDataToSimplex(uint8_t *queue, uint8_t headerByte1, uint8_
         }
 
         if (ReadACKForUnit(SimplexUnit)) {
-            //            if (true) {
             ClearQueue(transmitQueue, min(packageLength, dataLength - i), transmitQueueStartIndex);
             transmitQueueStartIndex = (transmitQueueStartIndex + min(j, dataLength - i)) % QUEUE_SIZE;
             transmitQueueLength = max(transmitQueueLength - j, 0);

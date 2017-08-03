@@ -37,6 +37,7 @@ typedef struct {
 
 // Struct to store instrument properties for each mode
 typedef struct {
+    Properties Startup;
     Properties Interim;
     Properties Science;
     Properties ReEntry;
@@ -53,6 +54,7 @@ typedef enum {
 
 // Struct to store transmission units for each mode
 typedef struct {
+    TransmissionUnit startup;
     TransmissionUnit interim;
     TransmissionUnit science;
     TransmissionUnit reentry;
