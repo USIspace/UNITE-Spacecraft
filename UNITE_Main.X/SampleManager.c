@@ -59,16 +59,16 @@ uint16_t GPS_BUFFER_SIZE = 33;
   Instrument Timer Properties
  ******************************/
 
-int currentLangmuirProbeWait = 0;
-int currentMagnetometerWait = 0;
-int currentTemperatureWait = 0;
-int currentGPSWait = 0;
+unsigned long currentLangmuirProbeWait = 0;
+unsigned long currentMagnetometerWait = 0;
+unsigned long currentTemperatureWait = 0;
+unsigned long currentGPSWait = 0;
 
 int langmuirProbeCallbackCount = 0;
 int magnetometerCallbackCount = 0;
 
-int currentLangmuirProbeSweepProgress = 0;
-int currentMagnetometerSweepProgress = 0;
+unsigned long currentLangmuirProbeSweepProgress = 0;
+unsigned long currentMagnetometerSweepProgress = 0;
 
 int currentMagnetometerOrbitProgress = 0;
 

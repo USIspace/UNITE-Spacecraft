@@ -36,8 +36,8 @@ extern "C" {
  * * M: Satellite Mode to Alter => Interim, Science, Reentry, All
  * * P: Property to Alter => Sampling Rate, Sweeping Rate, Sweeping Duration, Transmission Unit
  * * U: Time Unit for Value => Milliseconds, Seconds, Minute, Hour, Day, Sample
- * * O: Is Value the new default => Yes, No
- * * R: Does a System reset need to occur => Yes, No
+ * * O: Is Value the new default => No, Yes  (Bool)
+ * * R: Does a System reset need to occur => No, Yes  (Bool)
  * * VVVV: 4 Digit Value 
  */
 

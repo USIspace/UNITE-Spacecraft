@@ -45,6 +45,9 @@ const char duplexDownlinkFileReady[] = "RP333";
 const char duplexHousekeepingFilePoll[] = "PC401";
 const char duplexWaitingFilesPoll[] = "PC403";
 
+// Commanding
+uint8_t commandString[34] = { NULL };
+
 // Instrument file names
 const int FILE_COUNT_INDEX = 7;
 char langmuirProbeFileName[] = "LAPData";
@@ -584,14 +587,15 @@ void HandleCommand() {
             if (Read(DuplexUnit) != 'E') isError = true;
 
             // Read actual command
-            uint8_t commandString[messageLength];
+            Clear(commandString, messageLength, 0);
+            
             for (i = 0; i < messageLength; i++) {
 
                 char asciiNum = Read(DuplexUnit);
                 commandString[i] = asciiNum & 0x0F;
             }
             
-//            PollDuplex(duplexCmdReceived, 0);
+            PollDuplex(duplexCmdReceived, 0);
             
             if (!isError) PerformCommands(commandString, messageLength);
             

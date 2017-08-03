@@ -29,7 +29,7 @@ uint8_t value[4];
 int nextValueIndex = 0;
 
 // Boolean on/off for end of command
-bool isEndOfMessage = false;
+bool isEndOfCommand = false;
 
 /*****************
   Private Methods
@@ -42,7 +42,7 @@ bool IsNextCommand(uint8_t *sequenceNumber, int seqLength);
 void addValueByte(uint8_t);
 uint16_t convertHexToDecimal(uint8_t *);
 unsigned long convertTime(Unit, Unit);
-void RunCommand(System, Mode, Property, Unit, uint16_t);
+void RunCommand(System, Mode, Property, Unit, unsigned long);
 
 /************************
   Main Command Functions
@@ -58,7 +58,7 @@ void PerformCommands(uint8_t *commandString, uint16_t CMD_Length) {
             
             i += 3;
             
-            while (!isEndOfMessage && i < CMD_Length) {
+            while (!isEndOfCommand && i < CMD_Length) {
                 ParseByte(commandString[i++], byteIndex++);
                 
             }
@@ -70,6 +70,9 @@ void PerformCommands(uint8_t *commandString, uint16_t CMD_Length) {
 
                 // Run Command
                 RunCommand(system, mode, property, unit, convertedValue);
+                
+                // Reset end of command boolean
+                isEndOfCommand = false;
             }
             
         } else {
@@ -84,7 +87,7 @@ void PerformCommands(uint8_t *commandString, uint16_t CMD_Length) {
 void EndMessage() {
     byteIndex = 0;
     nextValueIndex = 0;
-    isEndOfMessage = true;
+    isEndOfCommand = true;
 }
 
 void ParseByte(uint8_t byte, CommandByteIndex index) {
@@ -115,7 +118,7 @@ void ParseByte(uint8_t byte, CommandByteIndex index) {
     }
 }
 
-void RunCommand(System system, Mode mode, Property property, Unit unit, uint16_t value) {
+void RunCommand(System system, Mode mode, Property property, Unit unit, unsigned long value) {
 
     bool isInstrument = false;
     Instrument *instrument;

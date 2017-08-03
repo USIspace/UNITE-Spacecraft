@@ -45,16 +45,16 @@ extern uint16_t LP_BUFFER_SIZE;
 extern uint16_t MAG_BUFFER_SIZE;
 
 // State Variables
-extern int currentLangmuirProbeWait;
-extern int currentMagnetometerWait;
-extern int currentTemperatureWait;
-extern int currentGPSWait;
+extern unsigned long currentLangmuirProbeWait;
+extern unsigned long currentMagnetometerWait;
+extern unsigned long currentTemperatureWait;
+extern unsigned long currentGPSWait;
 
 extern int langmuirProbeCallbackCount;
 extern int magnetometerCallbackCount;
 
-extern int currentLangmuirProbeSweepProgress;
-extern int currentMagnetometerSweepProgress;
+extern unsigned long currentLangmuirProbeSweepProgress;
+extern unsigned long currentMagnetometerSweepProgress;
 
 extern bool isLangmuirProbeSampling;
 extern bool isMagnetometerSweeping;

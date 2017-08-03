@@ -42,7 +42,7 @@ Instrument GPS = {
     { 3, 0, 0 }
 };
 
-int GetSampleRate(Instrument *instrument) {
+unsigned long GetSampleRate(Instrument *instrument) {
     
     switch (currentMode) {
         case interim: return instrument->Interim.sampleRate;
@@ -51,7 +51,7 @@ int GetSampleRate(Instrument *instrument) {
         default: return 0;
     }
 }
-int GetSweepRate(Instrument *instrument) {
+unsigned long GetSweepRate(Instrument *instrument) {
     
     switch (currentMode) {
         case interim: return instrument->Interim.sweepRate;
@@ -60,7 +60,7 @@ int GetSweepRate(Instrument *instrument) {
         default: return 0;
     }
 }
-int GetSweepDuration(Instrument *instrument) {
+unsigned long GetSweepDuration(Instrument *instrument) {
     
     switch (currentMode) {
         case interim: return instrument->Interim.sweepDuration;
