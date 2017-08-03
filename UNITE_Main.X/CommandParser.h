@@ -41,6 +41,8 @@ extern "C" {
  * * VVVV: 4 Digit Value 
  */
 
+
+// Defines the order of the bytes in a command
 typedef enum {
     SystemFlag = 0,
     ModeFlag,
@@ -52,6 +54,7 @@ typedef enum {
 
 } CommandByteIndex;
 
+// Defines the System for the first byte of a command
 typedef enum {
     Break = 0,
     Transmission,
@@ -66,6 +69,15 @@ typedef enum {
 
 } System;
 
+// Defines the Mode for the second byte of a command
+typedef enum {
+    Interim = 1,
+    Science,
+    ReEntry,
+    Global
+} Mode;
+
+// Defines the Property for the third byte of a command
 typedef enum {
     SamplingRate = 1,
     SweepRate,
@@ -75,6 +87,7 @@ typedef enum {
     Simplex_Duplex
 } Property;
 
+// Defines the time Unit for the fourth byte of a command
 typedef enum {
     None = 0,
     MilSec,
@@ -86,13 +99,8 @@ typedef enum {
 
 } Unit;
 
-typedef enum {
-    Interim = 1,
-    Science,
-    ReEntry,
-    Global
-} Mode;
 
+// Parses and performs a command byte string
 void PerformCommands(uint8_t *, uint16_t);
 
 unsigned long convertTime(Unit current, Unit final);
