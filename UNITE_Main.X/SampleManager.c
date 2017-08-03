@@ -35,6 +35,7 @@ char myFunString[29] = "Hey, World! UNITE Rules Now!";
 
 // GPS Properties
 bool isGPSReading = false;
+bool isGPSLocked = true;
 GPSDataIndex gpsIndex = 0;
 char unparsedGPSBuffer[74] = {NULL};
 char gpsTimeBuffer[10];
@@ -92,7 +93,7 @@ int currentLangmuirProbeVoltage = 0;
 
 ADCSampleConfig lpADCConfig = {
     0x0038, // AN3, 4, 5                   // adc channel select   
-    3 // number of adc channels to sample
+    3       // number of adc channels to sample
 };
 
 ADCSampleConfig magADCConfig = {
@@ -140,8 +141,6 @@ void BeginTemperatureSampling() {
 
 void BeginGPSSampling() {
     // Sample GPS Data and store in buffer
-
-    _LATE3 = LED_ON;
 
     // Clear out GPS Buffer
     memset(gpsBuffer, 0, sizeof (gpsBuffer));
@@ -197,19 +196,16 @@ void EndGPSSampling() {
     ParseGPSSample(unparsedGPSBuffer);
 
     //Only package and send if GPS is locked
-    if (currentGPSBufferIndex > 20)
+    if (currentGPSBufferIndex > 20) {
         PackageData(GPSSubSys, (int) timeInMin, gpsBuffer, GPS_BUFFER_SIZE);
+        isGPSLocked = true;
+    }
+    else isGPSLocked = false;
+    
     memset(gpsBuffer, 0, sizeof(gpsBuffer));
     currentGPSBufferIndex = 0;
     currentGPSWait = 0;
     gpsIndex = 0;
-
-    _LATE3 = LED_OFF;
-}
-
-void TransmitTestString() {
-
-    //    PackageData(LPSubSys, GetDayTimeInMin(totalTime), myFunString, 28);
 }
 
 /***************************
@@ -467,10 +463,10 @@ uint8_t ParseDecimal(char *originalString, int startIndex, GPSDataIndex dataType
 
     copiedIndex = CompressAscii(semiparsedSentence, (decPos + 1), (copiedIndex) - decPos, isDecimal) + decPos;
 
-    AppendToGPSBuffer((uint8_t *) semiparsedSentence, ++copiedIndex);
+    if (dataType != Time) AppendToGPSBuffer((uint8_t *) semiparsedSentence, ++copiedIndex);
 
     switch (dataType) {
-        case Time: SetTime((uint8_t *) semiparsedSentence, copiedIndex);
+        case Time: SetTime((uint8_t *) semiparsedSentence, ++copiedIndex);
             break;
         case Altitude: SetAltitude((uint8_t *) semiparsedSentence, copiedIndex);
             break;
@@ -509,7 +505,6 @@ void ParseGPSSample(char *unparsedSentence) {
 
                     i += ParseDecimal(unparsedSentence, i, gpsIndex);
 
-                    AppendToGPSBuffer((uint8_t *) unit, 1);
                     break;
 
                 case Latitude:

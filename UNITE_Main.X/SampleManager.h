@@ -60,6 +60,8 @@ extern bool isLangmuirProbeSampling;
 extern bool isMagnetometerSweeping;
 extern bool shouldMagnetometerSample;
 
+extern bool isGPSLocked;
+
 // Sampling Functions
 void BeginTemperatureSampling();
 void BeginGPSSampling();

@@ -19,29 +19,31 @@
   Global Variables
  *******************/
 
-// Stores the current mode the satellite should be in
-// Will be used as a switch for the satellite to change modes
+// Stores the current operational mode of UNITE
+// Used as a switch for the satellite to change modes
 UNITEMode currentMode = safe;
 bool shouldChangeMode = false;
-unsigned long lastAltitude = 400000;
+unsigned long lastAltitude = 400000; // 400 km
 unsigned long totalTime = 0; // Keeps track of overall mission clock
 double timeInMin = 0.0;      // Time in Min since 00:00
 
-bool isDuplexConnected = true;
+bool isDuplexConnected = false;
 
-// CONSTANTS
-uint16_t INTERIM_STOP_TIME = 21600; // 1800; // 30 mins in
-uint16_t SCIENCE_STOP_TIME = 43200; //3600;  // 60 mins in
-uint16_t REENTRY_STOP_TIME = 52000; //10800n // 3 hrs in
 
 /*******************************
   Satellite Mode Configurations
  *******************************/
 
+SatelliteMode StartupMode = {
+    400,    // Altitude to begin sampling in this mode
+    390,    // Altitude to end sampling and switch to new mode
+    5       // Days until needs to switch mode
+};
+
 SatelliteMode InterimMode = {
-    400, // Altitude to begin sampling in this mode 
-    300, // Altitude to end sampling and switch to new mode
-    380, // Days until needs to switch mode
+    390,  
+    300, 
+    380, 
 };
 
 SatelliteMode ScienceMode = {
@@ -59,6 +61,7 @@ SatelliteMode ReEntryMode = {
 SatelliteMode SafeMode = {
     0,
     0,
+    0
 };
 
 /******************************
@@ -104,12 +107,16 @@ void Satellite_Initialize() {
  ********************/
 
 // Description: Handler for switching satellite modes
-
+// time -> total mission duration in days
+// altitude -> last known altitude of the satellite in meters
+// Return: Boolean for whether a mode switch should occur
 bool ShouldUpdateMode(unsigned long time, unsigned long altitude) {
 
-    // Check current altitude
     switch (currentMode) {
         case safe: return true;
+        case startup: 
+            if (time > StartupMode.stopTime) return true;
+            else if ((altitude / 1000) <= StartupMode.endAltitudeInKm) return true;
         case interim:
             if (time > InterimMode.stopTime) return true;
             else if ((altitude / 1000) <= InterimMode.endAltitudeInKm) return true;
@@ -123,8 +130,9 @@ bool ShouldUpdateMode(unsigned long time, unsigned long altitude) {
     return false;
 }
 
+// Description: Getter for the correct operational mode
+
 UNITEMode UpdateMode() {
-    // Determine which mode should be active
 
     if (ShouldUpdateMode(totalTime, lastAltitude)) {
         
@@ -136,29 +144,24 @@ UNITEMode UpdateMode() {
         }*/
         
         switch (currentMode) {
+            case startup: return interim;
             case interim:
-
                 _LATE2 = LED_OFF;
                 _LATE3 = LED_ON;
 
                 return science;
             case science:
-
                 _LATE3 = LED_OFF;
                 _LATE4 = LED_ON;
 
                 return reentry;
             case reentry:
-
-                _LATE4 = LED_OFF;
-
-                TMR5_Stop();
-
-                return safe;
+                
+                return currentMode; // Never leave reentry mode
 
             case safe:
 
-                return interim;
+                return startup;
         }
     }
     
@@ -212,14 +215,14 @@ void MainLoop() {
         
         if (isGPSOn()) {
             BeginGPSSampling();
-            currentGPSWait = 0;
+            if (isGPSLocked) currentGPSWait = 0;
         } else {
             SetGPSPower(1);
         }
         
     } else SetGPSPower(0);
     
-    
+    // Send Power Switch Packet
     TogglePowerSwitches();
         
     // Transmission
@@ -231,9 +234,7 @@ void MainLoop() {
     
     // Update SatelliteMode
     currentMode = UpdateMode();
-    
-//    TestDACSPI();
-    
+        
     // Commanding
     HandleCommand();
 }
