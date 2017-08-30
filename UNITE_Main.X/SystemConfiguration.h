@@ -25,6 +25,9 @@ extern "C" {
 // Set to true if debugging software without Simplex or Duplex connected
 #define IS_DEBUG false
 
+// Set to true if using diagnostic port
+#define IS_DIAG false
+
 // Constant for the duration of an orbit in minutes
 #define ORBIT_DUR_MIN 93
 

@@ -168,6 +168,8 @@ void TransmitQueue() {
 
 void Send(uint8_t byte, TransmissionUnit unit) {
     
+    if (IS_DIAG) UART4_Write(byte);
+    
     switch (unit) {
         case SimplexUnit: UART3_Write(byte); break;
         case DuplexUnit: UART2_Write(byte); break;

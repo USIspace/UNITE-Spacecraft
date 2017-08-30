@@ -99,5 +99,5 @@ int TakeGPSSample(int);
 void ParseGPSSample();
 
 // Testing/Debugging Functions
-void TransmitTestString();
+void TestADC();
 void TestDACSPI();

@@ -237,6 +237,10 @@ void MainLoop() {
         
     // Commanding
     HandleCommand();
+    
+    
+    // TEST
+    TestADC();
 }
 
 

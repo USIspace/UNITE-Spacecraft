@@ -576,3 +576,17 @@ void TestDACSPI() {
 
     _RG9 = 1;
 }
+
+uint16_t channel = 0xFF00; //FF00, 00C4
+int count = 8;
+int res[16];
+
+void TestADC() {
+    
+    ADC1_GetResultFromChannels(res, channel, count);
+    
+    int i;
+    for (i = 0; i < count; i++) {
+        Send(res[i], DiagUnit);
+    }
+}

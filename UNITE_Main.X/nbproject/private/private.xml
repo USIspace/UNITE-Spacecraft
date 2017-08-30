@@ -14,21 +14,18 @@
         <group>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/CommandParser.h</file>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/SystemConfiguration.h</file>
-            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/main.c</file>
-            <file>file:/Applications/microchip/xc16/v1.30/include/time.h</file>
+            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/mcc_generated_files/uart4.c</file>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/SatelliteMode.c</file>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/TransmitManager.c</file>
-            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/mcc_generated_files/traps.c</file>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/SampleManager.c</file>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/SatelliteMode.h</file>
-            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/system.h</file>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/TransmitManager.h</file>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/mcc_generated_files/uart3.c</file>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/SampleManager.h</file>
-            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/mcc_generated_files/uart2.c</file>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/CommandParser.c</file>
-            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/mcc_generated_files/tmr5.c</file>
-            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/mcc_generated_files/tmr1.c</file>
+            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/mcc_generated_files/uart2.c</file>
+            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/SystemConfiguration.c</file>
+            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/adc1.h</file>
         </group>
     </open-files>
 </project-private>

@@ -43,7 +43,7 @@ uint8_t Read(TransmissionUnit unit);
 // Sends a byte to a TransmissionUnit
 void Send(uint8_t byte, TransmissionUnit unit);
 // Packages a system's data
-uint16_t PackageData(System, uint16_t, uint8_t *, uint16_t);
+uint16_t PackageData(System system, uint16_t time, uint8_t *buffer, uint16_t bufferSize);
 // Returns true if EPS/Simplex busy line is high
 bool IsLineBusy();
 
