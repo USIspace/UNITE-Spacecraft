@@ -587,6 +587,6 @@ void TestADC() {
     
     int i;
     for (i = 0; i < count; i++) {
-        Send(res[i], DiagUnit);
+        Send(res[i] / 4, DiagUnit);
     }
 }

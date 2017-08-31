@@ -129,6 +129,8 @@ void PIN_MANAGER_Initialize(void)
     RPINR17bits.U3RXR = 0x0004;   //RD9->UART3:U3RX;
 //    RPINR20bits.SDI1R = 0x001A;   //RG7->SPI1:SDI1;
     RPOR1bits.RP2R = 0x001C;      //RD8->UART3:U3TX;
+    RPINR27bits.U4RXR = 0x000C;   //RD11->UART4:U4RX
+    RPOR5bits.RP11R = 0x001E;     //RD0->UART4:U4TX
 
     __builtin_write_OSCCONL(OSCCON | 0x40); // lock   PPS
 
