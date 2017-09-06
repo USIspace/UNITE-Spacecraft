@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp */
 #include "CommandParser.h"
@@ -526,6 +527,44 @@ uint16_t GetWaitingFilesCount() {
     return -1;
 }
 
+void SetTotalTime() {
+    
+    if (isDuplexOn()) {
+        
+        PollDuplex(duplexHousekeepingFilePoll, 0);
+
+        if (ReadACKForUnit(DuplexUnit)) {
+
+            while (Read(DuplexUnit) != 0x47) { if (duplexTimeoutFlag) { return; } }
+            while (Read(DuplexUnit) != 0x55) { if (duplexTimeoutFlag) { return; } }
+
+            int i;
+            int responseLength = 13;
+
+            unsigned long epoch[4];
+            unsigned long totalEpoch;
+
+            for (i = 0; i < responseLength; i++) {
+                switch (i) {
+                    case 10: epoch[0] = Read(DuplexUnit);
+                        break;
+                    case 11: epoch[1] = Read(DuplexUnit);
+                        break;
+                    case 12: epoch[2] = Read(DuplexUnit);
+                        break;
+                    case 13: epoch[3] = Read(DuplexUnit);
+                        break;
+                    default: Read(DuplexUnit);
+                        break;
+                }
+            }
+
+            totalEpoch = epoch[3] << 24 | epoch[2] << 16 | epoch[1] << 8 | epoch[0];
+            totalTime = (time_t)((double)(totalEpoch - DUPLEX_EPOCH_OFFSET) / 3.0 * 3600 * 24);
+        }
+    }
+}
+
 void HandleCommand() {
 
     // Need to make sure that the command string is a set number of bytes
@@ -688,7 +727,7 @@ void ReadPowerSwitches() {
 
 void SetLangmuirProbePower(bool on) {
     if (on) langmuirMagPowerSwitch = 0xFF;
-    else langmuirMagPowerSwitch = 0x00;
+    else langmuirMagPowerSwitch = 0xFF;
 }
 
 void SetMagnetometerPower(bool on) {
@@ -697,7 +736,7 @@ void SetMagnetometerPower(bool on) {
 
 void SetTemperaturePower(bool on) {
     if (on) temperaturePowerSwitch = 0xFF;
-    else temperaturePowerSwitch = 0x00;
+    else temperaturePowerSwitch = 0xFF;
 }
 
 void SetGPSPower(bool on) {

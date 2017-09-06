@@ -565,16 +565,14 @@ uint8_t spiTesting = 0x00;
 uint16_t spi16Testing = 0x8000;
 
 void TestDACSPI() {
-
-    _RG9 = 0;
+    
+    _LATG7 = 0;
 
     //    SPI1_Exchange8bit(spiTesting++);
     SPI1_Exchange16bit(spi16Testing);
     //    SPI1_Exchange16bit(currentLangmuirProbeSweepPosition);
 
-    currentLangmuirProbeVoltage = currentLangmuirProbeVoltage + 655;
-
-    _RG9 = 1;
+    _LATG7 = 1;
 }
 
 uint16_t channel = 0xFF00; //FF00, 00C4

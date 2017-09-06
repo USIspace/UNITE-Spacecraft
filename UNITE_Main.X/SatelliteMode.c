@@ -81,7 +81,7 @@ void SatelliteProperties_Initialize() {
    _LATE4 = LED_OFF;
    
    //Slave select 1
-   _RG9 = 1;            
+   _LATG7 = 1;            
 }
 
  
@@ -238,9 +238,8 @@ void MainLoop() {
     // Commanding
     HandleCommand();
     
-    
     // TEST
-    TestADC();
+    TestDACSPI();
 }
 
 

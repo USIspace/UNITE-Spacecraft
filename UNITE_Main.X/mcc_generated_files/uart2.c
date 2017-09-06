@@ -78,14 +78,14 @@ void UART2_Initialize(void)
 
 uint8_t UART2_Read(void)
 {
-    time_t current = time(NULL);
-    time_t endWait = current + DUPLEX_RES_TIMEOUT;
+//    time_t current = time(NULL);
+    time_t endWait = time(NULL) + DUPLEX_RES_TIMEOUT;
     
     while(!(U2STAbits.URXDA == 1) && !duplexTimeoutFlag)
     {
         // Duplex read timeout
-        current = time(NULL);
-        if (current >= endWait) duplexTimeoutFlag = 1;
+//        current = time(NULL);
+        if (time(NULL) >= endWait) duplexTimeoutFlag = 1;
     }
 
     if ((U2STAbits.OERR == 1))

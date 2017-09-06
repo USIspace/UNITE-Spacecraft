@@ -25,6 +25,9 @@ extern "C" {
 #define SIMPLEX_RES_TIMEOUT     100000
 #define DUPLEX_RES_TIMEOUT      100000
 
+// Number of times the Duplex has restarted before launch
+#define DUPLEX_EPOCH_OFFSET     0
+
 // Boolean for whether UNITE is sending packets to a TransmissionUnit
 extern bool isSending;
 
@@ -49,6 +52,9 @@ bool IsLineBusy();
 
 // Reads SMS commands from Duplex
 void HandleCommand();
+
+// Sets the total time counter from Duplex Epoch
+void SetTotalTime();
 
 /****************
   Power Methods

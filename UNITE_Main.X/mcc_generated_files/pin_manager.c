@@ -75,7 +75,7 @@ void PIN_MANAGER_Initialize(void)
     TRISD = 0x0EE5;
     TRISE = 0x0001;  // 0x0021 previously
     TRISF = 0x006B;
-    TRISG = 0x008C;
+    TRISG = 0x020C;
 
     /****************************************************************************
      * Setting the Weak Pull Up and Weak Pull Down SFR(s)
@@ -115,12 +115,12 @@ void PIN_MANAGER_Initialize(void)
     __builtin_write_OSCCONL(OSCCON & 0xbf); // unlock PPS
 
     RPOR12bits.RP25R = 0x000C;    //RD4->SPI2:SS2OUT;
-    RPOR13bits.RP27R = 0x0009;    //RG9->SPI1:SS1OUT;
+//    RPOR9bits.RP19R = 0x0009;    //RG8->SPI1:SS1OUT;
     RPOR12bits.RP24R = 0x000B;    //RD1->SPI2:SCK2OUT;
     RPOR11bits.RP22R = 0x000A;    //RD3->SPI2:SDO2;
     RPOR15bits.RP30R = 0x0005;    //RF2->UART2:U2TX;
-//    RPOR10bits.RP21R = 0x0008;    //RG6->SPI1:SCK1OUT;
-    RPOR13bits.RP26R = 0x0008;    //RG7->SPI1:SCK1OUT;
+    RPOR10bits.RP21R = 0x0008;    //RG6->SPI1:SCK1OUT;
+//    RPOR13bits.RP26R = 0x0008;    //RG7->SPI1:SCK1OUT;
     RPINR19bits.U2RXR = 0x002D;   //RF6->UART2:U2RX;
     RPOR5bits.RP10R = 0x0003;     //RF4->UART1:U1TX;
     RPINR22bits.SDI2R = 0x0017;   //RD2->SPI2:SDI2;
