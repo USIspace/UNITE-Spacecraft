@@ -569,7 +569,10 @@ void TestDACSPI() {
     _LATG7 = 0;
 
     //    SPI1_Exchange8bit(spiTesting++);
-    SPI1_Exchange16bit(spi16Testing);
+    SPI1_Exchange16bit(0x00FF);
+    SPI1_Exchange16bit(0xFF00);
+    
+//    SPI1_Exchange16bit(spi16Testing);
     //    SPI1_Exchange16bit(currentLangmuirProbeSweepPosition);
 
     _LATG7 = 1;
