@@ -101,8 +101,8 @@ void wait_for(unsigned long something) {
     for (i = 0; i < wait; i++);
 }
 
-uint16_t Pow(int base, int exponent) {
-  uint16_t returnValue = 1;
+unsigned long Pow(int base, int exponent) {
+  unsigned long returnValue = 1;
   int i;
   for (i = 0; i < exponent; i++) {
       returnValue = returnValue * base;

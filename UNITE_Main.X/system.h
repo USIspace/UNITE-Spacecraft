@@ -22,7 +22,7 @@ go here. */
 void ConfigureOscillator(void); /* Handles clock switching/osc initialization */
 void wait_sec(unsigned long);
 void wait_for(unsigned long);
-uint16_t Pow(int, int);
+unsigned long Pow(int, int);
 void ClearQueue(uint8_t *,int,int);
 void Clear(void *,int,int);
 int CopyIntToByte(int *source, uint8_t *destination, int sourceStart, int destStart, int numberOfItems);

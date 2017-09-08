@@ -61,4 +61,4 @@ void MainLoop(void);
 // Updates timeInMin from GPS time of day
 void SetTime(uint8_t *, int);
 // Updates lastAltitude from GPS altitude
-void SetAltitude(uint8_t *, int);
+void SetAltitude(double alt);

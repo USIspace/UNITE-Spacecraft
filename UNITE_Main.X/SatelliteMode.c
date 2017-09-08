@@ -267,6 +267,11 @@ void SetTime(uint8_t *time, int arrayLength) {
     timeInMin = ((hours * 60) + mins);
 }
 
+void SetAltitude(double alt) {
+    lastAltitude = (int)alt;
+}
+
+/*
 void SetAltitude(uint8_t *alt, int arrayLength) {
     
     unsigned long convertedAltitude = 0;
@@ -286,4 +291,4 @@ void SetAltitude(uint8_t *alt, int arrayLength) {
     }
     
     if (convertedAltitude > 0) lastAltitude = convertedAltitude;
-}
+}*/

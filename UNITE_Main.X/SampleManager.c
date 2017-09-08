@@ -26,10 +26,10 @@ int langmuirProbeResults[16];
 int magnetometerResults[16];
 int temperatureResults[16];
 
-uint8_t langmuirProbeBuffer[300] = { NULL };
-uint8_t magnetometerBuffer[33] = { NULL };
-uint8_t temperatureBuffer[32] = { NULL };
-uint8_t gpsBuffer[33] = { NULL };
+uint8_t langmuirProbeBuffer[300] = {NULL};
+uint8_t magnetometerBuffer[33] = {NULL};
+uint8_t temperatureBuffer[32] = {NULL};
+uint8_t gpsBuffer[33] = {NULL};
 
 char myFunString[29] = "Hey, World! UNITE Rules Now!";
 
@@ -80,11 +80,11 @@ bool isMagnetometerSweeping = false;
 bool shouldMagnetometerSample = false;
 
 bool isProbeVoltagePositive = true;
-bool isProbeSweepPositive = true;       // Initialize to true to correctly sweep probe halfway through
-const uint16_t electronVoltage = 0xE666;     // 58982 = 4V
-const uint16_t ionVoltage = 0x1999;          // 6553 = -4V
-const uint16_t maxSweepVoltage = 0xF333;     // 62259 = 4.5V
-const uint16_t minSweepVoltage = 0x0CCC;     // 3276 = -4.5V
+bool isProbeSweepPositive = true; // Initialize to true to correctly sweep probe halfway through
+const uint16_t electronVoltage = 0xE666; // 58982 = 4V
+const uint16_t ionVoltage = 0x1999; // 6553 = -4V
+const uint16_t maxSweepVoltage = 0xF333; // 62259 = 4.5V
+const uint16_t minSweepVoltage = 0x0CCC; // 3276 = -4.5V
 int currentLangmuirProbeVoltage = 0;
 
 /**************************
@@ -93,7 +93,7 @@ int currentLangmuirProbeVoltage = 0;
 
 ADCSampleConfig lpADCConfig = {
     0x0038, // AN3, 4, 5                   // adc channel select   
-    3       // number of adc channels to sample
+    3 // number of adc channels to sample
 };
 
 ADCSampleConfig magADCConfig = {
@@ -115,7 +115,7 @@ ADCSampleConfig tmpADCConfig = {
 
 void BeginLangmuirProbeSampling() {
     // Sample Plasma Probe Data and store in buffer
-        isLangmuirProbeSampling = true;
+    isLangmuirProbeSampling = true;
 }
 
 void BeginMagnetometerSampling() {
@@ -156,12 +156,12 @@ void EndLangmuirProbeSampling() {
     currentLangmuirProbeSweepProgress = 0;
     isLangmuirProbeSampling = false;
     isProbeVoltagePositive = false;
-    
+
     //    PackageData(LPSubSys, (int)timeInMin, langmuirProbeBuffer, LP_BUFFER_SIZE);
-    memset(langmuirProbeBuffer, 0, sizeof(langmuirProbeBuffer));
+    memset(langmuirProbeBuffer, 0, sizeof (langmuirProbeBuffer));
     currentLangmuirProbeBufferIndex = 0;
     currentLangmuirProbeWait = 0;
-    
+
     // Resize LP Buffer based on sampling duration: Temperature sweep point # + Density sample point #
     LP_BUFFER_SIZE = (convertTime(Sec, MilSec)) / (GetSweepRate(&LangmuirProbe) * 5) + GetSweepDuration(&LangmuirProbe);
 
@@ -173,7 +173,7 @@ void EndMagnetometerSampling() {
     isMagnetometerSweeping = false;
 
     PackageData(MAGSubSys, (int) timeInMin, magnetometerBuffer, MAG_BUFFER_SIZE);
-    memset(magnetometerBuffer, 0, sizeof(magnetometerBuffer));
+    memset(magnetometerBuffer, 0, sizeof (magnetometerBuffer));
     currentMagnetometerBufferIndex = 0;
     currentMagnetometerWait = 0;
     //    MAG_BUFFER_SIZE = (GetSweepDuration(&Magnetometer) * convertTime(Sec, MilSec))/(GetSweepRate(&Magnetometer) * 100) * 3;
@@ -182,7 +182,7 @@ void EndMagnetometerSampling() {
 
 void EndTemperatureSensorSampling() {
     PackageData(TMPSubSys, (int) timeInMin, temperatureBuffer, TMP_BUFFER_SIZE);
-    memset(temperatureBuffer, 0, sizeof(temperatureBuffer));
+    memset(temperatureBuffer, 0, sizeof (temperatureBuffer));
     currentTemperatureBufferIndex = 0;
     currentTemperatureWait = 0;
 }
@@ -199,10 +199,9 @@ void EndGPSSampling() {
     if (currentGPSBufferIndex > 20) {
         PackageData(GPSSubSys, (int) timeInMin, gpsBuffer, GPS_BUFFER_SIZE);
         isGPSLocked = true;
-    }
-    else isGPSLocked = false;
-    
-    memset(gpsBuffer, 0, sizeof(gpsBuffer));
+    } else isGPSLocked = false;
+
+    memset(gpsBuffer, 0, sizeof (gpsBuffer));
     currentGPSBufferIndex = 0;
     currentGPSWait = 0;
     gpsIndex = 0;
@@ -215,25 +214,25 @@ void EndGPSSampling() {
 void ManageSweepingProgress() {
 
     if (isLangmuirProbeSampling) {
-        
+
         // Reset sweeping
         isLangmuirProbeSweeping = false;
         TMR2_Stop();
-        
+
         // Set correct voltage for sample
         currentLangmuirProbeVoltage = isProbeVoltagePositive ? electronVoltage : ionVoltage;
         isProbeVoltagePositive = !isProbeVoltagePositive;
-        
+
         // Take one sample
         TakeProbeSample();
-        
+
         // Take a sweep when halfway through the sample
         if (++currentLangmuirProbeSweepProgress == GetSweepDuration(&LangmuirProbe) / 2) {
             isLangmuirProbeSweeping = true;
             currentLangmuirProbeVoltage = minSweepVoltage;
             TMR2_Start();
         }
-        
+
         if (currentLangmuirProbeSweepProgress >= GetSweepDuration(&LangmuirProbe)) {
             EndLangmuirProbeSampling();
         }
@@ -253,7 +252,7 @@ void ManageSweepingProgress() {
 
 void TakeProbeSample() {
     Clear(langmuirProbeResults, RESULTS_SIZE, 0);
-    
+
     _RG9 = 0;
     SPI1_Exchange16bit(currentLangmuirProbeVoltage & 0xFFFF);
     _RG9 = 1;
@@ -270,18 +269,18 @@ void TakeProbeSample() {
 
     // Sweeping Algorithm
     if (isLangmuirProbeSweeping) {
-        
+
         // Calculation for the voltage adjustment needed to sweep from min voltage to max voltage
         // ~590 for a 1s sweep from -4.5 -> 4.5 -> -4.5
-        int voltageAdjustment = maxSweepVoltage * 4 / 
-                                    (convertTime(Sec,MilSec) / 
-                                        GetSweepRate(&LangmuirProbe) / 5) + 1; 
-        
+        int voltageAdjustment = maxSweepVoltage * 4 /
+                (convertTime(Sec, MilSec) /
+                GetSweepRate(&LangmuirProbe) / 5) + 1;
+
         // Applies the voltage adjustment within range(minSweepVoltage, maxSweepVoltage)
-        currentLangmuirProbeVoltage = max(minSweepVoltage, 
-                                          min(maxSweepVoltage, 
-                                                currentLangmuirProbeVoltage + 
-                                                isProbeSweepPositive ? voltageAdjustment : -voltageAdjustment));
+        currentLangmuirProbeVoltage = max(minSweepVoltage,
+                min(maxSweepVoltage,
+                currentLangmuirProbeVoltage +
+                isProbeSweepPositive ? voltageAdjustment : -voltageAdjustment));
 
         // Checks if the sweep should change from positive to negative
         if (currentLangmuirProbeVoltage == maxSweepVoltage) isProbeSweepPositive = false;
@@ -357,6 +356,7 @@ void AppendToGPSBuffer(uint8_t *buffer, int bufferSize) {
 // Description: Reads GPS sentence one byte at a time starting from '$'
 // int samplePos -> index variable to store in unparsed GPS buffer
 // Return: Next index
+
 int TakeGPSSample(int samplePos) {
 
     char nextChar = Read(GPSUnit);
@@ -475,6 +475,78 @@ uint8_t ParseDecimal(char *originalString, int startIndex, GPSDataIndex dataType
     return (parseProgress - 1);
 }
 
+// Gets length of next GPS sentence subsection
+// char *src -> original ascii GPS sentence
+// int start -> index to start reading from
+// Returns length of substring between commas
+
+int GetStringLength(char *src, int start) {
+
+    int i;
+    while (src[i + start] != ',') i++;
+
+    return i;
+}
+
+// Copies a substring of src to dest
+// char *src -> original ascii GPS sentence
+// char *dest -> destination string
+// int start -> index to start copying from
+// int length -> length of substring to copy
+// Returns number of characters copied
+
+int CopySubstring(char *src, char *dest, int start, int length) {
+
+    int i;
+    for (i = 0; i < length; i++) {
+        dest[i] = src[start + i];
+    }
+
+    return i;
+}
+
+double ParseDouble(char *string, int length) {
+
+    int progress;
+    int numArray[length - 1];
+    int decIndex;
+    double numberValue;
+
+    for (progress = 0; progress < length; progress++) {
+        char next = string[progress];
+
+        if (next != '.' && next != ',') numArray[progress] = next & 0x0F;
+        else if (next == '.') decIndex = progress;
+        else if (next == ',') progress = length;
+    }
+
+    // Calculate tens offset of decimal place
+    for (progress = 0; progress < sizeof (numArray); progress++) {
+        int exp = decIndex - 1 - progress; // Linear relation of decIndex to ten's place
+
+        if (progress < decIndex) numberValue += (numArray[progress] * Pow(10, exp));
+        if (progress >= decIndex) numberValue += (double) (numArray[progress]) / (double) (Pow(10, abs(exp)));
+    }
+
+    return numberValue;
+}
+
+int AsciiFromInt(int integer, char *dest, int length) {
+    
+    int mod = integer;
+    int exp = length - 1;
+    int i = 0;
+    
+    while (mod > 0) {
+        dest[i++] = mod / Pow(10,exp);
+        mod %= Pow(10,exp);
+    }
+    
+    return i;
+}
+
+
+
 // Main GPS parsing method
 // char *unparsedSentence -> ASCII GPS sentence to parse (GPGGA)
 
@@ -490,71 +562,80 @@ void ParseGPSSample(char *unparsedSentence) {
             gpsIndex++;
         } else {
 
-            switch (gpsIndex) {
+            if (gpsIndex == Header) {
 
-                case Header:
+                // Check if correct header
+                sentenceHeader = strstr(unparsedSentence, header);
+                if (sentenceHeader == NULL) i = 74;
+                else i += (strlen(header) - 1);
 
-                    // Check if correct header
-                    sentenceHeader = strstr(unparsedSentence, header);
-                    if (sentenceHeader == NULL) i = 74;
-                    else i += (strlen(header) - 1);
+            } else if (gpsIndex == Time) {
 
-                    break;
+                
+                i += ParseDecimal(unparsedSentence, i, gpsIndex);
 
-                case Time:
+            } else if (gpsIndex == Latitude) {
 
-                    i += ParseDecimal(unparsedSentence, i, gpsIndex);
+                i += ParseDecimal(unparsedSentence, i, gpsIndex);
 
-                    break;
+                AppendToGPSBuffer((uint8_t *) unit, 1);
 
-                case Latitude:
+            } else if (gpsIndex == LatDirection) {
 
-                    i += ParseDecimal(unparsedSentence, i, gpsIndex);
+                unit[0] = unparsedSentence[i];
+                AppendToGPSBuffer((uint8_t *) unit, 1);
 
-                    AppendToGPSBuffer((uint8_t *) unit, 1);
-                    break;
+                unit[0] = ',';
+                AppendToGPSBuffer((uint8_t *) unit, 1);
 
-                case LatDirection:
+            } else if (gpsIndex == Longitude) {
 
-                    unit[0] = unparsedSentence[i];
-                    AppendToGPSBuffer((uint8_t *) unit, 1);
+                i += ParseDecimal(unparsedSentence, i, gpsIndex);
 
-                    unit[0] = ',';
-                    AppendToGPSBuffer((uint8_t *) unit, 1);
-                    break;
+                unit[0] = ',';
+                AppendToGPSBuffer((uint8_t *) unit, 1);
 
-                case Longitude:
+            } else if (gpsIndex == LongDirection) {
 
-                    i += ParseDecimal(unparsedSentence, i, gpsIndex);
+                unit[0] = unparsedSentence[i];
+                AppendToGPSBuffer((uint8_t *) unit, 1);
 
-                    unit[0] = ',';
-                    AppendToGPSBuffer((uint8_t *) unit, 1);
-                    break;
+                unit[0] = ',';
+                AppendToGPSBuffer((uint8_t *) unit, 1);
 
-                case LongDirection:
+            } else if (gpsIndex == Altitude) {
 
-                    unit[0] = unparsedSentence[i];
-                    AppendToGPSBuffer((uint8_t *) unit, 1);
+                int length = GetStringLength(unparsedSentence, i);
 
-                    unit[0] = ',';
-                    AppendToGPSBuffer((uint8_t *) unit, 1);
-                    break;
+                if (length != 0) {
+                    
+                    // Cut out altitude substring from sentence 
+                    char altString[length];
+                    CopySubstring(unparsedSentence, altString, i, length);
+                    
+                    // Convert altitude from string to decimal
+                    double altitude = ParseDouble(altString, length);
+                    altitude /= 1000.0; // m -> km
+                    
+                    // Set Satellite altitude
+                    SetAltitude(altitude);
+                    
+                    // Truncate altitude value
+                    int altitudeRnd = (int)altitude;
+                    
+                    // Convert to ascii to compress
+                    char *asciiAlt[3];
+                    AsciiFromInt(altitudeRnd, asciiAlt, sizeof(asciiAlt));
+                    CompressAscii(asciiAlt, 0, 3, false);
+                    
+                    AppendToGPSBuffer((uint8_t *) asciiAlt, sizeof(asciiAlt));
+                }
 
-                case Altitude:
+                i += length + 1;
+//                i += ParseDecimal(unparsedSentence, i, gpsIndex);
 
-                    i += ParseDecimal(unparsedSentence, i, gpsIndex);
-
-                    unit[0] = ',';
-                    AppendToGPSBuffer((uint8_t *) unit, 1);
-                    break;
-
-                case AltUnit:
-
-                    unit[0] = unparsedSentence[i];
-                    AppendToGPSBuffer((uint8_t *) unit, 1);
-                    break;
-
-                default: break;
+                unit[0] = ',';
+                AppendToGPSBuffer((uint8_t *) unit, 1);
             }
         }
     }
@@ -565,14 +646,14 @@ uint8_t spiTesting = 0x00;
 uint16_t spi16Testing = 0x8000;
 
 void TestDACSPI() {
-    
+
     _LATG7 = 0;
 
     //    SPI1_Exchange8bit(spiTesting++);
     SPI1_Exchange16bit(0x00FF);
     SPI1_Exchange16bit(0xFF00);
-    
-//    SPI1_Exchange16bit(spi16Testing);
+
+    //    SPI1_Exchange16bit(spi16Testing);
     //    SPI1_Exchange16bit(currentLangmuirProbeSweepPosition);
 
     _LATG7 = 1;
@@ -583,9 +664,9 @@ int count = 8;
 int res[16];
 
 void TestADC() {
-    
+
     ADC1_GetResultFromChannels(res, channel, count);
-    
+
     int i;
     for (i = 0; i < count; i++) {
         Send(res[i] / 4, DiagUnit);
