@@ -12,18 +12,13 @@
     </editor-bookmarks>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/mcc_generated_files/pin_manager.c</file>
-            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/CommandParser.h</file>
-            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/SystemConfiguration.h</file>
-            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/main.c</file>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/SatelliteMode.c</file>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/TransmitManager.c</file>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/SampleManager.c</file>
-            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/mcc_generated_files/spi1.c</file>
-            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/adc1.c</file>
+            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/CommandParser.h</file>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/SatelliteMode.h</file>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/TransmitManager.h</file>
-            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/mcc_generated_files/uart3.c</file>
+            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/SystemConfiguration.h</file>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/SampleManager.h</file>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/CommandParser.c</file>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/SystemConfiguration.c</file>

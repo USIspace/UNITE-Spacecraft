@@ -571,7 +571,17 @@ void ParseGPSSample(char *unparsedSentence) {
 
             } else if (gpsIndex == Time) {
 
+                int length = GetStringLength(unparsedSentence, i);
                 
+                if (length > 0) {
+                    
+                    char timeString[length];
+                    CopySubstring(unparsedSentence, timeString, i, length);
+                    
+                    double time = ParseDouble(timeString, sizeof(timeString));
+                    
+                    
+                }
                 i += ParseDecimal(unparsedSentence, i, gpsIndex);
 
             } else if (gpsIndex == Latitude) {
@@ -607,14 +617,14 @@ void ParseGPSSample(char *unparsedSentence) {
 
                 int length = GetStringLength(unparsedSentence, i);
 
-                if (length != 0) {
+                if (length > 0) {
                     
                     // Cut out altitude substring from sentence 
                     char altString[length];
                     CopySubstring(unparsedSentence, altString, i, length);
                     
                     // Convert altitude from string to decimal
-                    double altitude = ParseDouble(altString, length);
+                    double altitude = ParseDouble(altString, sizeof(altString));
                     altitude /= 1000.0; // m -> km
                     
                     // Set Satellite altitude
@@ -626,9 +636,9 @@ void ParseGPSSample(char *unparsedSentence) {
                     // Convert to ascii to compress
                     char *asciiAlt[3];
                     AsciiFromInt(altitudeRnd, asciiAlt, sizeof(asciiAlt));
-                    CompressAscii(asciiAlt, 0, 3, false);
+                    CompressAscii(asciiAlt, 0, sizeof(asciiAlt), false);
                     
-                    AppendToGPSBuffer((uint8_t *) asciiAlt, sizeof(asciiAlt));
+                    AppendToGPSBuffer((uint8_t *) asciiAlt, 2);
                 }
 
                 i += length + 1;
