@@ -38,13 +38,8 @@ bool isGPSReading = false;
 bool isGPSLocked = true;
 GPSDataIndex gpsIndex = 0;
 char unparsedGPSBuffer[74] = {NULL};
-char gpsTimeBuffer[10];
-char gpsLatitudeBuffer[20];
-char gpsLatDirection[1];
-char gpsLongitudeBuffer[20];
-char gpsLongDirection[1];
-char gpsAltitudeBuffer[10];
-char gpsAltUnit[1];
+int latDecPrecision = 4;
+int longDecPrecision = 4;
 
 int currentLangmuirProbeBufferIndex = 0;
 int currentMagnetometerBufferIndex = 0;
@@ -443,37 +438,37 @@ int CompressAscii(char *string, int startIndex, int size, bool addTrailing) {
 // int startIndex -> index to start parsing from
 // GPSDataIndex dataType -> checks what kind of decimal 
 
-uint8_t ParseDecimal(char *originalString, int startIndex, GPSDataIndex dataType) {
-    char semiparsedSentence[20] = {NULL};
-    bool isDecimal = false;
-    int parseProgress = 0;
-    int copiedIndex = 0;
-    int decPos = 0;
-
-    while (originalString[startIndex + parseProgress] != ',') {
-        if (originalString[startIndex + parseProgress] == '.') {
-            decPos = CompressAscii(semiparsedSentence, decPos, parseProgress, isDecimal);
-            copiedIndex = decPos;
-            isDecimal = true;
-        }
-
-        semiparsedSentence[isDecimal ? copiedIndex++ : parseProgress] = originalString[startIndex + parseProgress];
-        parseProgress++;
-    }
-
-    copiedIndex = CompressAscii(semiparsedSentence, (decPos + 1), (copiedIndex) - decPos, isDecimal) + decPos;
-
-    if (dataType != Time) AppendToGPSBuffer((uint8_t *) semiparsedSentence, ++copiedIndex);
-
-    switch (dataType) {
-        case Time: SetTime((uint8_t *) semiparsedSentence, ++copiedIndex);
-            break;
-        case Altitude: SetAltitude((uint8_t *) semiparsedSentence, copiedIndex);
-            break;
-        default: break;
-    }
-    return (parseProgress - 1);
-}
+//uint8_t ParseDecimal(char *originalString, int startIndex, GPSDataIndex dataType) {
+//    char semiparsedSentence[20] = {NULL};
+//    bool isDecimal = false;
+//    int parseProgress = 0;
+//    int copiedIndex = 0;
+//    int decPos = 0;
+//
+//    while (originalString[startIndex + parseProgress] != ',') {
+//        if (originalString[startIndex + parseProgress] == '.') {
+//            decPos = CompressAscii(semiparsedSentence, decPos, parseProgress, isDecimal);
+//            copiedIndex = decPos;
+//            isDecimal = true;
+//        }
+//
+//        semiparsedSentence[isDecimal ? copiedIndex++ : parseProgress] = originalString[startIndex + parseProgress];
+//        parseProgress++;
+//    }
+//
+//    copiedIndex = CompressAscii(semiparsedSentence, (decPos + 1), (copiedIndex) - decPos, isDecimal) + decPos;
+//
+//    if (dataType != Time) AppendToGPSBuffer((uint8_t *) semiparsedSentence, ++copiedIndex);
+//
+//    switch (dataType) {
+//        case Time: SetTime((uint8_t *) semiparsedSentence, ++copiedIndex);
+//            break;
+//        case Altitude: SetAltitude((uint8_t *) semiparsedSentence, copiedIndex);
+//            break;
+//        default: break;
+//    }
+//    return (parseProgress - 1);
+//}
 
 // Gets length of next GPS sentence subsection
 // char *src -> original ascii GPS sentence
@@ -531,6 +526,8 @@ double ParseDouble(char *string, int length) {
     return numberValue;
 }
 
+double GetDoubleFromString;
+
 int AsciiFromInt(int integer, char *dest, int length) {
     
     int mod = integer;
@@ -545,7 +542,30 @@ int AsciiFromInt(int integer, char *dest, int length) {
     return i;
 }
 
+// Returns a double value from a substring of a GPS sentence
+// char *src -> source string
+// int start -> start index for substring
+// int length -> length of substring
+double GetDoubleFromSubString(char *src, int start, int length) {
+    
+    char subString[length];
+    CopySubstring(src, subString, start, length);
+    return ParseDouble(subString, length);
+}
 
+// Compresses and appends an integer value to GPS buffer
+// int value -> integer to append
+// int digits -> number of digits to append (e.g. 12345 has 5 digits)
+void AppendIntToGPSBuffer(int value, int digits) {
+
+    // Convert to an ASCII value
+    char ascii[digits];
+    AsciiFromInt(value, ascii, 6);
+    // Compress ASCII string
+    int compSize = CompressAscii(ascii, 0, sizeof (ascii), false);
+
+    AppendToGPSBuffer((uint8_t *)ascii, compSize);
+}
 
 // Main GPS parsing method
 // char *unparsedSentence -> ASCII GPS sentence to parse (GPGGA)
@@ -575,19 +595,35 @@ void ParseGPSSample(char *unparsedSentence) {
                 
                 if (length > 0) {
                     
-                    char timeString[length];
-                    CopySubstring(unparsedSentence, timeString, i, length);
+                    double time = GetDoubleFromSubString(unparsedSentence, i, length);
                     
-                    double time = ParseDouble(timeString, sizeof(timeString));
-                    
-                    
+                    // Set satellite's current time
+                    SetTime(time);
                 }
-                i += ParseDecimal(unparsedSentence, i, gpsIndex);
+                
+                i += length;
+//                i += ParseDecimal(unparsedSentence, i, gpsIndex);
 
             } else if (gpsIndex == Latitude) {
 
-                i += ParseDecimal(unparsedSentence, i, gpsIndex);
+                int length = GetStringLength(unparsedSentence, i);
+                
+                if (length > 0) {
+                    
+                    double latitude = GetDoubleFromSubString(unparsedSentence, i, length);
+                    
+                    int latitudeWhole = (int)latitude;
+                    int latitudeFractional = (int)(latitude * Pow(10,latDecPrecision));
+                    
+                    AppendIntToGPSBuffer(latitudeWhole, 4);
+                    unit[0] = '.';
+                    AppendToGPSBuffer((uint8_t *) unit, 1);
+                    AppendIntToGPSBuffer(latitudeFractional, 4);   
+                }
 
+                i += length;
+                
+                unit[0] = ',';
                 AppendToGPSBuffer((uint8_t *) unit, 1);
 
             } else if (gpsIndex == LatDirection) {
@@ -600,7 +636,22 @@ void ParseGPSSample(char *unparsedSentence) {
 
             } else if (gpsIndex == Longitude) {
 
-                i += ParseDecimal(unparsedSentence, i, gpsIndex);
+                int length = GetStringLength(unparsedSentence, i);
+                
+                if (length > 0) {
+                    
+                    double longitude = GetDoubleFromSubString(unparsedSentence, i, length);
+                    
+                    int longWhole = (int)longitude;
+                    int longFractional = (int)(longitude * Pow(10,longDecPrecision));
+                    
+                    AppendIntToGPSBuffer(longWhole, 4);
+                    unit[0] = '.';
+                    AppendToGPSBuffer((uint8_t *) unit, 1);
+                    AppendIntToGPSBuffer(longFractional, longDecPrecision);   
+                }
+
+                i += length;
 
                 unit[0] = ',';
                 AppendToGPSBuffer((uint8_t *) unit, 1);
@@ -619,26 +670,14 @@ void ParseGPSSample(char *unparsedSentence) {
 
                 if (length > 0) {
                     
-                    // Cut out altitude substring from sentence 
-                    char altString[length];
-                    CopySubstring(unparsedSentence, altString, i, length);
-                    
-                    // Convert altitude from string to decimal
-                    double altitude = ParseDouble(altString, sizeof(altString));
+                    //Get altitude value from GPS substring
+                    double altitude = GetDoubleFromSubString(unparsedSentence, i, length);
                     altitude /= 1000.0; // m -> km
                     
                     // Set Satellite altitude
                     SetAltitude(altitude);
                     
-                    // Truncate altitude value
-                    int altitudeRnd = (int)altitude;
-                    
-                    // Convert to ascii to compress
-                    char *asciiAlt[3];
-                    AsciiFromInt(altitudeRnd, asciiAlt, sizeof(asciiAlt));
-                    CompressAscii(asciiAlt, 0, sizeof(asciiAlt), false);
-                    
-                    AppendToGPSBuffer((uint8_t *) asciiAlt, 2);
+                    AppendIntToGPSBuffer((int)altitude, 3);
                 }
 
                 i += length + 1;

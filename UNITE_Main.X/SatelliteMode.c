@@ -242,30 +242,40 @@ void MainLoop() {
     TestDACSPI();
 }
 
-
-void SetTime(uint8_t *time, int arrayLength) {
-
-    int hours = 0;
-    int mins = 0;
+void SetTime(double formattedTime) {
     
-    // Convert string to int    
-    int i;
-    for (i = 0; i < arrayLength; i++) {
-        switch (i) {
-            case 0: 
-                hours += time[i] & 0x0F;
-                hours += ((time[i] & 0xF0) >> 4) * 10;
-                break;
-            case 1: 
-                mins += time[i] & 0x0F;
-                mins += ((time[i] & 0xF0) >> 4) * 10;
-                break;
-            default: break;
-        }
-    }
-    
-    timeInMin = ((hours * 60) + mins);
+    // 9h 56min 24sec . 00
+    int hours = (formattedTime / 10000) * 60;   // hours = 9h * 60 min/h
+    formattedTime = (int)formattedTime % 10000;                     // formattedTime = 56min 24sec
+    int min = formattedTime / 100;              // min = 56min
+    formattedTime = (int)formattedTime % 100;                       // formattedTime = 24sec
+    double sec = formattedTime / 60;            // sec = 0.40 min
+    timeInMin = hours + min + sec;
 }
+
+//void SetTime(uint8_t *time, int arrayLength) {
+//
+//    int hours = 0;
+//    int mins = 0;
+//    
+//    // Convert string to int    
+//    int i;
+//    for (i = 0; i < arrayLength; i++) {
+//        switch (i) {
+//            case 0: 
+//                hours += time[i] & 0x0F;
+//                hours += ((time[i] & 0xF0) >> 4) * 10;
+//                break;
+//            case 1: 
+//                mins += time[i] & 0x0F;
+//                mins += ((time[i] & 0xF0) >> 4) * 10;
+//                break;
+//            default: break;
+//        }
+//    }
+//    
+//    timeInMin = ((hours * 60) + mins);
+//}
 
 void SetAltitude(double alt) {
     lastAltitude = (int)alt;

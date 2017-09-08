@@ -59,6 +59,6 @@ UNITEMode UpdateMode(void);
 void MainLoop(void);
 
 // Updates timeInMin from GPS time of day
-void SetTime(uint8_t *, int);
+void SetTime(double formattedTime);
 // Updates lastAltitude from GPS altitude
 void SetAltitude(double alt);
