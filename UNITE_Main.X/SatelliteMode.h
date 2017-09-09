@@ -62,3 +62,6 @@ void MainLoop(void);
 void SetTime(double formattedTime);
 // Updates lastAltitude from GPS altitude
 void SetAltitude(double alt);
+
+// Diagnostic Logging mode
+void LogState();

@@ -85,7 +85,7 @@ typedef struct _TMR_OBJ_STRUCT
 
 static TMR_OBJ tmr5_obj;
 
-int TMR5_INTERRUPT_TICKER_FACTOR = 10;  // Begin in interim
+int TMR5_INTERRUPT_TICKER_FACTOR = 60;  // Begin in interim
 /**
   Section: Driver Interface
 */

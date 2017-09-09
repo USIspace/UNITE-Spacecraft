@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp */
 #include "CommandParser.h"
@@ -23,9 +24,11 @@
 // Used as a switch for the satellite to change modes
 UNITEMode currentMode = safe;
 bool shouldChangeMode = false;
-unsigned long lastAltitude = 400000; // 400 km
+unsigned long lastAltitude = 400; // 400 km
 unsigned long totalTime = 0; // Keeps track of overall mission clock
 double timeInMin = 0.0;      // Time in Min since 00:00
+
+int currentLogWait = 0;
 
 bool isDuplexConnected = false;
 
@@ -77,8 +80,8 @@ void SatelliteProperties_Initialize() {
    _LATE1 = LED_ON;
    _LATE2 = LED_ON;
    
-   _LATE3 = LED_OFF;
-   _LATE4 = LED_OFF;
+   _LATE3 = LED_ON;
+   _LATE4 = LED_ON;
    
    //Slave select 1
    _LATG7 = 1;            
@@ -116,16 +119,16 @@ bool ShouldUpdateMode(unsigned long time, unsigned long altitude) {
         case safe: return true;
         case startup: 
             if (time > StartupMode.stopTime) return true;
-            else if ((altitude / 1000) <= StartupMode.endAltitudeInKm) return true;
+            else if ((altitude) <= StartupMode.endAltitudeInKm) return true;
         case interim:
             if (time > InterimMode.stopTime) return true;
-            else if ((altitude / 1000) <= InterimMode.endAltitudeInKm) return true;
+            else if ((altitude) <= InterimMode.endAltitudeInKm) return true;
         case science:
             if (time > ScienceMode.stopTime) return true;
-            else if ((altitude / 1000) <= ScienceMode.endAltitudeInKm) return true;
+            else if ((altitude) <= ScienceMode.endAltitudeInKm) return true;
         case reentry: break;
             if (time > ReEntryMode.stopTime) return true;
-            else if ((altitude / 1000) <= ReEntryMode.endAltitudeInKm) return true;
+            else if ((altitude) <= ReEntryMode.endAltitudeInKm) return true;
     }
     return false;
 }
@@ -144,13 +147,23 @@ UNITEMode UpdateMode() {
         }*/
         
         switch (currentMode) {
-            case startup: return interim;
+            case startup: 
+                
+                _LATE2 = LED_OFF;
+                _LATE3 = LED_OFF;
+                _LATE4 = LED_OFF;
+                
+                return interim;
             case interim:
+                
                 _LATE2 = LED_OFF;
                 _LATE3 = LED_ON;
+                _LATE4 = LED_OFF;
 
                 return science;
             case science:
+                
+                _LATE2 = LED_OFF;
                 _LATE3 = LED_OFF;
                 _LATE4 = LED_ON;
 
@@ -175,52 +188,19 @@ UNITEMode UpdateMode() {
 void MainLoop() {
     
     // Langmuir Probe
-    if (!isLangmuirProbeSampling) {
-        if (++currentLangmuirProbeWait >= GetSampleRate(&LangmuirProbe)) {
-
-            if (isLangmuirProbeOn()) {
-                BeginLangmuirProbeSampling();
-                currentLangmuirProbeWait = 0;
-            } else {
-                SetLangmuirProbePower(1);
-            }
-        } // Wait to check MAG before turning switch off
-    } 
+    TrySampleLangmuirProbe();
     
     // Magnetometer
-    if ((++currentMagnetometerWait >= GetSampleRate(&Magnetometer)) || shouldMagnetometerSample) {
-        
-        if (isMagnetometerOn()) {
-            BeginMagnetometerSampling();
-            currentMagnetometerWait = 0;
-        } else {
-            SetMagnetometerPower(1);
-        }
-    } else SetMagnetometerPower(0);
-    
+    TrySampleMagnetometer();
     
     // Temperature Sensors
-    if (++currentTemperatureWait >= GetSampleRate(&TemperatureSensors)) {
-        
-        if (isTemperatureOn()) {
-            BeginTemperatureSampling();
-            currentTemperatureWait = 0;
-        } else {
-            SetTemperaturePower(1);
-        }
-    } else SetTemperaturePower(0);
+    TrySampleTemperature();
     
     // GPS
-    if (++currentGPSWait >= GetSampleRate(&GPS)) {
-        
-        if (isGPSOn()) {
-            BeginGPSSampling();
-            if (isGPSLocked) currentGPSWait = 0;
-        } else {
-            SetGPSPower(1);
-        }
-        
-    } else SetGPSPower(0);
+    TrySampleGPS();
+    
+    // Housekeeping
+    TrySampleHousekeeping();
     
     // Send Power Switch Packet
     TogglePowerSwitches();
@@ -238,8 +218,13 @@ void MainLoop() {
     // Commanding
     HandleCommand();
     
-    // TEST
-    TestDACSPI();
+    // Log
+    if (IS_DIAG) {
+        if (currentLogWait++ >= 10) LogState();
+    }
+    
+    // Test DAC
+//    TestDACSPI();
 }
 
 void SetTime(double formattedTime) {
@@ -302,3 +287,43 @@ void SetAltitude(uint8_t *alt, int arrayLength) {
     
     if (convertedAltitude > 0) lastAltitude = convertedAltitude;
 }*/
+
+time_t logCount = 0;
+
+// Logging Method for Diagnostic Mode
+void LogState() {
+    
+    char log[1000] = "UNITE Log #";
+    char newLine[] = "\n\n";
+    char endLine[] = "EOF";
+    
+    //Log Count
+    char count[10];
+    sprintf(count, "%u", (unsigned int)logCount);
+    strcat(log, count);
+    
+    strcat(log, newLine);
+    
+    //Time 
+    char timeString[50];
+    sprintf(timeString, "Total runtime: %u h %d min\nTime of day: %d:%d UTC", (unsigned int)(totalTime / 60), (int)(totalTime % 60), (int)(timeInMin / 60),(int)timeInMin % 60);
+    strcat(log, timeString);
+    
+    strcat(log, newLine);
+    
+    //Housekeeping
+    char housekeeping[500];
+    sprintf(housekeeping,
+            "Battery 1 Charge: %d \nBattery 2 Charge: %d \nBattery 1 Voltage: %d \nBattery 2 Voltage: %d \nBattery 1 Current: %d \nBattery 2 Current: %d \nBuss+ Voltage: %d \nSolar Panel 1 Voltage: %d \nSolar Panel 2 Voltage: %d \nSolar Panel 3 Voltage: %d \nSolar Panel 4 Voltage: %d \nSimplex Temp: %d \nDuplex Temp: %d \nEPS Temp: %d",
+            b1Charge,b2Charge,b1Voltage,b2Voltage,b1Current,b2Current,bussPlusVoltage,solar1Voltage,solar2Voltage,solar3Voltage,solar4Voltage,simplexTemp,duplexTemp,epsTemp);
+    
+    strcat(log, newLine);
+    strcat(log, endLine);
+    
+    int length = strlen(log);
+    int i;
+    
+    for (i = 0; i < length; i++) {
+        Send(log[i], DiagUnit);
+    }
+}

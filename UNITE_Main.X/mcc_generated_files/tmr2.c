@@ -165,7 +165,7 @@ uint16_t TMR2_Counter16BitGet( void )
 
 void __attribute__ ((weak)) TMR2_CallBack(void)
 {
-    TakeProbeSample();
+    TakeProbeSample(false);
 }
 
 void TMR2_Start( void )

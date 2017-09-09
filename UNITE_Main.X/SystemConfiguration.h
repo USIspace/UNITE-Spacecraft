@@ -25,8 +25,8 @@ extern "C" {
 // Set to true if debugging software without Simplex or Duplex connected
 #define IS_DEBUG false
 
-// Set to true if using diagnostic port
-#define IS_DIAG false
+// Set to true if using diagnostic mode
+#define IS_DIAG true
 
 // Constant for the duration of an orbit in minutes
 #define ORBIT_DUR_MIN 93
@@ -64,11 +64,15 @@ typedef struct {
 
 } TransmissionMode;
 
+// Declares how many samples Langmuir Probe should take per calibration
+extern unsigned long lpSamplesPerCalibration;
+
 // Declares global structs for each instrument
 extern Instrument LangmuirProbe;
 extern Instrument TemperatureSensors;
 extern Instrument Magnetometer;
 extern Instrument GPS;
+extern Instrument Housekeeping;
 
 // Declares a global struct for transmission modes for each operational mode 
 extern TransmissionMode TransmissionUnitForMode;

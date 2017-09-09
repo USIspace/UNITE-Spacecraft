@@ -152,8 +152,6 @@ void RunCommand(System system, Mode mode, Property property, Unit unit, unsigned
         case GPSSubSys: instrument = &GPS;
             isInstrument = true;
             break;
-        case Housekeeping: break;
-        case Beacon: break;
         default: break;
     }
 

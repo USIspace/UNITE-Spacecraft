@@ -76,8 +76,8 @@ uint8_t epsEcho[39] = { NULL };
 const int POWER_ECHO_LENGTH = 39;
 uint8_t powerPackagePreamble[4] = {0x50, 0x50, 0x50, 0x0B}; // 0x50 0x50 0x50 0x0B
 uint8_t commandBoardPowerSwitch = 0xFF;         // SW1
-uint8_t temperaturePowerSwitch = 0x00;          // SW2
-uint8_t langmuirMagPowerSwitch = 0x00;          // SW3
+uint8_t temperaturePowerSwitch = 0xFF;          // SW2
+uint8_t langmuirMagPowerSwitch = 0xFF;          // SW3
 uint8_t gpsPowerSwitch = 0x00;                  // SW4
 uint8_t duplexPowerSwitch = 0x00;               // SW5
 
@@ -87,6 +87,24 @@ bool isTemperatureOn() { return temperaturePowerSwitch == 0xFF; }
 bool isGPSOn() { return gpsPowerSwitch == 0xFF; }
 bool isDuplexOn() { return true; }//duplexPowerSwitch == 0xFF; } 
 
+// Housekeeping Data
+uint16_t b1Charge;
+uint16_t b2Charge;
+uint16_t b1Voltage;
+uint16_t b2Voltage;
+uint16_t b1Current;
+uint16_t b2Current;
+
+uint16_t bussPlusVoltage;
+
+uint16_t solar1Voltage;
+uint16_t solar2Voltage;
+uint16_t solar3Voltage;
+uint16_t solar4Voltage;
+
+uint16_t simplexTemp;
+uint16_t duplexTemp;
+uint16_t epsTemp;
 /********************
  Data Manager Methods
  ********************/
@@ -168,9 +186,7 @@ void TransmitQueue() {
 }
 
 void Send(uint8_t byte, TransmissionUnit unit) {
-    
-    if (IS_DIAG) UART4_Write(byte);
-    
+        
     switch (unit) {
         case SimplexUnit: UART3_Write(byte); break;
         case DuplexUnit: UART2_Write(byte); break;
@@ -690,34 +706,34 @@ void ReadPowerSwitches() {
                 case 5: langmuirMagPowerSwitch = Read(SimplexUnit); break;
                 case 7: gpsPowerSwitch = Read(SimplexUnit); break;
                 case 9: duplexPowerSwitch = Read(SimplexUnit); break;
-                case 10: break; // Battery 1 Charge High
-                case 11: break; // Battery 1 Charge Low
-                case 12: break; // Battery 2 Charge High
-                case 13: break; // Battery 2 Charge Low
-                case 14: break; // Battery 1 Voltage High
-                case 15: break; // Battery 1 Voltage Low
-                case 16: break; // Battery 2 Voltage High
-                case 17: break; // Battery 2 Voltage Low
-                case 18: break; // Battery 1 Current High
-                case 19: break; // Battery 1 Current Low
-                case 20: break; // Battery 2 Current High
-                case 21: break; // Battery 2 Current Low
-                case 22: break; // Buss+ Voltage High
-                case 23: break; // Buss+ Voltage Low
-                case 24: break; // Solar Panel 1 Voltage High
-                case 25: break; // Solar Panel 1 Voltage Low 
-                case 26: break; // Solar Panel 2 Voltage High
-                case 27: break; // Solar Panel 2 Voltage Low
-                case 28: break; // Solar Panel 3 Voltage High
-                case 29: break; // Solar Panel 3 Voltage Low
-                case 30: break; // Solar Panel 4 Voltage High
-                case 31: break; // Solar Panel 4 Voltage Low
-                case 32: break; // Simplex Temp High
-                case 33: break; // Simplex Temp Low
-                case 34: break; // Duplex Temp High
-                case 35: break; // Duplex Temp Low
-                case 36: break; // EPS Temp High
-                case 37: break; // EPS Temp Low
+                case 10: b1Charge = Read(SimplexUnit) << 8; break;          // Battery 1 Charge High
+                case 11: b1Charge += Read(SimplexUnit); break;              // Battery 1 Charge Low
+                case 12: b2Charge = Read(SimplexUnit) << 8; break;          // Battery 2 Charge High
+                case 13: b2Charge += Read(SimplexUnit); break;              // Battery 2 Charge Low
+                case 14: b1Voltage = Read(SimplexUnit) << 8; break;         // Battery 1 Voltage High
+                case 15: b1Voltage += Read(SimplexUnit); break;             // Battery 1 Voltage Low
+                case 16: b2Voltage = Read(SimplexUnit) << 8; break;         // Battery 2 Voltage High
+                case 17: b2Voltage += Read(SimplexUnit); break;             // Battery 2 Voltage Low
+                case 18: b1Current = Read(SimplexUnit) << 8; break;         // Battery 1 Current High
+                case 19: b1Current += Read(SimplexUnit); break;             // Battery 1 Current Low
+                case 20: b2Current = Read(SimplexUnit) << 8; break;         // Battery 2 Current High
+                case 21: b2Current += Read(SimplexUnit); break;             // Battery 2 Current Low
+                case 22: bussPlusVoltage = Read(SimplexUnit) << 8; break;   // Buss+ Voltage High
+                case 23: bussPlusVoltage += Read(SimplexUnit); break;       // Buss+ Voltage Low
+                case 24: solar1Voltage = Read(SimplexUnit) << 8; break;     // Solar Panel 1 Voltage High
+                case 25: solar1Voltage += Read(SimplexUnit); break;         // Solar Panel 1 Voltage Low 
+                case 26: solar2Voltage = Read(SimplexUnit) << 8; break;     // Solar Panel 2 Voltage High
+                case 27: solar2Voltage += Read(SimplexUnit); break;         // Solar Panel 2 Voltage Low
+                case 28: solar3Voltage = Read(SimplexUnit) << 8; break;     // Solar Panel 3 Voltage High
+                case 29: solar3Voltage += Read(SimplexUnit); break;         // Solar Panel 3 Voltage Low
+                case 30: solar4Voltage = Read(SimplexUnit) << 8; break;     // Solar Panel 4 Voltage High
+                case 31: solar4Voltage += Read(SimplexUnit); break;         // Solar Panel 4 Voltage Low
+                case 32: simplexTemp = Read(SimplexUnit) << 8; break;       // Simplex Temp High
+                case 33: simplexTemp += Read(SimplexUnit); break;           // Simplex Temp Low
+                case 34: duplexTemp = Read(SimplexUnit) << 8; break;        // Duplex Temp High
+                case 35: duplexTemp += Read(SimplexUnit); break;            // Duplex Temp Low
+                case 36: epsTemp = Read(SimplexUnit) << 8; break;           // EPS Temp High
+                case 37: epsTemp += Read(SimplexUnit); break;               // EPS Temp Low
                 case 38: isDuplexConnected = Read(SimplexUnit) > 0; break;
                 default: Read(SimplexUnit); break;
             }

@@ -35,6 +35,24 @@ extern bool isSending;
 extern bool simplexTimeoutFlag;
 extern bool duplexTimeoutFlag;
 
+extern uint16_t b1Charge;
+extern uint16_t b2Charge;
+extern uint16_t b1Voltage;
+extern uint16_t b2Voltage;
+extern uint16_t b1Current;
+extern uint16_t b2Current;
+
+extern uint16_t bussPlusVoltage;
+
+extern uint16_t solar1Voltage;
+extern uint16_t solar2Voltage;
+extern uint16_t solar3Voltage;
+extern uint16_t solar4Voltage;
+
+extern uint16_t simplexTemp;
+extern uint16_t duplexTemp;
+extern uint16_t epsTemp;
+
 /**********************
   Transmission Methods
  **********************/

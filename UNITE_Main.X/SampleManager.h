@@ -21,6 +21,10 @@ extern "C" {
 
 #endif	/* SAMPLEMANAGER_H */
 
+
+#define LP_VOLTAGE_CHL 1
+#define LP_TEMP_CHL 2
+
 // Defines types of GPS sentence data
 typedef enum {
     Header,
@@ -75,24 +79,28 @@ extern bool isGPSLocked;
 /* Sampling Functions */
 
 // Start sampling instruments
-void BeginTemperatureSampling();
-void BeginGPSSampling();
-void BeginMagnetometerSampling();
-void BeginLangmuirProbeSampling();
+void TrySampleLangmuirProbe();
+void TrySampleMagnetometer();
+void TrySampleTemperature();
+void TrySampleGPS();
+void TrySampleHousekeeping();
 
 // Stop sampling instruments
 void EndLangmuirProbeSampling();
 void EndMagnetometerSampling();
 void EndTemperatureSensorSampling();
 void EndGPSSampling();
+void EndHousekeepingSampling();
 
 // Manages the Sweeping progress of an instrument (called by Timer 1)
 void ManageSweepingProgress();
 
 // Takes an individual sample of each instrument
-void TakeProbeSample();
+void TakeProbeSample(bool isTemp);
+void CalLangmuirProbe();
 void TakeMagnetometerSample();
 void TakeTemperatureSample();
+void TakeHousekeepingSample();
 int TakeGPSSample(int);
 
 // Parses a GPS sentence

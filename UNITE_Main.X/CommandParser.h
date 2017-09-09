@@ -64,8 +64,7 @@ typedef enum {
     CDHSubSys,
     EPSSubSys,
     GPSSubSys,
-    Housekeeping,
-    Beacon
+    LPCal
 
 } System;
 

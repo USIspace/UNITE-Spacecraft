@@ -9,7 +9,7 @@
 #include "TransmitManager.h"
 
 
-//
+
 TransmissionMode TransmissionUnitForMode = {
     SimplexUnit,        // Startup mode
     SimplexOrDuplex,    // Interim mode
@@ -18,32 +18,42 @@ TransmissionMode TransmissionUnitForMode = {
 };
 
 // VALUES BELOW ARE ARBITRARY AND SUBJECT TO CHANGE
+
+unsigned long lpSamplesPerCalibration = 1;
+
 Instrument LangmuirProbe = {
-    { 1, 1, 16 },   // Startup mode: Sample every 1 minute, sample a sweep every 5 ms, sample for 16 sec
-    { 60, 1, 16 },  // Interim mode: Sample every 60 minutes, sample a sweep every 5 ms, sample for 16 sec
-    { 30, 1, 16 },  // Science mode: Sample every 30 minutes, sample a sweep every 5 ms, sample for 16 sec
-    { 15, 1, 16 }   // Reentry mode: Sample every 15 minutes, sample a sweep every 5 ms, sample for 16 sec
+    { 10, 1, 16 },   // Startup mode: Sample every 1 minute, sample a sweep every 5 ms, sample for 16 sec
+    { 20, 1, 16 },  // Interim mode: Sample every 60 minutes, sample a sweep every 5 ms, sample for 16 sec
+    { 10, 1, 16 },  // Science mode: Sample every 30 minutes, sample a sweep every 5 ms, sample for 16 sec
+    { 5, 1, 16 }   // Reentry mode: Sample every 15 minutes, sample a sweep every 5 ms, sample for 16 sec
 };
 
 Instrument TemperatureSensors = {
-    { 1, 0, 0 },    // Startup mode: Sample every 1 minute
-    { 4, 0, 0 },    // Interim mode: Sample every 4 minutes
-    { 2, 0, 0 },    // Science mode: Sample every 2 minutes  
-    { 1, 0, 0 }     // Reentry mode: Sample every 1 minute
+    { 4, 0, 0 },    // Startup mode: Sample every 1 minute
+    { 8, 0, 0 },    // Interim mode: Sample every 4 minutes
+    { 4, 0, 0 },    // Science mode: Sample every 2 minutes  
+    { 2, 0, 0 }     // Reentry mode: Sample every 1 minute
 };
 
 Instrument Magnetometer = {
-    { 1, 1, 20 },   // Startup Mode: Sample every 1 minute
-    { 60, 1, 20 },  // Interim Mode: Sample every 60 minutes
-    { 30, 1, 20 },  // Science Mode: Sample every 30 minutes
-    { 15, 1, 20 }   // Reentry Mode: Sample every 15 minutes
+    { 10, 1, 20 },   // Startup Mode: Sample every 1 minute
+    { 20, 1, 20 },  // Interim Mode: Sample every 60 minutes
+    { 10, 1, 20 },  // Science Mode: Sample every 30 minutes
+    { 5, 1, 20 }   // Reentry Mode: Sample every 15 minutes
 };
 
 Instrument GPS = {
-    { 1, 0, 0 },    // Startup Mode: Sample every 1 minute
-    { 4, 0, 0 },    // Interim Mode: Sample every 4 minutes
-    { 6, 0, 0 },    // Science Mode: Sample every 6 minutes
-    { 3, 0, 0 }     // Reentry Mode: Sample every 3 minutes
+    { 10, 0, 0 },    // Startup Mode: Sample every 1 minute
+    { 20, 0, 0 },    // Interim Mode: Sample every 4 minutes
+    { 10, 0, 0 },    // Science Mode: Sample every 6 minutes
+    { 5, 0, 0 }     // Reentry Mode: Sample every 3 minutes
+};
+
+Instrument Housekeeping = {
+    { 5, 0, 0},
+    { 10, 0, 0},
+    { 5, 0, 0},
+    { 2, 0, 0},
 };
 
 // Description: Getter for an instrument sample rate
@@ -95,9 +105,13 @@ uint8_t GetSystemHeaderID(System system) {
         case MAGSubSys: return 0x20;
         case TMPSubSys: return 0x30;
         case GPSSubSys: return 0x40;
+        case EPSSubSys: return 0x50;
+        case LPCal: return 0x60;
         default: return 0;
     }
 }
+
+// Description: Returns 
 
 // Description: Calculates the number of minutes since 00:00 UTC
 // totalMissionTimeInSec -> mission duration in seconds
