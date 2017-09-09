@@ -653,7 +653,7 @@ int CompressAscii(char *string, int startIndex, int size, bool addTrailing) {
 // int start -> index to start reading from
 // Returns length of substring between commas
 
-int GetStringLength(char *src, int start) {
+int GetSubStringLength(char *src, int start) {
 
     int i = 0;
     while (src[i + start] != ',') i++;
@@ -681,7 +681,7 @@ int CopySubstring(char *src, char *dest, int start, int length) {
 double ParseDouble(char *string, int length) {
 
     int progress;
-    int numArray[length - 1];
+    int numArray[length - 1] = {NULL};
     int decIndex;
     double numberValue;
 
@@ -771,7 +771,7 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
 
             } else if (gpsIndex == Time) {
 
-                int length = GetStringLength(unparsedSentence, i);
+                int length = GetSubStringLength(unparsedSentence, i);
 
                 if (length > 0) {
 
@@ -786,7 +786,7 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
 
             } else if (gpsIndex == Latitude) {
 
-                int length = GetStringLength(unparsedSentence, i);
+                int length = GetSubStringLength(unparsedSentence, i);
 
                 if (length > 0) {
 
@@ -817,7 +817,7 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
 
             } else if (gpsIndex == Longitude) {
 
-                int length = GetStringLength(unparsedSentence, i);
+                int length = GetSubStringLength(unparsedSentence, i);
 
                 if (length > 0) {
 
@@ -848,7 +848,7 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
 
             } else if (gpsIndex == Altitude) {
 
-                int length = GetStringLength(unparsedSentence, i);
+                int length = GetSubStringLength(unparsedSentence, i);
 
                 if (length > 0) {
 
