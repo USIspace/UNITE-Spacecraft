@@ -38,7 +38,7 @@ char myFunString[29] = "Hey, World! UNITE Rules Now!";
 bool isGPSReading = false;
 bool isGPSLocked = true;
 GPSDataIndex gpsIndex = 0;
-char unparsedGPSBuffer[74] = {NULL};
+char unparsedGPSBuffer[100] = {NULL};
 int latDecPrecision = 4;
 int longDecPrecision = 4;
 
@@ -543,12 +543,14 @@ int TakeGPSSample(int samplePos) {
 
     } else {
 
-        if ('$' == nextChar) samplePos = 0;
-        else
-            if ('\n' == nextChar) {
-            samplePos = -2;
+        if ('$' == nextChar)
+            samplePos = 0;
+        else if ('\n' == nextChar) {
+            samplePos = -1;
             isGPSReading = false;
             EndGPSSampling();
+            
+            return samplePos;
         }
 
         unparsedGPSBuffer[samplePos++] = nextChar;
@@ -757,7 +759,7 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
     char header[] = "$GPGGA";
     char *sentenceHeader;
 
-    for (i = 0; i < 74; i++) {
+    for (i = 0; i < 100; i++) {
         if (unparsedSentence[i] == ',') {
             gpsIndex++;
         } else {
