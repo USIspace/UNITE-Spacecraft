@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp */
 #include "CommandParser.h"
@@ -207,7 +208,6 @@ void TrySampleGPS() {
             // Turn on GPS Interrupt
             IEC0bits.U1RXIE = 1;
 
-            if (isGPSLocked) currentGPSWait = 0;
         } else {
             SetGPSPower(1);
         }
@@ -283,19 +283,19 @@ void EndGPSSampling() {
     ParseGPSSample(unparsedGPSBuffer);
 
     //Only package and send if GPS is locked
-    if (currentGPSBufferIndex > 20) {
-        PackageData(GPSSubSys, (int) timeInMin, gpsBuffer, GPS_BUFFER_SIZE);
+    if (currentGPSBufferIndex > 15) {
+        PackageData(GPSSubSys, (int)timeInMin, gpsBuffer, GPS_BUFFER_SIZE);
         isGPSLocked = true;
     } else isGPSLocked = false;
 
-    memset(gpsBuffer, 0, sizeof (gpsBuffer));
+    memset(gpsBuffer, 0, sizeof(gpsBuffer));
+    if (isGPSLocked) currentGPSWait = 0;
     currentGPSBufferIndex = 0;
-    currentGPSWait = 0;
     gpsIndex = 0;
 }
 
 void EndHousekeepingSampling() {
-    PackageData(EPSSubSys, (int) timeInMin, housekeepingBuffer, HOUSE_BUFFER_SIZE);
+    PackageData(EPSSubSys, (int)timeInMin, housekeepingBuffer, HOUSE_BUFFER_SIZE);
     memset(housekeepingBuffer, 0, sizeof(housekeepingBuffer));
     currentHousekeepingBufferIndex = 0;
     currentHousekeepingWait = 0;
@@ -486,20 +486,20 @@ void TakeTemperatureSample() {
 
 void TakeHousekeepingSample() {
    
-    housekeepingBuffer[0 + currentHousekeepingBufferIndex++] = b1Charge >> 2;
-    housekeepingBuffer[1 + currentHousekeepingBufferIndex++] = b2Charge >> 2;
-    housekeepingBuffer[2 + currentHousekeepingBufferIndex++] = b1Voltage >> 2;
-    housekeepingBuffer[3 + currentHousekeepingBufferIndex++] = b2Voltage >> 2;
-    housekeepingBuffer[4 + currentHousekeepingBufferIndex++] = b1Current >> 2;
-    housekeepingBuffer[5 + currentHousekeepingBufferIndex++] = b2Current >> 2;
-    housekeepingBuffer[6 + currentHousekeepingBufferIndex++] = bussPlusVoltage >> 2;
-    housekeepingBuffer[7 + currentHousekeepingBufferIndex++] = solar1Voltage >> 2;
-    housekeepingBuffer[8 + currentHousekeepingBufferIndex++] = solar2Voltage >> 2;
-    housekeepingBuffer[9 + currentHousekeepingBufferIndex++] = solar3Voltage >> 2;
-    housekeepingBuffer[10 + currentHousekeepingBufferIndex++] = solar4Voltage >> 2;
-    housekeepingBuffer[11 + currentHousekeepingBufferIndex++] = simplexTemp >> 2;
-    housekeepingBuffer[12 + currentHousekeepingBufferIndex++] = duplexTemp >> 2;
-    housekeepingBuffer[13 + currentHousekeepingBufferIndex++] = epsTemp >> 2;
+    housekeepingBuffer[currentHousekeepingBufferIndex++] = b1Charge >> 2;
+    housekeepingBuffer[currentHousekeepingBufferIndex++] = b2Charge >> 2;
+    housekeepingBuffer[currentHousekeepingBufferIndex++] = b1Voltage >> 2;
+    housekeepingBuffer[currentHousekeepingBufferIndex++] = b2Voltage >> 2;
+    housekeepingBuffer[currentHousekeepingBufferIndex++] = b1Current >> 2;
+    housekeepingBuffer[currentHousekeepingBufferIndex++] = b2Current >> 2;
+    housekeepingBuffer[currentHousekeepingBufferIndex++] = bussPlusVoltage >> 2;
+    housekeepingBuffer[currentHousekeepingBufferIndex++] = solar1Voltage >> 2;
+    housekeepingBuffer[currentHousekeepingBufferIndex++] = solar2Voltage >> 2;
+    housekeepingBuffer[currentHousekeepingBufferIndex++] = solar3Voltage >> 2;
+    housekeepingBuffer[currentHousekeepingBufferIndex++] = solar4Voltage >> 2;
+    housekeepingBuffer[currentHousekeepingBufferIndex++] = simplexTemp >> 2;
+    housekeepingBuffer[currentHousekeepingBufferIndex++] = duplexTemp >> 2;
+    housekeepingBuffer[currentHousekeepingBufferIndex++] = epsTemp >> 2;
     
     if (currentHousekeepingBufferIndex >= HOUSE_BUFFER_SIZE) {
         EndHousekeepingSampling();
@@ -683,7 +683,7 @@ int CopySubstring(char *src, char *dest, int start, int length) {
 double ParseDouble(char *string, int length) {
 
     int progress;
-    int numArray[length - 1] = {NULL};
+    int numArray[length - 1];
     int decIndex;
     double numberValue;
 
@@ -697,10 +697,10 @@ double ParseDouble(char *string, int length) {
 
     // Calculate tens offset of decimal place
     for (progress = 0; progress < sizeof (numArray); progress++) {
-        int exp = decIndex - 1 - progress; // Linear relation of decIndex to ten's place
+        int exponent = decIndex - 1 - progress; // Linear relation of decIndex to ten's place
 
-        if (progress < decIndex) numberValue += (numArray[progress] * Pow(10, exp));
-        if (progress >= decIndex) numberValue += (double) (numArray[progress]) / (double) (Pow(10, abs(exp)));
+        if (progress < decIndex) numberValue += (numArray[progress] * pow(10.0, (double)exponent));
+        if (progress >= decIndex) numberValue += (double) (numArray[progress]) / (double)(pow(10.0, (exponent > 0) ? (double)(exponent) : (double)(-exponent)));
     }
 
     return numberValue;
@@ -711,12 +711,12 @@ double GetDoubleFromString;
 int AsciiFromInt(int integer, char *dest, int length) {
 
     int mod = integer;
-    int exp = length - 1;
+    double exponent = length - 1;
     int i = 0;
 
-    while (mod > 0) {
-        dest[i++] = mod / Pow(10, exp);
-        mod %= Pow(10, exp);
+    while (mod > 0 && exponent >= 0) {
+        dest[i++] = (char)((int)(mod / pow(10.0, exponent)));
+        mod %= (int)(pow(10.0, exponent--));
     }
 
     return i;
@@ -742,7 +742,7 @@ double GetDoubleFromSubString(char *src, int start, int length) {
 void AppendIntToGPSBuffer(char *ascii, int value, int length) {
 
     // Convert to an ASCII value
-    AsciiFromInt(value, ascii, 6);
+    AsciiFromInt(value, ascii, length);
     // Compress ASCII string
     int compSize = CompressAscii(ascii, 0, length, false);
 
@@ -783,7 +783,7 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
                     SetTime(time);
                 }
 
-                i += length;
+                i += length - 1;
                 //                i += ParseDecimal(unparsedSentence, i, gpsIndex);
 
             } else if (gpsIndex == Latitude) {
@@ -794,8 +794,8 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
 
                     double latitude = GetDoubleFromSubString(unparsedSentence, i, length);
 
-                    int latitudeWhole = (int) latitude;
-                    int latitudeFractional = (int) (latitude * Pow(10, latDecPrecision));
+                    int latitudeWhole = (int)latitude;
+                    int latitudeFractional = (int)(latitude * pow(10.0,(double)latDecPrecision));
 
                     char ascii[4];
                     AppendIntToGPSBuffer(ascii, latitudeWhole, sizeof(ascii));
@@ -804,7 +804,7 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
                     AppendIntToGPSBuffer(ascii, latitudeFractional, latDecPrecision);
                 }
 
-                i += length;
+                i += length - 1;
 
                 unit[0] = ',';
                 AppendToGPSBuffer((uint8_t *) unit, 1);
@@ -826,7 +826,7 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
                     double longitude = GetDoubleFromSubString(unparsedSentence, i, length);
 
                     int longWhole = (int) longitude;
-                    int longFractional = (int) (longitude * Pow(10, longDecPrecision));
+                    int longFractional = (int) (longitude * pow(10.0, (double)longDecPrecision));
 
                     char ascii[4];
                     AppendIntToGPSBuffer(ascii, longWhole, sizeof(ascii));
@@ -835,7 +835,7 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
                     AppendIntToGPSBuffer(ascii, longFractional, longDecPrecision);
                 }
 
-                i += length;
+                i += length - 1;
 
                 unit[0] = ',';
                 AppendToGPSBuffer((uint8_t *) unit, 1);
@@ -865,11 +865,11 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
                     AppendIntToGPSBuffer(ascii, (int)altitude, sizeof(ascii));
                 }
 
-                i += length + 1;
-                //                i += ParseDecimal(unparsedSentence, i, gpsIndex);
+                i += length - 1;
 
                 unit[0] = ',';
                 AppendToGPSBuffer((uint8_t *) unit, 1);
+                
             }
         }
     }

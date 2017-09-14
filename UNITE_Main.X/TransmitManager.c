@@ -692,12 +692,12 @@ void TogglePowerSwitches() {
 
 void ReadPowerSwitches() {
          
-    while(Read(SimplexUnit) != 0x50 && !simplexTimeoutFlag);
-    while(Read(SimplexUnit) != 0x50 && !simplexTimeoutFlag);
-    while(Read(SimplexUnit) != 0x50 && !simplexTimeoutFlag);
-    while(Read(SimplexUnit) != 0x0B && !simplexTimeoutFlag);
+    while(Read(SimplexUnit) != 0x50) { if (simplexTimeoutFlag) return; }
+    while(Read(SimplexUnit) != 0x50) { if (simplexTimeoutFlag) return; }
+    while(Read(SimplexUnit) != 0x50) { if (simplexTimeoutFlag) return; }
+    while(Read(SimplexUnit) != 0x0B) { if (simplexTimeoutFlag) return; }
     
-    if (!IsLineBusy(SimplexUnit)) {
+//    if (!IsLineBusy(SimplexUnit)) {
         int i;
         for (i = 0; i < POWER_ECHO_LENGTH; i++) {
 
@@ -706,44 +706,44 @@ void ReadPowerSwitches() {
                 case 5: langmuirMagPowerSwitch = Read(SimplexUnit); break;
                 case 7: gpsPowerSwitch = Read(SimplexUnit); break;
                 case 9: duplexPowerSwitch = Read(SimplexUnit); break;
-                case 10: b1Charge = Read(SimplexUnit) << 8; break;          // Battery 1 Charge High
-                case 11: b1Charge += Read(SimplexUnit); break;              // Battery 1 Charge Low
-                case 12: b2Charge = Read(SimplexUnit) << 8; break;          // Battery 2 Charge High
-                case 13: b2Charge += Read(SimplexUnit); break;              // Battery 2 Charge Low
-                case 14: b1Voltage = Read(SimplexUnit) << 8; break;         // Battery 1 Voltage High
-                case 15: b1Voltage += Read(SimplexUnit); break;             // Battery 1 Voltage Low
-                case 16: b2Voltage = Read(SimplexUnit) << 8; break;         // Battery 2 Voltage High
-                case 17: b2Voltage += Read(SimplexUnit); break;             // Battery 2 Voltage Low
-                case 18: b1Current = Read(SimplexUnit) << 8; break;         // Battery 1 Current High
-                case 19: b1Current += Read(SimplexUnit); break;             // Battery 1 Current Low
-                case 20: b2Current = Read(SimplexUnit) << 8; break;         // Battery 2 Current High
-                case 21: b2Current += Read(SimplexUnit); break;             // Battery 2 Current Low
-                case 22: bussPlusVoltage = Read(SimplexUnit) << 8; break;   // Buss+ Voltage High
-                case 23: bussPlusVoltage += Read(SimplexUnit); break;       // Buss+ Voltage Low
-                case 24: solar1Voltage = Read(SimplexUnit) << 8; break;     // Solar Panel 1 Voltage High
-                case 25: solar1Voltage += Read(SimplexUnit); break;         // Solar Panel 1 Voltage Low 
-                case 26: solar2Voltage = Read(SimplexUnit) << 8; break;     // Solar Panel 2 Voltage High
-                case 27: solar2Voltage += Read(SimplexUnit); break;         // Solar Panel 2 Voltage Low
-                case 28: solar3Voltage = Read(SimplexUnit) << 8; break;     // Solar Panel 3 Voltage High
-                case 29: solar3Voltage += Read(SimplexUnit); break;         // Solar Panel 3 Voltage Low
-                case 30: solar4Voltage = Read(SimplexUnit) << 8; break;     // Solar Panel 4 Voltage High
-                case 31: solar4Voltage += Read(SimplexUnit); break;         // Solar Panel 4 Voltage Low
-                case 32: simplexTemp = Read(SimplexUnit) << 8; break;       // Simplex Temp High
-                case 33: simplexTemp += Read(SimplexUnit); break;           // Simplex Temp Low
-                case 34: duplexTemp = Read(SimplexUnit) << 8; break;        // Duplex Temp High
-                case 35: duplexTemp += Read(SimplexUnit); break;            // Duplex Temp Low
-                case 36: epsTemp = Read(SimplexUnit) << 8; break;           // EPS Temp High
-                case 37: epsTemp += Read(SimplexUnit); break;               // EPS Temp Low
+                case 10: b1Charge = Read(SimplexUnit); b1Charge <<= 8; break;   // Battery 1 Charge High
+                case 11: b1Charge += Read(SimplexUnit); break;                  // Battery 1 Charge Low
+                case 12: b2Charge = Read(SimplexUnit); b2Charge <<= 8; break;   // Battery 2 Charge High
+                case 13: b2Charge += Read(SimplexUnit); break;                  // Battery 2 Charge Low
+                case 14: b1Voltage = Read(SimplexUnit); b1Voltage <<= 8; break;         // Battery 1 Voltage High
+                case 15: b1Voltage += Read(SimplexUnit); break;                 // Battery 1 Voltage Low
+                case 16: b2Voltage = Read(SimplexUnit); b2Voltage <<= 8; break;         // Battery 2 Voltage High
+                case 17: b2Voltage += Read(SimplexUnit); break;                 // Battery 2 Voltage Low
+                case 18: b1Current = Read(SimplexUnit); b1Current <<= 8; break;         // Battery 1 Current High
+                case 19: b1Current += Read(SimplexUnit); break;                 // Battery 1 Current Low
+                case 20: b2Current = Read(SimplexUnit); b2Current <<= 8; break;         // Battery 2 Current High
+                case 21: b2Current += Read(SimplexUnit); break;                 // Battery 2 Current Low
+                case 22: bussPlusVoltage = Read(SimplexUnit); bussPlusVoltage <<= 8; break;   // Buss+ Voltage High
+                case 23: bussPlusVoltage += Read(SimplexUnit); break;           // Buss+ Voltage Low
+                case 24: solar1Voltage = Read(SimplexUnit); solar1Voltage <<= 8; break;     // Solar Panel 1 Voltage High
+                case 25: solar1Voltage += Read(SimplexUnit); break;             // Solar Panel 1 Voltage Low 
+                case 26: solar2Voltage = Read(SimplexUnit); solar2Voltage <<= 8; break;     // Solar Panel 2 Voltage High
+                case 27: solar2Voltage += Read(SimplexUnit); break;             // Solar Panel 2 Voltage Low
+                case 28: solar3Voltage = Read(SimplexUnit); solar3Voltage <<= 8; break;     // Solar Panel 3 Voltage High
+                case 29: solar3Voltage += Read(SimplexUnit); break;             // Solar Panel 3 Voltage Low
+                case 30: solar4Voltage = Read(SimplexUnit); solar4Voltage <<= 8; break;     // Solar Panel 4 Voltage High
+                case 31: solar4Voltage += Read(SimplexUnit); break;             // Solar Panel 4 Voltage Low
+                case 32: simplexTemp = Read(SimplexUnit); simplexTemp <<= 8; break;       // Simplex Temp High
+                case 33: simplexTemp += Read(SimplexUnit); break;               // Simplex Temp Low
+                case 34: duplexTemp = Read(SimplexUnit); duplexTemp <<= 8; break;        // Duplex Temp High
+                case 35: duplexTemp += Read(SimplexUnit); break;                // Duplex Temp Low
+                case 36: epsTemp = Read(SimplexUnit); epsTemp <<= 8; break;           // EPS Temp High
+                case 37: epsTemp += Read(SimplexUnit); break;                   // EPS Temp Low
                 case 38: isDuplexConnected = Read(SimplexUnit) > 0; break;
                 default: Read(SimplexUnit); break;
             }
         }
-    }
+//    }
 }
 
 void SetLangmuirProbePower(bool on) {
     if (on) langmuirMagPowerSwitch = 0xFF;
-    else langmuirMagPowerSwitch = 0xFF;
+    else langmuirMagPowerSwitch = 0x00;
 }
 
 void SetMagnetometerPower(bool on) {
@@ -752,7 +752,7 @@ void SetMagnetometerPower(bool on) {
 
 void SetTemperaturePower(bool on) {
     if (on) temperaturePowerSwitch = 0xFF;
-    else temperaturePowerSwitch = 0xFF;
+    else temperaturePowerSwitch = 0x00;
 }
 
 void SetGPSPower(bool on) {

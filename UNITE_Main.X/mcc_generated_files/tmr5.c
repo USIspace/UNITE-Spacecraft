@@ -168,7 +168,7 @@ void __attribute__ ((weak)) TMR5_CallBack(void)
     // Add your custom callback code here
     MainLoop();                                  //User timer to call sampling function
 
-    IO_RE1_Toggle();
+    _LATE1 = LED_ON;
 }
 
 void TMR5_Start( void )

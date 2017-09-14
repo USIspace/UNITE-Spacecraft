@@ -137,7 +137,7 @@ bool ShouldUpdateMode(unsigned long time, unsigned long altitude) {
 
 UNITEMode UpdateMode() {
 
-    if (ShouldUpdateMode(totalTime, lastAltitude)) {
+    if (ShouldUpdateMode(totalTime / 3600, lastAltitude)) {
         
         /*
         int i;
@@ -220,8 +220,15 @@ void MainLoop() {
     
     // Log
     if (IS_DIAG) {
-        if (currentLogWait++ >= 10) LogState();
+        if (currentLogWait++ >= 10) { 
+            LogState();
+            currentLogWait = 0;
+            
+            SetAltitude(0.0);
+        }
     }
+    
+    
     
     // Test DAC
 //    TestDACSPI();
@@ -263,7 +270,9 @@ void SetTime(double formattedTime) {
 //}
 
 void SetAltitude(double alt) {
-    lastAltitude = (int)alt;
+    
+     lastAltitude -= 1;
+//    lastAltitude = (int)alt;
 }
 
 /*
@@ -295,11 +304,11 @@ void LogState() {
     
     char log[1000] = "UNITE Log #";
     char newLine[] = "\n\n";
-    char endLine[] = "EOF";
+    char endLine[] = "EOF\n";
     
     //Log Count
     char count[10];
-    sprintf(count, "%u", (unsigned int)logCount);
+    sprintf(count, "%u", (unsigned int)logCount++);
     strcat(log, count);
     
     strcat(log, newLine);
@@ -317,13 +326,12 @@ void LogState() {
             "Battery 1 Charge: %d \nBattery 2 Charge: %d \nBattery 1 Voltage: %d \nBattery 2 Voltage: %d \nBattery 1 Current: %d \nBattery 2 Current: %d \nBuss+ Voltage: %d \nSolar Panel 1 Voltage: %d \nSolar Panel 2 Voltage: %d \nSolar Panel 3 Voltage: %d \nSolar Panel 4 Voltage: %d \nSimplex Temp: %d \nDuplex Temp: %d \nEPS Temp: %d",
             b1Charge,b2Charge,b1Voltage,b2Voltage,b1Current,b2Current,bussPlusVoltage,solar1Voltage,solar2Voltage,solar3Voltage,solar4Voltage,simplexTemp,duplexTemp,epsTemp);
     
+    strcat(log, housekeeping)
     strcat(log, newLine);
     strcat(log, endLine);
     
-    int length = strlen(log);
     int i;
-    
-    for (i = 0; i < length; i++) {
-        Send(log[i], DiagUnit);
+    for (i = 0; i < 100; i++) {
+        Send((uint8_t)log[i], DiagUnit);
     }
 }
