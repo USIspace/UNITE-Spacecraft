@@ -28,6 +28,12 @@ extern "C" {
 // Set to true if using diagnostic mode
 #define IS_DIAG true
 
+// Set to true if Duplex should timeout when waiting for input
+#define IS_DUP_TIMEOUT_ENABLED false
+
+// Set to true is Simplex shoule timeout when waiting for input
+#define IS_SIM_TIMEOUT_ENABLED false
+
 // Constant for the duration of an orbit in minutes
 #define ORBIT_DUR_MIN 93
 

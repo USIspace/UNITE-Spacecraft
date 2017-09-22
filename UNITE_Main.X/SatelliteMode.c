@@ -30,9 +30,6 @@ double timeInMin = 0.0;      // Time in Min since 00:00
 
 int currentLogWait = 0;
 
-bool isDuplexConnected = false;
-
-
 /*******************************
   Satellite Mode Configurations
  *******************************/
@@ -149,7 +146,7 @@ UNITEMode UpdateMode() {
         switch (currentMode) {
             case startup: 
                 
-                _LATE2 = LED_OFF;
+                _LATE2 = LED_ON;
                 _LATE3 = LED_OFF;
                 _LATE4 = LED_OFF;
                 
@@ -174,6 +171,10 @@ UNITEMode UpdateMode() {
 
             case safe:
 
+                _LATE2 = LED_OFF;
+                _LATE3 = LED_OFF;
+                _LATE4 = LED_OFF;
+                
                 return startup;
         }
     }
@@ -211,6 +212,7 @@ void MainLoop() {
     // Update Time    
     totalTime += TMR5_INTERRUPT_TICKER_FACTOR;
     timeInMin += (double)TMR5_INTERRUPT_TICKER_FACTOR / 60.0;
+    if (timeInMin > 1440) timeInMin -= 1440;
     
     // Update SatelliteMode
     currentMode = UpdateMode();
@@ -229,9 +231,6 @@ void MainLoop() {
     }
     
     
-    
-    // Test DAC
-//    TestDACSPI();
 }
 
 void SetTime(double formattedTime) {
@@ -271,7 +270,7 @@ void SetTime(double formattedTime) {
 
 void SetAltitude(double alt) {
     
-     lastAltitude -= 1;
+     lastAltitude -= 2;
 //    lastAltitude = (int)alt;
 }
 
@@ -315,7 +314,7 @@ void LogState() {
     
     //Time 
     char timeString[50];
-    sprintf(timeString, "Total runtime: %u h %d min\nTime of day: %d:%d UTC", (unsigned int)(totalTime / 60), (int)(totalTime % 60), (int)(timeInMin / 60),(int)timeInMin % 60);
+    sprintf(timeString, "Total runtime: %u h %d min\nTime of day: %d:%d UTC", (unsigned int)(totalTime / 3600), (int)(totalTime / 60), (int)(timeInMin / 60),(int)timeInMin % 60);
     strcat(log, timeString);
     
     strcat(log, newLine);
@@ -323,15 +322,16 @@ void LogState() {
     //Housekeeping
     char housekeeping[500];
     sprintf(housekeeping,
-            "Battery 1 Charge: %d \nBattery 2 Charge: %d \nBattery 1 Voltage: %d \nBattery 2 Voltage: %d \nBattery 1 Current: %d \nBattery 2 Current: %d \nBuss+ Voltage: %d \nSolar Panel 1 Voltage: %d \nSolar Panel 2 Voltage: %d \nSolar Panel 3 Voltage: %d \nSolar Panel 4 Voltage: %d \nSimplex Temp: %d \nDuplex Temp: %d \nEPS Temp: %d",
-            b1Charge,b2Charge,b1Voltage,b2Voltage,b1Current,b2Current,bussPlusVoltage,solar1Voltage,solar2Voltage,solar3Voltage,solar4Voltage,simplexTemp,duplexTemp,epsTemp);
+            "Battery 1 Charge: %u \nBattery 2 Charge: %u \nBattery 1 Voltage: %u \nBattery 2 Voltage: %u \nBattery 1 Current: %u \nBattery 2 Current: %u \nBuss+ Voltage: %u \nSolar Panel 1 Voltage: %u \nSolar Panel 2 Voltage: %u \nSolar Panel 3 Voltage: %u \nSolar Panel 4 Voltage: %u \nSimplex Temp: %u \nDuplex Temp: %u \nEPS Temp: %u",
+            (unsigned int)b1Charge,(unsigned int)b2Charge,(unsigned int)b1Voltage,(unsigned int)b2Voltage,(unsigned int)b1Current,(unsigned int)b2Current,(unsigned int)bussPlusVoltage,(unsigned int)solar1Voltage,(unsigned int)solar2Voltage,(unsigned int)solar3Voltage,(unsigned int)solar4Voltage,(unsigned int)simplexTemp,(unsigned int)duplexTemp,(unsigned int)epsTemp);
     
-    strcat(log, housekeeping)
+    strcat(log, housekeeping);
     strcat(log, newLine);
     strcat(log, endLine);
     
+    uint16_t length = strlen(log);
     int i;
-    for (i = 0; i < 100; i++) {
+    for (i = 0; i < length; i++) {
         Send((uint8_t)log[i], DiagUnit);
     }
 }

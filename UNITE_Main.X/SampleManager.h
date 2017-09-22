@@ -75,7 +75,6 @@ extern bool shouldMagnetometerSample;
 // Did GPS obtain lock for last sample
 extern bool isGPSLocked;
 
-
 /* Sampling Functions */
 
 // Start sampling instruments

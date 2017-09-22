@@ -55,15 +55,19 @@ char langmuirProbeFileName[] = "LAPData";
 char magnetometerFileName[] = "MAGData";
 char temperatureFileName[] = "TMPData";
 char gpsFileName[] = "GPSData";
+char housekeepingFileName[] = "EPSData";
 int langmuirProbeFileCount = 1;
 int magnetometerFileCount = 1;
 int temperatureFileCount = 1;
 int gpsFileCount = 1;
+int housekeepingFileCount = 1;
 
 
 int currentDuplexConnectionWait = 0;
 const int DUPLEX_TIMEOUT = 3;
 bool duplexTimeoutFlag = 0;
+const int MAX_FILES_WAITING = 5;
+bool isDuplexConnected = true;
 
 
 const int DUP_RES_LENGTH = 11;
@@ -171,10 +175,11 @@ void TransmitQueue() {
     if (!isSending && transmitQueueLength > 0) {
         
         TransmissionUnit unit = GetTransmissionUnitForMode();
+        uint16_t waitingFilesCount = GetWaitingFilesCount();
         
-        if (unit > 0 && currentDuplexConnectionWait < DUPLEX_TIMEOUT && isDuplexOn()) {
-            if (!isDuplexConnected) currentDuplexConnectionWait++;
-            else if (isDuplexConnected) {
+        if (unit > 0 && currentDuplexConnectionWait < DUPLEX_TIMEOUT && isDuplexOn() && waitingFilesCount < MAX_FILES_WAITING) {
+            if (isDuplexConnected == false) currentDuplexConnectionWait++;
+            else {
                 SendData(transmitQueue, transmitQueueLength, unit);
                 currentDuplexConnectionWait = 0;
             }
@@ -496,19 +501,21 @@ size_t CreateFileHeader(char *formattedString,uint8_t instrument, uint16_t dataL
     // Parse filename from instrument byte
     switch (instrument) {
         case 0x10:             
-            sprintf(fileName,"%s%i.txt",langmuirProbeFileName,langmuirProbeFileCount++);
+            sprintf(fileName,"%s%i.dat",langmuirProbeFileName,langmuirProbeFileCount++);
             break;
         case 0x20:             
-            sprintf(fileName,"%s%i.txt",magnetometerFileName,magnetometerFileCount++);
+            sprintf(fileName,"%s%i.dat",magnetometerFileName,magnetometerFileCount++);
             break;
         case 0x30:             
-            sprintf(fileName,"%s%i.txt",temperatureFileName,temperatureFileCount++);
+            sprintf(fileName,"%s%i.dat",temperatureFileName,temperatureFileCount++);
             break;
         case 0x40:            
-            sprintf(fileName,"%s%i.txt",gpsFileName,gpsFileCount++);
+            sprintf(fileName,"%s%i.dat",gpsFileName,gpsFileCount++);
             break;
+        case 0x50:
+            sprintf(fileName,"%s%i.dat",housekeepingFileName,housekeepingFileCount++);
         default:
-            strcpy(fileName, "Data0000.txt");
+            strcpy(fileName, "Data0000.dat");
             break;     
     }
     
@@ -523,16 +530,19 @@ uint16_t GetWaitingFilesCount() {
     
     if (ReadACKForUnit(DuplexUnit)) {
         
+        while (Read(DuplexUnit) != 0x47) { if (duplexTimeoutFlag) { return 0xFF; } }
+        while (Read(DuplexUnit) != 0x55) { if (duplexTimeoutFlag) { return 0xFF; } }
+        
         int i;
-        int responseLength = 15;
+        int responseLength = 13;
         
         uint8_t highByte, lowByte;
         
         for (i = 0; i < responseLength; i++) {
             
             switch (i) {
-                case 14: highByte = Read(DuplexUnit); break;
-                case 15: lowByte = Read(DuplexUnit); break;
+                case 11: highByte = Read(DuplexUnit); break;
+                case 12: lowByte = Read(DuplexUnit); break;
                 default: Read(DuplexUnit); break;
             }
         }
@@ -710,13 +720,13 @@ void ReadPowerSwitches() {
                 case 11: b1Charge += Read(SimplexUnit); break;                  // Battery 1 Charge Low
                 case 12: b2Charge = Read(SimplexUnit); b2Charge <<= 8; break;   // Battery 2 Charge High
                 case 13: b2Charge += Read(SimplexUnit); break;                  // Battery 2 Charge Low
-                case 14: b1Voltage = Read(SimplexUnit); b1Voltage <<= 8; break;         // Battery 1 Voltage High
+                case 14: b1Voltage = Read(SimplexUnit); b1Voltage <<= 8; break; // Battery 1 Voltage High
                 case 15: b1Voltage += Read(SimplexUnit); break;                 // Battery 1 Voltage Low
-                case 16: b2Voltage = Read(SimplexUnit); b2Voltage <<= 8; break;         // Battery 2 Voltage High
+                case 16: b2Voltage = Read(SimplexUnit); b2Voltage <<= 8; break; // Battery 2 Voltage High
                 case 17: b2Voltage += Read(SimplexUnit); break;                 // Battery 2 Voltage Low
-                case 18: b1Current = Read(SimplexUnit); b1Current <<= 8; break;         // Battery 1 Current High
+                case 18: b1Current = Read(SimplexUnit); b1Current <<= 8; break; // Battery 1 Current High
                 case 19: b1Current += Read(SimplexUnit); break;                 // Battery 1 Current Low
-                case 20: b2Current = Read(SimplexUnit); b2Current <<= 8; break;         // Battery 2 Current High
+                case 20: b2Current = Read(SimplexUnit); b2Current <<= 8; break; // Battery 2 Current High
                 case 21: b2Current += Read(SimplexUnit); break;                 // Battery 2 Current Low
                 case 22: bussPlusVoltage = Read(SimplexUnit); bussPlusVoltage <<= 8; break;   // Buss+ Voltage High
                 case 23: bussPlusVoltage += Read(SimplexUnit); break;           // Buss+ Voltage Low
@@ -734,7 +744,7 @@ void ReadPowerSwitches() {
                 case 35: duplexTemp += Read(SimplexUnit); break;                // Duplex Temp Low
                 case 36: epsTemp = Read(SimplexUnit); epsTemp <<= 8; break;           // EPS Temp High
                 case 37: epsTemp += Read(SimplexUnit); break;                   // EPS Temp Low
-                case 38: isDuplexConnected = Read(SimplexUnit) > 0; break;
+//                case 38: isDuplexConnected = Read(SimplexUnit) > 0; break;
                 default: Read(SimplexUnit); break;
             }
         }

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp */
 #include "CommandParser.h"
@@ -121,20 +122,25 @@ ADCSampleConfig tmpADCConfig = {
 void TrySampleLangmuirProbe() {
 
     if (!isLangmuirProbeSampling) {
-        if (++currentLangmuirProbeWait >= GetSampleRate(&LangmuirProbe)) {
+        
+        time_t sampleRate = GetSampleRate(&LangmuirProbe);
+        
+        if (sampleRate != 0) { // If sample rate is zero, don't sample
+            if (++currentLangmuirProbeWait >= sampleRate) {
 
-            if (isLangmuirProbeOn()) {
+                if (isLangmuirProbeOn()) {
 
-                _LATG9 = 1;
-                
-                // Sample Plasma Probe Data and store in buffer
-                isLangmuirProbeSampling = true;
+                    _LATG9 = 1;
 
-                currentLangmuirProbeWait = 0;
-            } else {
-                SetLangmuirProbePower(1);
-            }
-        } // Wait to check MAG before turning switch off
+                    // Sample Plasma Probe Data and store in buffer
+                    isLangmuirProbeSampling = true;
+
+                    currentLangmuirProbeWait = 0;
+                } else {
+                    SetLangmuirProbePower(1);
+                }
+            } // Wait to check MAG before turning switch off
+        }
     }
 }
 
@@ -150,80 +156,91 @@ void TryCalibrateLangmuirProbe() {
 
 void TrySampleMagnetometer() {
 
-    if ((++currentMagnetometerWait >= GetSampleRate(&Magnetometer)) || shouldMagnetometerSample) {
+    time_t sampleRate = GetSampleRate(&Magnetometer);
+    
+    if (sampleRate != 0) {
+        if ((++currentMagnetometerWait >= sampleRate) || shouldMagnetometerSample) {
 
-        if (isMagnetometerOn()) {
+            if (isMagnetometerOn()) {
 
-            // Sample Magnetometer Data and store in buffer
+                // Sample Magnetometer Data and store in buffer
 
-            /* 
-             * Magnetometer Sweeping Algorithm
-             */
-            //    isMagnetometerSweeping = true;
-            //    TMR3_Start();                  // TMR3 samples every 100 ms and stores in results
+                /* 
+                 * Magnetometer Sweeping Algorithm
+                 */
+                //    isMagnetometerSweeping = true;
+                //    TMR3_Start();                  // TMR3 samples every 100 ms and stores in results
 
-            /*
-             * Magnetometer Orbit Sampling
-             */
-            shouldMagnetometerSample = true;
-            TakeMagnetometerSample();
+                /*
+                 * Magnetometer Orbit Sampling
+                 */
+                shouldMagnetometerSample = true;
+                TakeMagnetometerSample();
 
-            currentMagnetometerWait = 0;
-        } else {
-            SetMagnetometerPower(1);
-        }
-    } else SetMagnetometerPower(0);
-
-
+                currentMagnetometerWait = 0;
+            } else {
+                SetMagnetometerPower(1);
+            }
+        } else SetMagnetometerPower(0);
+    }
 }
 
 void TrySampleTemperature() {
 
-    if (++currentTemperatureWait >= GetSampleRate(&TemperatureSensors)) {
+    time_t sampleRate = GetSampleRate(&TemperatureSensors);
+    
+    if (sampleRate != 0) {
+        if (++currentTemperatureWait >= sampleRate) {
 
-        if (isTemperatureOn()) {
+            if (isTemperatureOn()) {
 
-            // Sample Temperature Sensor Data and store in buffer
-            TakeTemperatureSample();
+                // Sample Temperature Sensor Data and store in buffer
+                TakeTemperatureSample();
 
-            currentTemperatureWait = 0;
-        } else {
-            SetTemperaturePower(1);
-        }
-    } else SetTemperaturePower(0);
-
+                currentTemperatureWait = 0;
+            } else {
+                SetTemperaturePower(1);
+            }
+        } else SetTemperaturePower(0);
+    }
 
 }
 
 void TrySampleGPS() {
 
-    if (++currentGPSWait >= GetSampleRate(&GPS)) {
+    time_t sampleRate = GetSampleRate(&GPS);
+    
+    if (sampleRate != 0) {
+        if (++currentGPSWait >= sampleRate) {
 
-        if (isGPSOn()) {
-            // Sample GPS Data and store in buffer
+            if (isGPSOn()) {
+                // Sample GPS Data and store in buffer
 
-            // Clear out GPS Buffer
-            memset(gpsBuffer, 0, sizeof (gpsBuffer));
+                // Clear out GPS Buffer
+                memset(gpsBuffer, 0, sizeof (gpsBuffer));
 
-            // Turn on GPS Interrupt
-            IEC0bits.U1RXIE = 1;
+                // Turn on GPS Interrupt
+                IEC0bits.U1RXIE = 1;
 
-        } else {
-            SetGPSPower(1);
-        }
+            } else {
+                SetGPSPower(1);
+            }
 
-    } else SetGPSPower(0);
-
+        } else SetGPSPower(0);
+    }
 
 }
 
 void TrySampleHousekeeping() {
 
-    // Housekeeping
-    if (++currentHousekeepingWait >= GetSampleRate(&Housekeeping)) {
+    time_t sampleRate = GetSampleRate(&Housekeeping);
+    
+    if (sampleRate != 0) {
+        if (++currentHousekeepingWait >= sampleRate) {
 
-        TakeHousekeepingSample();
-        currentHousekeepingWait = 0;
+            TakeHousekeepingSample();
+            currentHousekeepingWait = 0;
+        }
     }
 }
 
@@ -321,7 +338,8 @@ void ManageSweepingProgress() {
         TakeProbeSample(false);
 
         // Take a sweep when halfway through the sample
-        if (++currentLangmuirProbeSweepProgress == GetSweepDuration(&LangmuirProbe) / 2) {
+        unsigned long sampleDuration = GetSweepDuration(&LangmuirProbe) / 2;
+        if (++currentLangmuirProbeSweepProgress == sampleDuration) {
             isLangmuirProbeSweeping = true;
             currentLangmuirProbeVoltage = minSweepVoltage;
             TMR2_Start();
@@ -795,7 +813,7 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
                     double latitude = GetDoubleFromSubString(unparsedSentence, i, length);
 
                     int latitudeWhole = (int)latitude;
-                    int latitudeFractional = (int)(latitude * pow(10.0,(double)latDecPrecision));
+                    int latitudeFractional = (int)((latitude - latitudeWhole) * pow(10.0,(double)latDecPrecision));
 
                     char ascii[4];
                     AppendIntToGPSBuffer(ascii, latitudeWhole, sizeof(ascii));
@@ -826,7 +844,7 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
                     double longitude = GetDoubleFromSubString(unparsedSentence, i, length);
 
                     int longWhole = (int) longitude;
-                    int longFractional = (int) (longitude * pow(10.0, (double)longDecPrecision));
+                    int longFractional = (int)((longitude - longWhole) * pow(10.0, (double)longDecPrecision));
 
                     char ascii[4];
                     AppendIntToGPSBuffer(ascii, longWhole, sizeof(ascii));
@@ -859,7 +877,7 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
                     altitude /= 1000.0; // m -> km
 
                     // Set Satellite altitude
-                    SetAltitude(altitude);
+//                    SetAltitude(altitude);
 
                     char ascii[3];
                     AppendIntToGPSBuffer(ascii, (int)altitude, sizeof(ascii));

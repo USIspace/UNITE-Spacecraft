@@ -44,8 +44,6 @@ extern UNITEMode currentMode;
 extern unsigned long totalTime;
 // Global variable for time in minutes since 00:00 UTC
 extern double timeInMin;
-// Global variable to track when Duplex is connected
-extern bool isDuplexConnected;
 // Global variable to track the last GPS altitude reading
 extern unsigned long lastAltitude;
 

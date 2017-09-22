@@ -31,6 +31,9 @@ extern "C" {
 // Boolean for whether UNITE is sending packets to a TransmissionUnit
 extern bool isSending;
 
+// Global variable to track when Duplex is connected
+//bool isDuplexConnected;
+
 // Timeout flags
 extern bool simplexTimeoutFlag;
 extern bool duplexTimeoutFlag;

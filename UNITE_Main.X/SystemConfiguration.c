@@ -11,7 +11,7 @@
 
 
 TransmissionMode TransmissionUnitForMode = {
-    SimplexUnit,        // Startup mode
+    SimplexOrDuplex,        // Startup mode
     SimplexOrDuplex,    // Interim mode
     DuplexUnit,         // Science mode
     SimplexUnit         // Reentry mode
@@ -22,38 +22,38 @@ TransmissionMode TransmissionUnitForMode = {
 unsigned long lpSamplesPerCalibration = 1;
 
 Instrument LangmuirProbe = {
-    { 10, 1, 16 },   // Startup mode: Sample every 1 minute, sample a sweep every 5 ms, sample for 16 sec
-    { 20, 1, 16 },  // Interim mode: Sample every 60 minutes, sample a sweep every 5 ms, sample for 16 sec
-    { 10, 1, 16 },  // Science mode: Sample every 30 minutes, sample a sweep every 5 ms, sample for 16 sec
-    { 5, 1, 16 }   // Reentry mode: Sample every 15 minutes, sample a sweep every 5 ms, sample for 16 sec
+    { 90, 1, 16 },   // Startup mode: Sample every 1 minute, sample a sweep every 5 ms, sample for 16 sec
+    { 1020, 1, 16 },  // Interim mode: Sample every 60 minutes, sample a sweep every 5 ms, sample for 16 sec
+    { 840, 1, 16 },  // Science mode: Sample every 30 minutes, sample a sweep every 5 ms, sample for 16 sec
+    { 2160, 1, 16 }   // Reentry mode: Sample every 15 minutes, sample a sweep every 5 ms, sample for 16 sec
 };
 
 Instrument TemperatureSensors = {
-    { 4, 0, 0 },    // Startup mode: Sample every 1 minute
-    { 8, 0, 0 },    // Interim mode: Sample every 4 minutes
-    { 4, 0, 0 },    // Science mode: Sample every 2 minutes  
-    { 2, 0, 0 }     // Reentry mode: Sample every 1 minute
+    { 30, 0, 0 },    // Startup mode: Sample every 1 minute //30
+    { 120, 0, 0 },    // Interim mode: Sample every 4 minutes
+    { 60, 0, 0 },    // Science mode: Sample every 2 minutes  
+    { 480, 0, 0 }     // Reentry mode: Sample every 1 minute
 };
 
 Instrument Magnetometer = {
-    { 10, 1, 20 },   // Startup Mode: Sample every 1 minute
-    { 20, 1, 20 },  // Interim Mode: Sample every 60 minutes
-    { 10, 1, 20 },  // Science Mode: Sample every 30 minutes
-    { 5, 1, 20 }   // Reentry Mode: Sample every 15 minutes
+    { 90, 1, 20 },   // Startup Mode: Sample every 1 minute
+    { 1020, 1, 20 },  // Interim Mode: Sample every 60 minutes
+    { 840, 1, 20 },  // Science Mode: Sample every 30 minutes
+    { 2160, 1, 20 }   // Reentry Mode: Sample every 15 minutes
 };
 
 Instrument GPS = {
-    { 2, 0, 0 },    // Startup Mode: Sample every 1 minute
-    { 20, 0, 0 },    // Interim Mode: Sample every 4 minutes
-    { 10, 0, 0 },    // Science Mode: Sample every 6 minutes
-    { 5, 0, 0 }     // Reentry Mode: Sample every 3 minutes
+    { 90, 0, 0 },    // Startup Mode: Sample every 1 minute
+    { 1020, 0, 0 },    // Interim Mode: Sample every 4 minutes
+    { 840, 0, 0 },    // Science Mode: Sample every 6 minutes
+    { 2160, 0, 0 }     // Reentry Mode: Sample every 3 minutes
 };
 
 Instrument Housekeeping = {
-    { 5, 0, 0},
-    { 10, 0, 0},
-    { 5, 0, 0},
-    { 2, 0, 0},
+    { 30, 0, 0},
+    { 120, 0, 0},
+    { 240, 0, 0},
+    { 480, 0, 0},
 };
 
 // Description: Getter for an instrument sample rate
