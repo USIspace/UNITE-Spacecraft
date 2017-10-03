@@ -23,7 +23,7 @@ extern "C" {
 
 
 // Set to true if debugging software without Simplex or Duplex connected
-#define IS_DEBUG false
+#define IS_DEBUG true
 
 // Set to true if using diagnostic mode
 #define IS_DIAG true
