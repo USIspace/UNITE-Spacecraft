@@ -80,8 +80,8 @@ uint8_t epsEcho[39] = { NULL };
 const int POWER_ECHO_LENGTH = 39;
 uint8_t powerPackagePreamble[4] = {0x50, 0x50, 0x50, 0x0B}; // 0x50 0x50 0x50 0x0B
 uint8_t commandBoardPowerSwitch = 0xFF;         // SW1
-uint8_t temperaturePowerSwitch = 0xFF;          // SW2
-uint8_t langmuirMagPowerSwitch = 0xFF;          // SW3
+uint8_t temperaturePowerSwitch = 0x0;          // SW2
+uint8_t langmuirMagPowerSwitch = 0x0;          // SW3
 uint8_t gpsPowerSwitch = 0x00;                  // SW4
 uint8_t duplexPowerSwitch = 0x00;               // SW5
 
@@ -702,10 +702,10 @@ void TogglePowerSwitches() {
 
 void ReadPowerSwitches() {
          
-    while(Read(SimplexUnit) != 0x50) { if (simplexTimeoutFlag) return; }
-    while(Read(SimplexUnit) != 0x50) { if (simplexTimeoutFlag) return; }
-    while(Read(SimplexUnit) != 0x50) { if (simplexTimeoutFlag) return; }
-    while(Read(SimplexUnit) != 0x0B) { if (simplexTimeoutFlag) return; }
+    while(Read(SimplexUnit) != 'P') { if (simplexTimeoutFlag) return; }
+    while(Read(SimplexUnit) != 'P') { if (simplexTimeoutFlag) return; }
+    while(Read(SimplexUnit) != 'P') { if (simplexTimeoutFlag) return; }
+    while(Read(SimplexUnit) != 11) { if (simplexTimeoutFlag) return; }
     
 //    if (!IsLineBusy(SimplexUnit)) {
         int i;

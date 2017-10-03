@@ -93,10 +93,10 @@ void TMR4_Initialize (void)
 {
     //TMR4 0; 
     TMR4 = 0x0000;
-    //Period = 1 s; Frequency = 16000000 Hz; PR4 62500; 
-    PR4 = 0xF424;
-    //TCKPS 1:256; T32 16 Bit; TON enabled; TSIDL disabled; TCS FOSC/2; TGATE disabled; 
-    T4CON = 0x8030;
+    //Period = 5 ms; Frequency = 16000000 Hz; PR4 10000; 
+    PR4 = 0x2710;
+    //TCKPS 1:*; T32 16 Bit; TON enabled; TSIDL disabled; TCS FOSC/2; TGATE disabled; 
+    T4CON = 0x8010;
 
     
     IFS1bits.T4IF = false;
@@ -161,6 +161,7 @@ uint16_t TMR4_Counter16BitGet( void )
 
 void __attribute__ ((weak)) TMR4_CallBack(void)
 {
+    TakeProbeSample(false);
 }
 
 void TMR4_Start( void )

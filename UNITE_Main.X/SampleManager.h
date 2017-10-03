@@ -55,6 +55,7 @@ extern uint16_t MAG_BUFFER_SIZE;
 
 // Sampling wait timers for each instrument
 extern unsigned long currentLangmuirProbeWait;
+extern unsigned long currentLangmuirProbeCalWait;
 extern unsigned long currentMagnetometerWait;
 extern unsigned long currentTemperatureWait;
 extern unsigned long currentGPSWait;

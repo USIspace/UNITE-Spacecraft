@@ -29,7 +29,7 @@ extern "C" {
 #define IS_DIAG true
 
 // Set to true if Duplex should timeout when waiting for input
-#define IS_DUP_TIMEOUT_ENABLED false
+#define IS_DUP_TIMEOUT_ENABLED true
 
 // Set to true is Simplex shoule timeout when waiting for input
 #define IS_SIM_TIMEOUT_ENABLED false

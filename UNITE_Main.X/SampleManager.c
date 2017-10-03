@@ -18,6 +18,7 @@
 #include "mcc_generated_files/tmr3.h"
 #include "mcc_generated_files/tmr4.h"
 #include "mcc_generated_files/spi1.h"
+#include "mcc_generated_files/uart1.h"
 
 
 /*****************************
@@ -90,8 +91,9 @@ bool isProbeSweepPositive = true; // Initialize to true to correctly sweep probe
 const uint16_t electronVoltage = 0xE666; // 58982 = 4V
 const uint16_t ionVoltage = 0x1999; // 6553 = -4V
 const uint16_t maxSweepVoltage = 0xF333; // 62259 = 4.5V
-const uint16_t minSweepVoltage = 0x0CCC; // 3276 = -4.5V
+const uint16_t minSweepVoltage = 0x0CCD; // 3276 = -4.5V
 int currentLangmuirProbeVoltage = 0;
+double preciseSweepVoltage = 0.0;
 
 /**************************
   Sampling Configurations
@@ -217,7 +219,7 @@ void TrySampleGPS() {
                 // Sample GPS Data and store in buffer
 
                 // Clear out GPS Buffer
-                memset(gpsBuffer, 0, sizeof (gpsBuffer));
+                memset(gpsBuffer, 0, sizeof(gpsBuffer));
 
                 // Turn on GPS Interrupt
                 IEC0bits.U1RXIE = 1;
@@ -247,6 +249,18 @@ void TrySampleHousekeeping() {
 // MARK: End Methods
 
 void EndLangmuirProbeSampling() {
+    
+    // Set Probe Voltage to 4V 
+    currentLangmuirProbeVoltage = electronVoltage;
+    uint16_t voltageHigh = (currentLangmuirProbeVoltage & 0xFF00) >> 8;
+    uint16_t voltageLow = (currentLangmuirProbeVoltage & 0x00FF) << 8;
+    
+    _LATG7 = 0;
+    SPI1_Exchange16bit(voltageHigh);
+    SPI1_Exchange16bit(voltageLow);
+    _LATG7 = 1;
+    
+    // Try Calibrate Probe Tip
     TryCalibrateLangmuirProbe();
     
     currentLangmuirProbeSweepProgress = 0;
@@ -328,7 +342,7 @@ void ManageSweepingProgress() {
 
         // Reset sweeping
         isLangmuirProbeSweeping = false;
-        TMR2_Stop();
+        TMR4_Stop();
 
         // Set correct voltage for sample
         currentLangmuirProbeVoltage = isProbeVoltagePositive ? electronVoltage : ionVoltage;
@@ -338,11 +352,12 @@ void ManageSweepingProgress() {
         TakeProbeSample(false);
 
         // Take a sweep when halfway through the sample
-        unsigned long sampleDuration = GetSweepDuration(&LangmuirProbe) / 2;
-        if (++currentLangmuirProbeSweepProgress == sampleDuration) {
+        unsigned long sampleDuration = (GetSweepDuration(&LangmuirProbe) / 2);
+        if (currentLangmuirProbeSweepProgress++ == sampleDuration) {
             isLangmuirProbeSweeping = true;
             currentLangmuirProbeVoltage = minSweepVoltage;
-            TMR2_Start();
+            preciseSweepVoltage = 0.0;
+            TMR4_Start();
         }
 
         if (currentLangmuirProbeSweepProgress >= GetSweepDuration(&LangmuirProbe)) {
@@ -367,8 +382,6 @@ void CalLangmuirProbe() {
     Clear(langmuirProbeResults, RESULTS_SIZE,0);
     
     int i = 0;
-
-    _LATG9 = 0; //Sets the voltage of the probe to 4V  
 
     for(i = 0; i < 4; i++) {
         //Still need to select which channel to get results from on ADC
@@ -418,10 +431,10 @@ void TakeProbeSample(bool isTemp) {
     uint16_t voltageHigh = (currentLangmuirProbeVoltage & 0xFF00) >> 8;
     uint16_t voltageLow = (currentLangmuirProbeVoltage & 0x00FF) << 8;
     
-    _RG9 = 0;
+    _LATG7 = 0;
     SPI1_Exchange16bit(voltageHigh);
     SPI1_Exchange16bit(voltageLow);
-    _RG9 = 1;
+    _LATG7 = 1;
 
     // Sample Probe from ADC
     ADC1_GetResultFromChannels(langmuirProbeResults, lpADCConfig.channelSelect, lpADCConfig.channelCount);
@@ -441,19 +454,15 @@ void TakeProbeSample(bool isTemp) {
 
         // Calculation for the voltage adjustment needed to sweep from min voltage to max voltage
         // ~590 for a 1s sweep from -4.5 -> 4.5 -> -4.5
-        int voltageAdjustment = maxSweepVoltage * 4 /
-                (convertTime(Sec, MilSec) /
-                GetSweepRate(&LangmuirProbe) / 5) + 1;
-
+        double voltageAdjustment = 655.3; // maxSweepVoltage * 4 / (convertTime(Sec, MilSec) / GetSweepRate(&LangmuirProbe) / 5) + 1;
+        preciseSweepVoltage += isProbeSweepPositive ? voltageAdjustment : -voltageAdjustment;
+        
         // Applies the voltage adjustment within range(minSweepVoltage, maxSweepVoltage)
-        currentLangmuirProbeVoltage = max(minSweepVoltage,
-                min(maxSweepVoltage,
-                currentLangmuirProbeVoltage +
-                isProbeSweepPositive ? voltageAdjustment : -voltageAdjustment));
+        currentLangmuirProbeVoltage = (int)preciseSweepVoltage;
 
         // Checks if the sweep should change from positive to negative
-        if (currentLangmuirProbeVoltage == maxSweepVoltage) isProbeSweepPositive = false;
-        else if (currentLangmuirProbeVoltage == minSweepVoltage) isProbeSweepPositive = true;
+        if (currentLangmuirProbeVoltage >= maxSweepVoltage - (voltageAdjustment / 2)) isProbeSweepPositive = false;
+        else if (currentLangmuirProbeVoltage <= minSweepVoltage + (voltageAdjustment / 2)) isProbeSweepPositive = true;
     }
 }
 
@@ -895,7 +904,7 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
 
 
 uint8_t spiTesting = 0x00;
-int spi16Testing = 0xFFFF;
+int spi16Testing = 0x9C40;
 
 void TestDACSPI() {
 

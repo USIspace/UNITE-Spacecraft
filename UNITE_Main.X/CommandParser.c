@@ -194,21 +194,27 @@ void RunCommand(System system, Mode mode, Property property, Unit unit, unsigned
         case SamplingRate:
 
             if (isOverride) {
-                modeProperties->sampleRate = value * convertTime(unit, Min);
-                modeProperties1->sampleRate = value * convertTime(unit, Min);
-                modeProperties2->sampleRate = value * convertTime(unit, Min);
+                if (unit == Sample) {
+                    if (system == LPSubSys && isReset) lpSamplesPerCalibration = value;
+                } else {
+                    modeProperties->sampleRate = value * convertTime(unit, Min);
+                    modeProperties1->sampleRate = value * convertTime(unit, Min);
+                    modeProperties2->sampleRate = value * convertTime(unit, Min);
+                }
             } else {
                 
                 // Update wait timers so that the new wait time occurs only once
-                int changeInWait = modeProperties->sampleRate - (value * convertTime(unit, Min));
+                int changeInWait = unit == Sample ? value : modeProperties->sampleRate - (value * convertTime(unit, Min));
                 switch (system) {
-                    case LPSubSys: currentLangmuirProbeWait = currentLangmuirProbeWait + changeInWait;
+                    case LPSubSys: 
+                        if (isReset) currentLangmuirProbeCalWait += changeInWait;
+                        else currentLangmuirProbeWait += changeInWait;
                         break;
-                    case MAGSubSys: currentMagnetometerWait = currentMagnetometerWait + changeInWait;
+                    case MAGSubSys: currentMagnetometerWait += changeInWait;
                         break;
-                    case TMPSubSys: currentTemperatureWait = currentTemperatureWait + changeInWait;
+                    case TMPSubSys: currentTemperatureWait += changeInWait;
                         break;
-                    case GPSSubSys: currentGPSWait = currentGPSWait + changeInWait;
+                    case GPSSubSys: currentGPSWait += changeInWait;
                         break;
                     default: break;
                 }

@@ -119,14 +119,11 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _T2Interrupt (  )
     //***User Area Begin
     
     // callback function - called every 3th pass
-    if (++currentLangmuirProbeSweepProgress >= GetSweepRate(&LangmuirProbe))
-    {
+//    if (++currentLangmuirProbeSweepProgress >= GetSweepRate(&LangmuirProbe))
+//    {
         // ticker function call
-        TMR2_CallBack();
-
-        // reset ticker counter
-        currentLangmuirProbeSweepProgress = 0;
-    }
+    TMR2_CallBack();
+//    }
 
     //***User Area End
 

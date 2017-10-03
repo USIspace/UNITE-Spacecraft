@@ -222,13 +222,15 @@ void MainLoop() {
     
     // Log
     if (IS_DIAG) {
-        if (currentLogWait++ >= 10) { 
+        if (currentLogWait++ >= 5) { 
             LogState();
             currentLogWait = 0;
             
             SetAltitude(0.0);
         }
     }
+    
+//    TestDACSPI();
     
     
 }
@@ -270,7 +272,7 @@ void SetTime(double formattedTime) {
 
 void SetAltitude(double alt) {
     
-     lastAltitude -= 2;
+     lastAltitude -= 1;
 //    lastAltitude = (int)alt;
 }
 
