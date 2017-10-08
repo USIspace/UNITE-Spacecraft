@@ -29,6 +29,10 @@ int langmuirProbeResults[16];
 int magnetometerResults[16];
 int temperatureResults[16];
 
+uint16_t langmuirProbeDiagData[5];
+uint16_t magnetometerDiagData[3];
+uint16_t temperatureDiagData[8];
+
 uint8_t langmuirProbeBuffer[300] = {NULL};
 uint8_t magnetometerBuffer[33] = {NULL};
 uint8_t temperatureBuffer[32] = {NULL};
@@ -265,9 +269,12 @@ void EndLangmuirProbeSampling() {
     
     currentLangmuirProbeSweepProgress = 0;
     isLangmuirProbeSampling = false;
-    isProbeVoltagePositive = false;
+    isProbeVoltagePositive = true;
+    isProbeSweepPositive = true;
 
     PackageData(LPSubSys, (int)timeInMin, langmuirProbeBuffer, currentLangmuirProbeBufferIndex);
+
+    // Reset Progress Values
     memset(langmuirProbeBuffer, 0, sizeof(langmuirProbeBuffer));
     currentLangmuirProbeBufferIndex = 0;
     currentLangmuirProbeWait = 0;
@@ -414,8 +421,17 @@ void CalLangmuirProbe() {
         }
         
         int probeResultSize = 1;
+        
+        // Diagnostic Data -> Calibration Value
+        CopyIntToDoubleByte(langmuirProbeResults, langmuirProbeDiagData, LP_VOLTAGE_CHL, i + 1, probeResultSize);
+        
+        langmuirProbeResults[LP_VOLTAGE_CHL] /= 4; // Trim to size of a byte
+        
         CopyIntToByte(langmuirProbeResults, langmuirProbeBuffer, LP_VOLTAGE_CHL, currentLangmuirProbeBufferIndex, probeResultSize);
         currentLangmuirProbeBufferIndex += probeResultSize;
+        
+        
+        
     }
     
     EndLangmuirProbeCal();
@@ -439,6 +455,12 @@ void TakeProbeSample(bool isTemp) {
     // Sample Probe from ADC
     ADC1_GetResultFromChannels(langmuirProbeResults, lpADCConfig.channelSelect, lpADCConfig.channelCount);
 
+    // Diagnostic Data -> Temperature Value
+    if (isTemp) {
+        memset(langmuirProbeDiagData, 0, sizeof(langmuirProbeDiagData));
+        CopyIntToDoubleByte(langmuirProbeResults, langmuirProbeDiagData, LP_TEMP_CHL, 0, 1);
+    }
+    
     // Manipulate Data Here
     int i;
     for (i = 0; i < RESULTS_SIZE; i++) {
@@ -470,6 +492,10 @@ void TakeMagnetometerSample() {
     Clear(magnetometerResults, RESULTS_SIZE, 0);
     ADC1_GetResultFromChannels(magnetometerResults, magADCConfig.channelSelect, magADCConfig.channelCount);
 
+    // Diagnostic Data -> X, Y, Z
+    memset(magnetometerDiagData, 0, sizeof(magnetometerDiagData));
+    CopyIntToDoubleByte(magnetometerResults, magnetometerDiagData, 0, 0, sizeof(magnetometerDiagData));
+    
     // Scale Results down to a byte
     int i;
     for (i = 0; i < RESULTS_SIZE; i++) {
@@ -496,6 +522,10 @@ void TakeTemperatureSample() {
     Clear(temperatureResults, RESULTS_SIZE, 0);
     ADC1_GetResultFromChannels(temperatureResults, tmpADCConfig.channelSelect, tmpADCConfig.channelCount);
 
+    // Diagnostic Data -> Temp 1-8
+    memset(temperatureDiagData, 0, sizeof(temperatureDiagData));
+    CopyIntToDoubleByte(temperatureResults, temperatureDiagData, 0, 0, sizeof(temperatureDiagData));
+    
     // Scale Results down to a byte
     int i;
     for (i = 0; i < RESULTS_SIZE; i++) {

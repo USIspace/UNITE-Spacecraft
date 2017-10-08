@@ -22,8 +22,8 @@ extern "C" {
 #endif	/* TRANSMITMANAGER_H */
 
 // Timeout values in seconds - Subject to change
-#define SIMPLEX_RES_TIMEOUT     100000
-#define DUPLEX_RES_TIMEOUT      100000
+#define SIMPLEX_RES_TIMEOUT     4000000 // 4 sec -> 4*10^6 ns
+#define DUPLEX_RES_TIMEOUT      4000000
 
 // Number of times the Duplex has restarted before launch
 #define DUPLEX_EPOCH_OFFSET     0

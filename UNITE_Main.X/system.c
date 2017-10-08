@@ -140,6 +140,18 @@ int CopyIntToByte(int *source, uint8_t *destination, int sourceStart, int destSt
     return numberOfItems;
 }
 
+int CopyIntToDoubleByte(int *source, uint16_t *destination, int sourceStart, int destStart, int numberOfItems) {
+    
+    int i;
+//    uint16_t **castedSource = (uint16_t **)source;
+    
+    for (i = 0; i < numberOfItems; i++) {
+        destination[i + destStart] = (source[i + sourceStart]);
+    }
+    
+    return numberOfItems;
+}
+
 int CopyBytes(uint8_t *source, uint8_t *destination, int sourceStart, int destStart, int numberOfItems) {
     
     int i;

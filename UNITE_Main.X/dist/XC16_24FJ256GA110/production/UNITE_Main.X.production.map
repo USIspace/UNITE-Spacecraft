@@ -129,7 +129,7 @@ Archive member included because of file (symbol)
 /Applications/microchip/xc16/v1.32/bin/bin/../../lib/libc-elf.a(malloc.eo)
                               build/XC16_24FJ256GA110/production/TransmitManager.o (_free)
 /Applications/microchip/xc16/v1.32/bin/bin/../../lib/libc-elf.a(memcpy.eo)
-                              build/XC16_24FJ256GA110/production/TransmitManager.o (_memcpy)
+                              build/XC16_24FJ256GA110/production/SatelliteMode.o (_memcpy)
 /Applications/microchip/xc16/v1.32/bin/bin/../../lib/libc-elf.a(memset.eo)
                               build/XC16_24FJ256GA110/production/SampleManager.o (_memset)
 /Applications/microchip/xc16/v1.32/bin/bin/../../lib/libc-elf.a(strcat.eo)
@@ -175,12 +175,12 @@ Program Memory  [Origin = 0x200, Length = 0x2a9f8]
 section                    address   length (PC units)   length (bytes) (dec)
 -------                    -------   -----------------   --------------------
 .text                        0x200              0x1410          0x1e18  (7704)
-.const                      0x1610               0x218           0x324  (804)
-.text                       0x1828              0x299e          0x3e6d  (15981)
-.dinit                      0x41c6               0x20c           0x312  (786)
-.text                       0x43d2              0x10e2          0x1953  (6483)
+.const                      0x1610               0x2f4           0x46e  (1134)
+.text                       0x1904              0x2b94          0x415e  (16734)
+.dinit                      0x4498               0x22c           0x342  (834)
+.text                       0x46c4              0x1134          0x19ce  (6606)
 
-                 Total program memory used (bytes):         0x7c0e  (31758) 12%
+                 Total program memory used (bytes):         0x80f4  (33012) 12%
 
 
 Ivt Memory  [Origin = 0x4, Length = 0xfc]
@@ -224,17 +224,17 @@ section                    address      alignment gaps    total length  (dec)
 .nbss                        0x908                   0             0x2  (2)
 .ndata                       0x90a                   0             0x6  (6)
 .nbss                        0x910                   0             0x4  (4)
-.bss                         0x914                   0           0xaa8  (2728)
-.data                       0x13bc                   0            0x90  (144)
-.bss                        0x144c                   0            0x60  (96)
-.data                       0x14ac                   0            0xa8  (168)
-.bss                        0x1554                   0            0x20  (32)
-.data                       0x1574                   0            0x1e  (30)
-.bss                        0x1592                   0            0x3e  (62)
-.data                       0x15d0                   0             0x2  (2)
-.bss                        0x15d2                   0             0x2  (2)
+.bss                         0x914                   0           0xac8  (2760)
+.data                       0x13dc                   0           0x112  (274)
+.bss                        0x14ee                   0            0x30  (48)
+.data                       0x151e                   0            0x56  (86)
+.bss                        0x1574                   0            0x20  (32)
+.data                       0x1594                   0            0x1e  (30)
+.bss                        0x15b2                   0            0x3e  (62)
+.data                       0x15f0                   0             0x2  (2)
+.bss                        0x15f2                   0             0x2  (2)
 
-                 Total data memory used (bytes):          0xdd4  (3540) 21%
+                 Total data memory used (bytes):          0xdf4  (3572) 21%
 
 
 Dynamic Memory Usage
@@ -242,9 +242,9 @@ Dynamic Memory Usage
 region                     address                      maximum length  (dec)
 ------                     -------                      ---------------------
 heap                             0                                   0  (0)
-stack                       0x15d4                              0x322c  (12844)
+stack                       0x15f4                              0x320c  (12812)
 
-                 Maximum dynamic memory (bytes):         0x322c  (12844)
+                 Maximum dynamic memory (bytes):         0x320c  (12812)
 
 
 External Symbols in Data Memory (by address):
@@ -283,10 +283,11 @@ External Symbols in Data Memory (by address):
                     0x084e                  _simplexTimeoutFlag
                     0x0850                  _currentDuplexConnectionWait
                     0x0852                  _duplexTimeoutFlag
-                    0x0853                  _temperaturePowerSwitch
-                    0x0854                  _langmuirMagPowerSwitch
-                    0x0855                  _gpsPowerSwitch
-                    0x0856                  _duplexPowerSwitch
+                    0x0853                  _isDuplexConnected
+                    0x0854                  _temperaturePowerSwitch
+                    0x0855                  _langmuirMagPowerSwitch
+                    0x0856                  _gpsPowerSwitch
+                    0x0857                  _duplexPowerSwitch
                     0x0858                  _b1Charge
                     0x085a                  _b2Charge
                     0x085c                  _b1Voltage
@@ -348,8 +349,7 @@ External Symbols in Data Memory (by address):
                     0x08fa                  _temperatureFileCount
                     0x08fc                  _gpsFileCount
                     0x08fe                  _housekeepingFileCount
-                    0x0900                  _isDuplexConnected
-                    0x0901                  _commandBoardPowerSwitch
+                    0x0900                  _commandBoardPowerSwitch
                     0x0902                  _isLightOn5
                     0x090a                  _TMR5_INTERRUPT_TICKER_FACTOR
                     0x090e                  _TMR1_INTERRUPT_TICKER_FACTOR
@@ -359,51 +359,54 @@ External Symbols in Data Memory (by address):
                     0x112e                  _langmuirProbeResults
                     0x114e                  _magnetometerResults
                     0x116e                  _temperatureResults
-                    0x118e                  _langmuirProbeBuffer
-                    0x12ba                  _magnetometerBuffer
-                    0x12db                  _temperatureBuffer
-                    0x12fb                  _gpsBuffer
-                    0x131c                  _housekeepingBuffer
-                    0x1338                  _unparsedGPSBuffer
-                    0x139c                  _res
-                    0x13bc                  _LangmuirProbe
-                    0x13ec                  _Magnetometer
-                    0x141c                  _GPS
-                    0x144c                  _TemperatureSensors
-                    0x147c                  _Housekeeping
-                    0x14fe                  _simplexPackagePreamble
-                    0x1502                  _langmuirProbeFileName
-                    0x150a                  _magnetometerFileName
-                    0x1512                  _temperatureFileName
-                    0x151a                  _gpsFileName
-                    0x1522                  _housekeepingFileName
-                    0x152a                  _powerPackagePreamble
-                    0x152e                  __iob
-                    0x1552                  __Files
-                    0x1574                  _myFunString
-                    0x15ac                  ___allocs
-                    0x15b4                  ___allocp
-                    0x15b6                  ___alloct
-                    0x15b8                  ___allocx
-                    0x15bc                  __outdone
-                    0x15bd                  __sibuf
-                    0x15bf                  __sobuf
-                    0x15c2                  _value
-                    0x15d0                  ___C30_UART
-                    0x15d2                  ___curbrk
+                    0x118e                  _langmuirProbeDiagData
+                    0x1198                  _magnetometerDiagData
+                    0x119e                  _temperatureDiagData
+                    0x11ae                  _langmuirProbeBuffer
+                    0x12da                  _magnetometerBuffer
+                    0x12fb                  _temperatureBuffer
+                    0x131b                  _gpsBuffer
+                    0x133c                  _housekeepingBuffer
+                    0x1358                  _unparsedGPSBuffer
+                    0x13bc                  _res
+                    0x13dc                  _LangmuirProbe
+                    0x140c                  _TemperatureSensors
+                    0x143c                  _Magnetometer
+                    0x146c                  _GPS
+                    0x14ee                  _Housekeeping
+                    0x151e                  _simplexPackagePreamble
+                    0x1522                  _langmuirProbeFileName
+                    0x152a                  _magnetometerFileName
+                    0x1532                  _temperatureFileName
+                    0x153a                  _gpsFileName
+                    0x1542                  _housekeepingFileName
+                    0x154a                  _powerPackagePreamble
+                    0x154e                  __iob
+                    0x1572                  __Files
+                    0x1594                  _myFunString
+                    0x15cc                  ___allocs
+                    0x15d4                  ___allocp
+                    0x15d6                  ___alloct
+                    0x15d8                  ___allocx
+                    0x15dc                  __outdone
+                    0x15dd                  __sibuf
+                    0x15df                  __sobuf
+                    0x15e2                  _value
+                    0x15f0                  ___C30_UART
+                    0x15f2                  ___curbrk
 
 External Symbols in Data Memory (by name):
 
-                    0x141c                  _GPS
+                    0x146c                  _GPS
                     0x08a6                  _GPS_BUFFER_SIZE
                     0x0842                  _GetDoubleFromString
                     0x08a8                  _HOUSE_BUFFER_SIZE
-                    0x147c                  _Housekeeping
+                    0x14ee                  _Housekeeping
                     0x0882                  _InterimMode
                     0x08a0                  _LP_BUFFER_SIZE
-                    0x13bc                  _LangmuirProbe
+                    0x13dc                  _LangmuirProbe
                     0x08a2                  _MAG_BUFFER_SIZE
-                    0x13ec                  _Magnetometer
+                    0x143c                  _Magnetometer
                     0x0892                  _ReEntryMode
                     0x08ca                  _SafeMode
                     0x088a                  _ScienceMode
@@ -411,19 +414,19 @@ External Symbols in Data Memory (by name):
                     0x08a4                  _TMP_BUFFER_SIZE
                     0x090e                  _TMR1_INTERRUPT_TICKER_FACTOR
                     0x090a                  _TMR5_INTERRUPT_TICKER_FACTOR
-                    0x144c                  _TemperatureSensors
+                    0x140c                  _TemperatureSensors
                     0x08ea                  _TransmissionUnitForMode
-                    0x1552                  __Files
-                    0x15d0                  ___C30_UART
-                    0x15b4                  ___allocp
-                    0x15ac                  ___allocs
-                    0x15b6                  ___alloct
-                    0x15b8                  ___allocx
-                    0x15d2                  ___curbrk
-                    0x152e                  __iob
-                    0x15bc                  __outdone
-                    0x15bd                  __sibuf
-                    0x15bf                  __sobuf
+                    0x1572                  __Files
+                    0x15f0                  ___C30_UART
+                    0x15d4                  ___allocp
+                    0x15cc                  ___allocs
+                    0x15d6                  ___alloct
+                    0x15d8                  ___allocx
+                    0x15f2                  ___curbrk
+                    0x154e                  __iob
+                    0x15dc                  __outdone
+                    0x15dd                  __sibuf
+                    0x15df                  __sobuf
                     0x0858                  _b1Charge
                     0x0860                  _b1Current
                     0x085c                  _b1Voltage
@@ -433,7 +436,7 @@ External Symbols in Data Memory (by name):
                     0x0864                  _bussPlusVoltage
                     0x08d6                  _byteIndex
                     0x08ba                  _channel
-                    0x0901                  _commandBoardPowerSwitch
+                    0x0900                  _commandBoardPowerSwitch
                     0x10e4                  _commandString
                     0x08bc                  _count
                     0x0850                  _currentDuplexConnectionWait
@@ -455,20 +458,20 @@ External Symbols in Data Memory (by name):
                     0x0874                  _currentMode
                     0x080a                  _currentTemperatureBufferIndex
                     0x081c                  _currentTemperatureWait
-                    0x0856                  _duplexPowerSwitch
+                    0x0857                  _duplexPowerSwitch
                     0x0870                  _duplexTemp
                     0x0852                  _duplexTimeoutFlag
                     0x1106                  _epsEcho
                     0x0872                  _epsTemp
-                    0x12fb                  _gpsBuffer
+                    0x131b                  _gpsBuffer
                     0x08fc                  _gpsFileCount
-                    0x151a                  _gpsFileName
+                    0x153a                  _gpsFileName
                     0x0802                  _gpsIndex
-                    0x0855                  _gpsPowerSwitch
-                    0x131c                  _housekeepingBuffer
+                    0x0856                  _gpsPowerSwitch
+                    0x133c                  _housekeepingBuffer
                     0x08fe                  _housekeepingFileCount
-                    0x1522                  _housekeepingFileName
-                    0x0900                  _isDuplexConnected
+                    0x1542                  _housekeepingFileName
+                    0x0853                  _isDuplexConnected
                     0x08e8                  _isEndOfCommand
                     0x089a                  _isGPSLocked
                     0x0800                  _isGPSReading
@@ -482,11 +485,12 @@ External Symbols in Data Memory (by name):
                     0x08aa                  _isProbeVoltagePositive
                     0x08e1                  _isReset
                     0x0848                  _isSending
-                    0x0854                  _langmuirMagPowerSwitch
-                    0x118e                  _langmuirProbeBuffer
+                    0x0855                  _langmuirMagPowerSwitch
+                    0x11ae                  _langmuirProbeBuffer
                     0x0828                  _langmuirProbeCallbackCount
+                    0x118e                  _langmuirProbeDiagData
                     0x08f6                  _langmuirProbeFileCount
-                    0x1502                  _langmuirProbeFileName
+                    0x1522                  _langmuirProbeFileName
                     0x112e                  _langmuirProbeResults
                     0x0876                  _lastAltitude
                     0x089c                  _latDecPrecision
@@ -495,24 +499,25 @@ External Symbols in Data Memory (by name):
                     0x08ac                  _lpADCConfig
                     0x08f2                  _lpSamplesPerCalibration
                     0x08b0                  _magADCConfig
-                    0x12ba                  _magnetometerBuffer
+                    0x12da                  _magnetometerBuffer
                     0x082a                  _magnetometerCallbackCount
+                    0x1198                  _magnetometerDiagData
                     0x08f8                  _magnetometerFileCount
-                    0x150a                  _magnetometerFileName
+                    0x152a                  _magnetometerFileName
                     0x114e                  _magnetometerResults
                     0x08da                  _mode
-                    0x1574                  _myFunString
+                    0x1594                  _myFunString
                     0x08e6                  _nextValueIndex
-                    0x152a                  _powerPackagePreamble
+                    0x154a                  _powerPackagePreamble
                     0x083e                  _preciseSweepVoltage
                     0x08dc                  _property
-                    0x139c                  _res
+                    0x13bc                  _res
                     0x08e2                  _seqByte1
                     0x08e3                  _seqByte2
                     0x08e4                  _seqByte3
                     0x08be                  _shouldChangeMode
                     0x0839                  _shouldMagnetometerSample
-                    0x14fe                  _simplexPackagePreamble
+                    0x151e                  _simplexPackagePreamble
                     0x086e                  _simplexTemp
                     0x084e                  _simplexTimeoutFlag
                     0x0866                  _solar1Voltage
@@ -522,10 +527,11 @@ External Symbols in Data Memory (by name):
                     0x08b8                  _spi16Testing
                     0x0846                  _spiTesting
                     0x08d8                  _system
-                    0x12db                  _temperatureBuffer
+                    0x12fb                  _temperatureBuffer
+                    0x119e                  _temperatureDiagData
                     0x08fa                  _temperatureFileCount
-                    0x1512                  _temperatureFileName
-                    0x0853                  _temperaturePowerSwitch
+                    0x1532                  _temperatureFileName
+                    0x0854                  _temperaturePowerSwitch
                     0x116e                  _temperatureResults
                     0x08c4                  _timeInMin
                     0x08b4                  _tmpADCConfig
@@ -534,8 +540,8 @@ External Symbols in Data Memory (by name):
                     0x084c                  _transmitQueueLength
                     0x084a                  _transmitQueueStartIndex
                     0x08de                  _unit
-                    0x1338                  _unparsedGPSBuffer
-                    0x15c2                  _value
+                    0x1358                  _unparsedGPSBuffer
+                    0x15e2                  _value
 
 External Symbols in Program Memory (by address):
 
@@ -563,9 +569,9 @@ External Symbols in Program Memory (by address):
                   0x0005c8                  ___subsf3
                   0x0005ca                  ___addsf3
                   0x000684                  ___divsf3
-                  0x000708                  ___lesf2
-                  0x000708                  ___ltsf2
                   0x000708                  ___eqsf2
+                  0x000708                  ___ltsf2
+                  0x000708                  ___lesf2
                   0x00070c                  ___gesf2
                   0x00070c                  ___gtsf2
                   0x000710                  ___fixsfsi
@@ -598,423 +604,427 @@ External Symbols in Program Memory (by address):
                   0x000f02                  _strlen
                   0x000f0e                  _strstr
                   0x000f3a                  _strchr
-                  0x000f54                  __sprintf_cdnopsuxX
                   0x000f54                  __sprintf_cdnopuxX
-                  0x000f92                  __vfprintf_cdnopsuxX
+                  0x000f54                  __sprintf_cdnopsuxX
                   0x000f92                  __vfprintf_cdnopuxX
+                  0x000f92                  __vfprintf_cdnopsuxX
                   0x001564                  _strncmp
                   0x001604                  ___mulp32peds3
                   0x001604                  ___mulsi3
                   0x001604                  ___mulp32eds3
-                  0x001782                  _HEADER_SIZE
-                  0x001784                  _QUEUE_SIZE
-                  0x001786                  _PREAMBLE_LENGTH
-                  0x001788                  _SIM_RES_LENGTH
-                  0x00178a                  _DUPLEX_SYNC_LENGTH
-                  0x00178c                  _duplexSyncBytes
-                  0x00178e                  _DUPLEX_PACK_BYTE_LENGTH
-                  0x001790                  _duplexUplinkSMSPoll
-                  0x001796                  _duplexUplinkSMSReady
-                  0x00179c                  _duplexCmdReceived
-                  0x0017a1                  _duplexDownlinkFilePoll
-                  0x0017a7                  _duplexDownlinkFileReady
-                  0x0017ad                  _duplexHousekeepingFilePoll
-                  0x0017b3                  _duplexWaitingFilesPoll
-                  0x0017ba                  _FILE_COUNT_INDEX
-                  0x0017bc                  _DUPLEX_TIMEOUT
-                  0x0017be                  _MAX_FILES_WAITING
-                  0x0017c0                  _DUP_RES_LENGTH
-                  0x0017c2                  _POWER_ECHO_LENGTH
-                  0x0017f4                  _ADC_CHANNEL_MAP
-                  0x001814                  _RESULTS_SIZE
-                  0x001816                  _electronVoltage
-                  0x001818                  _ionVoltage
-                  0x00181a                  _maxSweepVoltage
-                  0x00181c                  _minSweepVoltage
-                  0x001826                  _VALUE_ARRAY_SIZE
-                  0x001828                  _isLangmuirProbeOn
-                  0x00183e                  _isMagnetometerOn
-                  0x001854                  _isTemperatureOn
-                  0x00186a                  _isGPSOn
-                  0x001880                  _isDuplexOn
-                  0x001888                  _SaveData
-                  0x0018d6                  _PackageData
-                  0x001970                  _TransmitQueue
-                  0x0019d4                  _Send
-                  0x001a00                  _Read
-                  0x001a52                  _TransmitPreamble
-                  0x001a7c                  _PollDuplex
-                  0x001b26                  _SendData
-                  0x001c5c                  _TransmitInstrumentDataToSimplex
-                  0x001d5a                  _TransmitInstrumentDataToDuplex
-                  0x001f04                  _ReadACKForUnit
-                  0x001fbc                  _IsLineBusy
-                  0x001fd2                  _CreateFileHeader
-                  0x0020c2                  _GetWaitingFilesCount
-                  0x002148                  _SetTotalTime
-                  0x002248                  _HandleCommand
-                  0x00247c                  _TogglePowerSwitches
-                  0x0024f0                  _ReadPowerSwitches
-                  0x002784                  _SetLangmuirProbePower
-                  0x00279a                  _SetMagnetometerPower
-                  0x0027a6                  _SetTemperaturePower
-                  0x0027bc                  _SetGPSPower
-                  0x0027d2                  _TrySampleLangmuirProbe
-                  0x00281c                  _TryCalibrateLangmuirProbe
-                  0x002844                  _TrySampleMagnetometer
-                  0x002892                  _TrySampleTemperature
-                  0x0028d6                  _TrySampleGPS
-                  0x00291e                  _TrySampleHousekeeping
-                  0x002950                  _EndLangmuirProbeSampling
-                  0x0029d4                  _EndLangmuirProbeCal
-                  0x0029e4                  _EndMagnetometerSampling
-                  0x002a18                  _EndTemperatureSensorSampling
-                  0x002a44                  _EndGPSSampling
-                  0x002a8c                  _EndHousekeepingSampling
-                  0x002ab8                  _ManageSweepingProgress
-                  0x002b34                  _CalLangmuirProbe
-                  0x002bd4                  _TakeProbeSample
-                  0x002d06                  _TakeMagnetometerSample
-                  0x002d8c                  _TakeTemperatureSample
-                  0x002dfc                  _TakeHousekeepingSample
-                  0x002eee                  _AppendToGPSBuffer
-                  0x002f2a                  _TakeGPSSample
-                  0x002f8c                  _CompressAscii
-                  0x0030ec                  _GetSubStringLength
-                  0x003110                  _CopySubstring
-                  0x003142                  _ParseDouble
-                  0x003272                  _AsciiFromInt
-                  0x00330e                  _GetDoubleFromSubString
-                  0x00335c                  _AppendIntToGPSBuffer
-                  0x003382                  _ParseGPSSample
-                  0x0035ca                  _TestDACSPI
-                  0x0035ea                  _TestADC
-                  0x003624                  _PerformCommands
-                  0x0036c2                  _EndMessage
-                  0x0036d0                  _ParseByte
-                  0x00373e                  _RunCommand
-                  0x003c2a                  _IsNextCommand
-                  0x003cdc                  _addValueByte
-                  0x003cfa                  _convertHexToDecimal
-                  0x003d3a                  _convertTime
-                  0x003de4                  _SatelliteProperties_Initialize
-                  0x003dfc                  _Satellite_Initialize
-                  0x003e0e                  _ShouldUpdateMode
-                  0x003eae                  _UpdateMode
-                  0x003f1a                  _MainLoop
-                  0x003fa2                  _SetTime
-                  0x004022                  _SetAltitude
-                  0x004036                  _LogState
-                  0x0043d2                  _UART1_Initialize
-                  0x004410                  _UART1_Read
-                  0x004446                  _UART1_ReadBuffer
-                  0x00447a                  _UART1_Write
-                  0x0044b0                  _UART1_WriteBuffer
-                  0x0044e2                  _UART1_TransferStatusGet
-                  0x00451e                  _UART1_Peek
-                  0x004546                  _UART1_ReceiveBufferSizeGet
-                  0x004574                  _UART1_TransmitBufferSizeGet
-                  0x0045a4                  _UART1_ReceiveBufferIsEmpty
-                  0x0045bc                  _UART1_TransmitBufferIsFull
-                  0x0045d4                  _UART1_StatusGet
-                  0x0045dc                  _SPI1_Initialize
-                  0x0045ee                  _SPI1_Exchange
-                  0x004656                  _SPI1_ExchangeBuffer
-                  0x004770                  _SPI1_Exchange16bit
-                  0x004780                  _SPI1_Exchange16bitBuffer
-                  0x004796                  _SPI1_TransferModeGet
-                  0x0047ac                  _SPI1_StatusGet
-                  0x0047b4                  _SPI1_Exchange8bit
-                  0x0047c4                  _SPI2_Initialize
-                  0x0047d6                  _SPI2_Exchange
-                  0x00483e                  _SPI2_ExchangeBuffer
-                  0x004958                  _SPI2_Exchange8bit
-                  0x004968                  _SPI2_Exchange8bitBuffer
-                  0x00497c                  _SPI2_TransferModeGet
-                  0x004992                  _SPI2_StatusGet
-                  0x00499a                  _ConfigureOscillator
-                  0x0049d6                  _wait_for
-                  0x004a18                  _Pow
-                  0x004a5c                  _ClearQueue
-                  0x004a86                  _Clear
-                  0x004ab4                  _CopyIntToByte
-                  0x004aee                  _CopyBytes
-                  0x004b30                  _GetSampleRate
-                  0x004b6c                  _GetSweepRate
-                  0x004baa                  _GetSweepDuration
-                  0x004be8                  _GetSystemHeaderID
-                  0x004c2c                  _GetDayTimeInMin
-                  0x004c44                  _GetTransmissionPackageLength
-                  0x004c58                  _GetTransmissionUnitForMode
-                  0x004c8c                  _InitializeADC1
-                  0x004cca                  _ADC1_GetResultFromChannels
-                  0x004d88                  _ADC1_ResultGetFromChannel
-                  0x004dc0                  _ADC1_ManualSampleForSec
-                  0x004dd0                  _PIN_MANAGER_Initialize
-                  0x004eda                  _TMR1_Initialize
-                  0x004ef4                  _TMR1_Period16BitSet
-                  0x004f06                  _TMR1_Period16BitGet
-                  0x004f0e                  _TMR1_Counter16BitSet
-                  0x004f20                  _TMR1_Counter16BitGet
-                  0x004f3a                  _TMR1_Start
-                  0x004f4a                  _TMR1_Stop
-                  0x004f54                  _TMR1_GetElapsedThenClear
-                  0x004f6c                  _TMR1_SoftwareCounterGet
-                  0x004f78                  _TMR1_SoftwareCounterClear
-                  0x004f84                  _TMR2_Initialize
-                  0x004f9e                  _TMR2_Period16BitSet
-                  0x004fb0                  _TMR2_Period16BitGet
-                  0x004fb8                  _TMR2_Counter16BitSet
-                  0x004fca                  _TMR2_Counter16BitGet
-                  0x004fdc                  _TMR2_Start
-                  0x004fec                  _TMR2_Stop
-                  0x004ff6                  _TMR2_GetElapsedThenClear
-                  0x00500e                  _TMR2_SoftwareCounterGet
-                  0x00501a                  _TMR2_SoftwareCounterClear
-                  0x005026                  _TMR4_Initialize
-                  0x005040                  _TMR4_Period16BitSet
-                  0x005052                  _TMR4_Period16BitGet
-                  0x00505a                  _TMR4_Counter16BitSet
-                  0x00506c                  _TMR4_Counter16BitGet
-                  0x00507e                  _TMR4_Start
-                  0x00508e                  _TMR4_Stop
-                  0x005098                  _TMR4_GetElapsedThenClear
-                  0x0050b0                  _TMR4_SoftwareCounterGet
-                  0x0050bc                  _TMR4_SoftwareCounterClear
-                  0x0050c8                  _TMR5_Initialize
-                  0x0050e2                  _TMR5_Period16BitSet
-                  0x0050f4                  _TMR5_Period16BitGet
-                  0x0050fc                  _TMR5_Counter16BitSet
-                  0x00510e                  _TMR5_Counter16BitGet
-                  0x005120                  _TMR5_Start
-                  0x005130                  _TMR5_Stop
-                  0x00513a                  _TMR5_GetElapsedThenClear
-                  0x005152                  _TMR5_SoftwareCounterGet
-                  0x00515e                  _TMR5_SoftwareCounterClear
-                  0x00516a                  _TMR3_Initialize
-                  0x005184                  _TMR3_Period16BitSet
-                  0x005196                  _TMR3_Period16BitGet
-                  0x00519e                  _TMR3_Counter16BitSet
-                  0x0051b0                  _TMR3_Counter16BitGet
-                  0x0051c0                  _TMR3_Start
-                  0x0051d0                  _TMR3_Stop
-                  0x0051da                  _TMR3_GetElapsedThenClear
-                  0x0051f2                  _TMR3_SoftwareCounterGet
-                  0x0051fe                  _TMR3_SoftwareCounterClear
-                  0x00520a                  _CRC16_Initialize
-                  0x00521a                  _CRC16SendBytes
-                  0x005296                  _UART2_Initialize
-                  0x0052aa                  _UART2_Read
-                  0x0052ec                  _UART2_Write
-                  0x005304                  _UART2_StatusGet
-                  0x00530c                  _UART3_Initialize
-                  0x005320                  _UART3_Read
-                  0x005358                  _UART3_Write
-                  0x005370                  _UART3_StatusGet
-                  0x005378                  _INTERRUPT_Initialize
-                  0x0053e2                  _UART4_Initialize
-                  0x0053f6                  _UART4_Read
-                  0x005414                  _UART4_Write
-                  0x00542c                  _UART4_StatusGet
-                  0x005434                  _SYSTEM_Initialize
-                  0x00545a                  _OSCILLATOR_Initialize
-                  0x00549c                  _main
-                  0x0054ae                  _InitApp
+                  0x00185e                  _HEADER_SIZE
+                  0x001860                  _QUEUE_SIZE
+                  0x001862                  _PREAMBLE_LENGTH
+                  0x001864                  _SIM_RES_LENGTH
+                  0x001866                  _DUPLEX_SYNC_LENGTH
+                  0x001868                  _duplexSyncBytes
+                  0x00186a                  _DUPLEX_PACK_BYTE_LENGTH
+                  0x00186c                  _duplexUplinkSMSPoll
+                  0x001872                  _duplexUplinkSMSReady
+                  0x001878                  _duplexCmdReceived
+                  0x00187d                  _duplexDownlinkFilePoll
+                  0x001883                  _duplexDownlinkFileReady
+                  0x001889                  _duplexHousekeepingFilePoll
+                  0x00188f                  _duplexWaitingFilesPoll
+                  0x001896                  _FILE_COUNT_INDEX
+                  0x001898                  _DUPLEX_TIMEOUT
+                  0x00189a                  _MAX_FILES_WAITING
+                  0x00189c                  _DUP_RES_LENGTH
+                  0x00189e                  _POWER_ECHO_LENGTH
+                  0x0018d0                  _ADC_CHANNEL_MAP
+                  0x0018f0                  _RESULTS_SIZE
+                  0x0018f2                  _electronVoltage
+                  0x0018f4                  _ionVoltage
+                  0x0018f6                  _maxSweepVoltage
+                  0x0018f8                  _minSweepVoltage
+                  0x001902                  _VALUE_ARRAY_SIZE
+                  0x001904                  _isLangmuirProbeOn
+                  0x00191a                  _isMagnetometerOn
+                  0x001930                  _isTemperatureOn
+                  0x001946                  _isGPSOn
+                  0x00195c                  _isDuplexOn
+                  0x001972                  _SaveData
+                  0x0019c0                  _PackageData
+                  0x001a5a                  _TransmitQueue
+                  0x001abe                  _Send
+                  0x001aea                  _Read
+                  0x001b3c                  _TransmitPreamble
+                  0x001b66                  _PollDuplex
+                  0x001c10                  _SendData
+                  0x001d46                  _TransmitInstrumentDataToSimplex
+                  0x001e44                  _TransmitInstrumentDataToDuplex
+                  0x001fee                  _ReadACKForUnit
+                  0x0020a6                  _IsLineBusy
+                  0x0020bc                  _CreateFileHeader
+                  0x0021ac                  _GetWaitingFilesCount
+                  0x002232                  _SetTotalTime
+                  0x002332                  _HandleCommand
+                  0x002566                  _TogglePowerSwitches
+                  0x0025da                  _ReadPowerSwitches
+                  0x002880                  _SetLangmuirProbePower
+                  0x002896                  _SetMagnetometerPower
+                  0x0028a2                  _SetTemperaturePower
+                  0x0028b8                  _SetGPSPower
+                  0x0028ce                  _SetDuplexPower
+                  0x0028e6                  _TrySampleLangmuirProbe
+                  0x002930                  _TryCalibrateLangmuirProbe
+                  0x002958                  _TrySampleMagnetometer
+                  0x0029a6                  _TrySampleTemperature
+                  0x0029ea                  _TrySampleGPS
+                  0x002a32                  _TrySampleHousekeeping
+                  0x002a64                  _EndLangmuirProbeSampling
+                  0x002aee                  _EndLangmuirProbeCal
+                  0x002afe                  _EndMagnetometerSampling
+                  0x002b32                  _EndTemperatureSensorSampling
+                  0x002b5e                  _EndGPSSampling
+                  0x002ba6                  _EndHousekeepingSampling
+                  0x002bd2                  _ManageSweepingProgress
+                  0x002c4e                  _CalLangmuirProbe
+                  0x002d08                  _TakeProbeSample
+                  0x002e54                  _TakeMagnetometerSample
+                  0x002eee                  _TakeTemperatureSample
+                  0x002f72                  _TakeHousekeepingSample
+                  0x003064                  _AppendToGPSBuffer
+                  0x0030a0                  _TakeGPSSample
+                  0x003102                  _CompressAscii
+                  0x003262                  _GetSubStringLength
+                  0x003286                  _CopySubstring
+                  0x0032b8                  _ParseDouble
+                  0x0033e8                  _AsciiFromInt
+                  0x003484                  _GetDoubleFromSubString
+                  0x0034d2                  _AppendIntToGPSBuffer
+                  0x0034f8                  _ParseGPSSample
+                  0x003740                  _TestDACSPI
+                  0x003760                  _TestADC
+                  0x00379a                  _PerformCommands
+                  0x003838                  _EndMessage
+                  0x003846                  _ParseByte
+                  0x0038b4                  _RunCommand
+                  0x003da0                  _IsNextCommand
+                  0x003e52                  _addValueByte
+                  0x003e70                  _convertHexToDecimal
+                  0x003eb0                  _convertTime
+                  0x003f5a                  _SatelliteProperties_Initialize
+                  0x003f78                  _Satellite_Initialize
+                  0x003f8a                  _ShouldUpdateMode
+                  0x00402a                  _UpdateMode
+                  0x004096                  _MainLoop
+                  0x004118                  _SetTime
+                  0x004198                  _SetAltitude
+                  0x0041ac                  _LogState
+                  0x0046c4                  _UART1_Initialize
+                  0x004702                  _UART1_Read
+                  0x004738                  _UART1_ReadBuffer
+                  0x00476c                  _UART1_Write
+                  0x0047a2                  _UART1_WriteBuffer
+                  0x0047d4                  _UART1_TransferStatusGet
+                  0x004810                  _UART1_Peek
+                  0x004838                  _UART1_ReceiveBufferSizeGet
+                  0x004866                  _UART1_TransmitBufferSizeGet
+                  0x004896                  _UART1_ReceiveBufferIsEmpty
+                  0x0048ae                  _UART1_TransmitBufferIsFull
+                  0x0048c6                  _UART1_StatusGet
+                  0x0048ce                  _SPI1_Initialize
+                  0x0048e0                  _SPI1_Exchange
+                  0x004948                  _SPI1_ExchangeBuffer
+                  0x004a62                  _SPI1_Exchange16bit
+                  0x004a72                  _SPI1_Exchange16bitBuffer
+                  0x004a88                  _SPI1_TransferModeGet
+                  0x004a9e                  _SPI1_StatusGet
+                  0x004aa6                  _SPI1_Exchange8bit
+                  0x004ab6                  _SPI2_Initialize
+                  0x004ac8                  _SPI2_Exchange
+                  0x004b30                  _SPI2_ExchangeBuffer
+                  0x004c4a                  _SPI2_Exchange8bit
+                  0x004c5a                  _SPI2_Exchange8bitBuffer
+                  0x004c6e                  _SPI2_TransferModeGet
+                  0x004c84                  _SPI2_StatusGet
+                  0x004c8c                  _ConfigureOscillator
+                  0x004cc8                  _wait_for
+                  0x004d0a                  _Pow
+                  0x004d4e                  _ClearQueue
+                  0x004d78                  _Clear
+                  0x004da6                  _CopyIntToByte
+                  0x004de0                  _CopyIntToDoubleByte
+                  0x004e1a                  _CopyBytes
+                  0x004e5c                  _GetSampleRate
+                  0x004e98                  _GetSweepRate
+                  0x004ed6                  _GetSweepDuration
+                  0x004f14                  _GetSystemHeaderID
+                  0x004f58                  _GetDayTimeInMin
+                  0x004f70                  _GetTransmissionPackageLength
+                  0x004f84                  _GetTransmissionUnitForMode
+                  0x004fb8                  _InitializeADC1
+                  0x004ff6                  _ADC1_GetResultFromChannels
+                  0x0050b4                  _ADC1_ResultGetFromChannel
+                  0x0050ec                  _ADC1_ManualSampleForSec
+                  0x0050fc                  _PIN_MANAGER_Initialize
+                  0x005206                  _TMR1_Initialize
+                  0x005220                  _TMR1_Period16BitSet
+                  0x005232                  _TMR1_Period16BitGet
+                  0x00523a                  _TMR1_Counter16BitSet
+                  0x00524c                  _TMR1_Counter16BitGet
+                  0x005266                  _TMR1_Start
+                  0x005276                  _TMR1_Stop
+                  0x005280                  _TMR1_GetElapsedThenClear
+                  0x005298                  _TMR1_SoftwareCounterGet
+                  0x0052a4                  _TMR1_SoftwareCounterClear
+                  0x0052b0                  _TMR2_Initialize
+                  0x0052ca                  _TMR2_Period16BitSet
+                  0x0052dc                  _TMR2_Period16BitGet
+                  0x0052e4                  _TMR2_Counter16BitSet
+                  0x0052f6                  _TMR2_Counter16BitGet
+                  0x005308                  _TMR2_Start
+                  0x005318                  _TMR2_Stop
+                  0x005322                  _TMR2_GetElapsedThenClear
+                  0x00533a                  _TMR2_SoftwareCounterGet
+                  0x005346                  _TMR2_SoftwareCounterClear
+                  0x005352                  _TMR4_Initialize
+                  0x00536c                  _TMR4_Period16BitSet
+                  0x00537e                  _TMR4_Period16BitGet
+                  0x005386                  _TMR4_Counter16BitSet
+                  0x005398                  _TMR4_Counter16BitGet
+                  0x0053aa                  _TMR4_Start
+                  0x0053ba                  _TMR4_Stop
+                  0x0053c4                  _TMR4_GetElapsedThenClear
+                  0x0053dc                  _TMR4_SoftwareCounterGet
+                  0x0053e8                  _TMR4_SoftwareCounterClear
+                  0x0053f4                  _TMR5_Initialize
+                  0x00540e                  _TMR5_Period16BitSet
+                  0x005420                  _TMR5_Period16BitGet
+                  0x005428                  _TMR5_Counter16BitSet
+                  0x00543a                  _TMR5_Counter16BitGet
+                  0x00544c                  _TMR5_Start
+                  0x00545c                  _TMR5_Stop
+                  0x005466                  _TMR5_GetElapsedThenClear
+                  0x00547e                  _TMR5_SoftwareCounterGet
+                  0x00548a                  _TMR5_SoftwareCounterClear
+                  0x005496                  _TMR3_Initialize
+                  0x0054b0                  _TMR3_Period16BitSet
+                  0x0054c2                  _TMR3_Period16BitGet
+                  0x0054ca                  _TMR3_Counter16BitSet
+                  0x0054dc                  _TMR3_Counter16BitGet
+                  0x0054ec                  _TMR3_Start
+                  0x0054fc                  _TMR3_Stop
+                  0x005506                  _TMR3_GetElapsedThenClear
+                  0x00551e                  _TMR3_SoftwareCounterGet
+                  0x00552a                  _TMR3_SoftwareCounterClear
+                  0x005536                  _CRC16_Initialize
+                  0x005546                  _CRC16SendBytes
+                  0x0055c2                  _UART3_Initialize
+                  0x0055d6                  _UART3_Read
+                  0x005624                  _UART3_Write
+                  0x00563c                  _UART3_StatusGet
+                  0x005644                  _UART2_Initialize
+                  0x005658                  _UART2_Read
+                  0x00569a                  _UART2_Write
+                  0x0056b2                  _UART2_StatusGet
+                  0x0056ba                  _INTERRUPT_Initialize
+                  0x005724                  _SYSTEM_Initialize
+                  0x00574a                  _OSCILLATOR_Initialize
+                  0x005778                  _UART4_Initialize
+                  0x00578c                  _UART4_Read
+                  0x0057aa                  _UART4_Write
+                  0x0057c2                  _UART4_StatusGet
+                  0x0057e0                  _main
+                  0x0057f2                  _InitApp
 
 External Symbols in Program Memory (by name):
 
-                  0x004cca                  _ADC1_GetResultFromChannels
-                  0x004dc0                  _ADC1_ManualSampleForSec
-                  0x004d88                  _ADC1_ResultGetFromChannel
-                  0x0017f4                  _ADC_CHANNEL_MAP
-                  0x00335c                  _AppendIntToGPSBuffer
-                  0x002eee                  _AppendToGPSBuffer
-                  0x003272                  _AsciiFromInt
-                  0x00521a                  _CRC16SendBytes
-                  0x00520a                  _CRC16_Initialize
-                  0x002b34                  _CalLangmuirProbe
-                  0x004a86                  _Clear
-                  0x004a5c                  _ClearQueue
-                  0x002f8c                  _CompressAscii
-                  0x00499a                  _ConfigureOscillator
-                  0x004aee                  _CopyBytes
-                  0x004ab4                  _CopyIntToByte
-                  0x003110                  _CopySubstring
-                  0x001fd2                  _CreateFileHeader
-                  0x00178e                  _DUPLEX_PACK_BYTE_LENGTH
-                  0x00178a                  _DUPLEX_SYNC_LENGTH
-                  0x0017bc                  _DUPLEX_TIMEOUT
-                  0x0017c0                  _DUP_RES_LENGTH
-                  0x002a44                  _EndGPSSampling
-                  0x002a8c                  _EndHousekeepingSampling
-                  0x0029d4                  _EndLangmuirProbeCal
-                  0x002950                  _EndLangmuirProbeSampling
-                  0x0029e4                  _EndMagnetometerSampling
-                  0x0036c2                  _EndMessage
-                  0x002a18                  _EndTemperatureSensorSampling
-                  0x0017ba                  _FILE_COUNT_INDEX
-                  0x004c2c                  _GetDayTimeInMin
-                  0x00330e                  _GetDoubleFromSubString
-                  0x004b30                  _GetSampleRate
-                  0x0030ec                  _GetSubStringLength
-                  0x004baa                  _GetSweepDuration
-                  0x004b6c                  _GetSweepRate
-                  0x004be8                  _GetSystemHeaderID
-                  0x004c44                  _GetTransmissionPackageLength
-                  0x004c58                  _GetTransmissionUnitForMode
-                  0x0020c2                  _GetWaitingFilesCount
-                  0x001782                  _HEADER_SIZE
-                  0x002248                  _HandleCommand
-                  0x005378                  _INTERRUPT_Initialize
-                  0x0054ae                  _InitApp
-                  0x004c8c                  _InitializeADC1
-                  0x001fbc                  _IsLineBusy
-                  0x003c2a                  _IsNextCommand
-                  0x004036                  _LogState
-                  0x0017be                  _MAX_FILES_WAITING
-                  0x003f1a                  _MainLoop
-                  0x002ab8                  _ManageSweepingProgress
-                  0x00545a                  _OSCILLATOR_Initialize
-                  0x004dd0                  _PIN_MANAGER_Initialize
-                  0x0017c2                  _POWER_ECHO_LENGTH
-                  0x001786                  _PREAMBLE_LENGTH
-                  0x0018d6                  _PackageData
-                  0x0036d0                  _ParseByte
-                  0x003142                  _ParseDouble
-                  0x003382                  _ParseGPSSample
-                  0x003624                  _PerformCommands
-                  0x001a7c                  _PollDuplex
-                  0x004a18                  _Pow
-                  0x001784                  _QUEUE_SIZE
-                  0x001814                  _RESULTS_SIZE
-                  0x001a00                  _Read
-                  0x001f04                  _ReadACKForUnit
-                  0x0024f0                  _ReadPowerSwitches
-                  0x00373e                  _RunCommand
-                  0x001788                  _SIM_RES_LENGTH
-                  0x0045ee                  _SPI1_Exchange
-                  0x004770                  _SPI1_Exchange16bit
-                  0x004780                  _SPI1_Exchange16bitBuffer
-                  0x0047b4                  _SPI1_Exchange8bit
-                  0x004656                  _SPI1_ExchangeBuffer
-                  0x0045dc                  _SPI1_Initialize
-                  0x0047ac                  _SPI1_StatusGet
-                  0x004796                  _SPI1_TransferModeGet
-                  0x0047d6                  _SPI2_Exchange
-                  0x004958                  _SPI2_Exchange8bit
-                  0x004968                  _SPI2_Exchange8bitBuffer
-                  0x00483e                  _SPI2_ExchangeBuffer
-                  0x0047c4                  _SPI2_Initialize
-                  0x004992                  _SPI2_StatusGet
-                  0x00497c                  _SPI2_TransferModeGet
-                  0x005434                  _SYSTEM_Initialize
-                  0x003de4                  _SatelliteProperties_Initialize
-                  0x003dfc                  _Satellite_Initialize
-                  0x001888                  _SaveData
-                  0x0019d4                  _Send
-                  0x001b26                  _SendData
-                  0x004022                  _SetAltitude
-                  0x0027bc                  _SetGPSPower
-                  0x002784                  _SetLangmuirProbePower
-                  0x00279a                  _SetMagnetometerPower
-                  0x0027a6                  _SetTemperaturePower
-                  0x003fa2                  _SetTime
-                  0x002148                  _SetTotalTime
-                  0x003e0e                  _ShouldUpdateMode
-                  0x004f20                  _TMR1_Counter16BitGet
-                  0x004f0e                  _TMR1_Counter16BitSet
-                  0x004f54                  _TMR1_GetElapsedThenClear
-                  0x004eda                  _TMR1_Initialize
-                  0x004f06                  _TMR1_Period16BitGet
-                  0x004ef4                  _TMR1_Period16BitSet
-                  0x004f78                  _TMR1_SoftwareCounterClear
-                  0x004f6c                  _TMR1_SoftwareCounterGet
-                  0x004f3a                  _TMR1_Start
-                  0x004f4a                  _TMR1_Stop
-                  0x004fca                  _TMR2_Counter16BitGet
-                  0x004fb8                  _TMR2_Counter16BitSet
-                  0x004ff6                  _TMR2_GetElapsedThenClear
-                  0x004f84                  _TMR2_Initialize
-                  0x004fb0                  _TMR2_Period16BitGet
-                  0x004f9e                  _TMR2_Period16BitSet
-                  0x00501a                  _TMR2_SoftwareCounterClear
-                  0x00500e                  _TMR2_SoftwareCounterGet
-                  0x004fdc                  _TMR2_Start
-                  0x004fec                  _TMR2_Stop
-                  0x0051b0                  _TMR3_Counter16BitGet
-                  0x00519e                  _TMR3_Counter16BitSet
-                  0x0051da                  _TMR3_GetElapsedThenClear
-                  0x00516a                  _TMR3_Initialize
-                  0x005196                  _TMR3_Period16BitGet
-                  0x005184                  _TMR3_Period16BitSet
-                  0x0051fe                  _TMR3_SoftwareCounterClear
-                  0x0051f2                  _TMR3_SoftwareCounterGet
-                  0x0051c0                  _TMR3_Start
-                  0x0051d0                  _TMR3_Stop
-                  0x00506c                  _TMR4_Counter16BitGet
-                  0x00505a                  _TMR4_Counter16BitSet
-                  0x005098                  _TMR4_GetElapsedThenClear
-                  0x005026                  _TMR4_Initialize
-                  0x005052                  _TMR4_Period16BitGet
-                  0x005040                  _TMR4_Period16BitSet
-                  0x0050bc                  _TMR4_SoftwareCounterClear
-                  0x0050b0                  _TMR4_SoftwareCounterGet
-                  0x00507e                  _TMR4_Start
-                  0x00508e                  _TMR4_Stop
-                  0x00510e                  _TMR5_Counter16BitGet
-                  0x0050fc                  _TMR5_Counter16BitSet
-                  0x00513a                  _TMR5_GetElapsedThenClear
-                  0x0050c8                  _TMR5_Initialize
-                  0x0050f4                  _TMR5_Period16BitGet
-                  0x0050e2                  _TMR5_Period16BitSet
-                  0x00515e                  _TMR5_SoftwareCounterClear
-                  0x005152                  _TMR5_SoftwareCounterGet
-                  0x005120                  _TMR5_Start
-                  0x005130                  _TMR5_Stop
-                  0x002f2a                  _TakeGPSSample
-                  0x002dfc                  _TakeHousekeepingSample
-                  0x002d06                  _TakeMagnetometerSample
-                  0x002bd4                  _TakeProbeSample
-                  0x002d8c                  _TakeTemperatureSample
-                  0x0035ea                  _TestADC
-                  0x0035ca                  _TestDACSPI
-                  0x00247c                  _TogglePowerSwitches
-                  0x001d5a                  _TransmitInstrumentDataToDuplex
-                  0x001c5c                  _TransmitInstrumentDataToSimplex
-                  0x001a52                  _TransmitPreamble
-                  0x001970                  _TransmitQueue
-                  0x00281c                  _TryCalibrateLangmuirProbe
-                  0x0028d6                  _TrySampleGPS
-                  0x00291e                  _TrySampleHousekeeping
-                  0x0027d2                  _TrySampleLangmuirProbe
-                  0x002844                  _TrySampleMagnetometer
-                  0x002892                  _TrySampleTemperature
-                  0x0043d2                  _UART1_Initialize
-                  0x00451e                  _UART1_Peek
-                  0x004410                  _UART1_Read
-                  0x004446                  _UART1_ReadBuffer
-                  0x0045a4                  _UART1_ReceiveBufferIsEmpty
-                  0x004546                  _UART1_ReceiveBufferSizeGet
-                  0x0045d4                  _UART1_StatusGet
-                  0x0044e2                  _UART1_TransferStatusGet
-                  0x0045bc                  _UART1_TransmitBufferIsFull
-                  0x004574                  _UART1_TransmitBufferSizeGet
-                  0x00447a                  _UART1_Write
-                  0x0044b0                  _UART1_WriteBuffer
-                  0x005296                  _UART2_Initialize
-                  0x0052aa                  _UART2_Read
-                  0x005304                  _UART2_StatusGet
-                  0x0052ec                  _UART2_Write
-                  0x00530c                  _UART3_Initialize
-                  0x005320                  _UART3_Read
-                  0x005370                  _UART3_StatusGet
-                  0x005358                  _UART3_Write
-                  0x0053e2                  _UART4_Initialize
-                  0x0053f6                  _UART4_Read
-                  0x00542c                  _UART4_StatusGet
-                  0x005414                  _UART4_Write
-                  0x003eae                  _UpdateMode
-                  0x001826                  _VALUE_ARRAY_SIZE
+                  0x004ff6                  _ADC1_GetResultFromChannels
+                  0x0050ec                  _ADC1_ManualSampleForSec
+                  0x0050b4                  _ADC1_ResultGetFromChannel
+                  0x0018d0                  _ADC_CHANNEL_MAP
+                  0x0034d2                  _AppendIntToGPSBuffer
+                  0x003064                  _AppendToGPSBuffer
+                  0x0033e8                  _AsciiFromInt
+                  0x005546                  _CRC16SendBytes
+                  0x005536                  _CRC16_Initialize
+                  0x002c4e                  _CalLangmuirProbe
+                  0x004d78                  _Clear
+                  0x004d4e                  _ClearQueue
+                  0x003102                  _CompressAscii
+                  0x004c8c                  _ConfigureOscillator
+                  0x004e1a                  _CopyBytes
+                  0x004da6                  _CopyIntToByte
+                  0x004de0                  _CopyIntToDoubleByte
+                  0x003286                  _CopySubstring
+                  0x0020bc                  _CreateFileHeader
+                  0x00186a                  _DUPLEX_PACK_BYTE_LENGTH
+                  0x001866                  _DUPLEX_SYNC_LENGTH
+                  0x001898                  _DUPLEX_TIMEOUT
+                  0x00189c                  _DUP_RES_LENGTH
+                  0x002b5e                  _EndGPSSampling
+                  0x002ba6                  _EndHousekeepingSampling
+                  0x002aee                  _EndLangmuirProbeCal
+                  0x002a64                  _EndLangmuirProbeSampling
+                  0x002afe                  _EndMagnetometerSampling
+                  0x003838                  _EndMessage
+                  0x002b32                  _EndTemperatureSensorSampling
+                  0x001896                  _FILE_COUNT_INDEX
+                  0x004f58                  _GetDayTimeInMin
+                  0x003484                  _GetDoubleFromSubString
+                  0x004e5c                  _GetSampleRate
+                  0x003262                  _GetSubStringLength
+                  0x004ed6                  _GetSweepDuration
+                  0x004e98                  _GetSweepRate
+                  0x004f14                  _GetSystemHeaderID
+                  0x004f70                  _GetTransmissionPackageLength
+                  0x004f84                  _GetTransmissionUnitForMode
+                  0x0021ac                  _GetWaitingFilesCount
+                  0x00185e                  _HEADER_SIZE
+                  0x002332                  _HandleCommand
+                  0x0056ba                  _INTERRUPT_Initialize
+                  0x0057f2                  _InitApp
+                  0x004fb8                  _InitializeADC1
+                  0x0020a6                  _IsLineBusy
+                  0x003da0                  _IsNextCommand
+                  0x0041ac                  _LogState
+                  0x00189a                  _MAX_FILES_WAITING
+                  0x004096                  _MainLoop
+                  0x002bd2                  _ManageSweepingProgress
+                  0x00574a                  _OSCILLATOR_Initialize
+                  0x0050fc                  _PIN_MANAGER_Initialize
+                  0x00189e                  _POWER_ECHO_LENGTH
+                  0x001862                  _PREAMBLE_LENGTH
+                  0x0019c0                  _PackageData
+                  0x003846                  _ParseByte
+                  0x0032b8                  _ParseDouble
+                  0x0034f8                  _ParseGPSSample
+                  0x00379a                  _PerformCommands
+                  0x001b66                  _PollDuplex
+                  0x004d0a                  _Pow
+                  0x001860                  _QUEUE_SIZE
+                  0x0018f0                  _RESULTS_SIZE
+                  0x001aea                  _Read
+                  0x001fee                  _ReadACKForUnit
+                  0x0025da                  _ReadPowerSwitches
+                  0x0038b4                  _RunCommand
+                  0x001864                  _SIM_RES_LENGTH
+                  0x0048e0                  _SPI1_Exchange
+                  0x004a62                  _SPI1_Exchange16bit
+                  0x004a72                  _SPI1_Exchange16bitBuffer
+                  0x004aa6                  _SPI1_Exchange8bit
+                  0x004948                  _SPI1_ExchangeBuffer
+                  0x0048ce                  _SPI1_Initialize
+                  0x004a9e                  _SPI1_StatusGet
+                  0x004a88                  _SPI1_TransferModeGet
+                  0x004ac8                  _SPI2_Exchange
+                  0x004c4a                  _SPI2_Exchange8bit
+                  0x004c5a                  _SPI2_Exchange8bitBuffer
+                  0x004b30                  _SPI2_ExchangeBuffer
+                  0x004ab6                  _SPI2_Initialize
+                  0x004c84                  _SPI2_StatusGet
+                  0x004c6e                  _SPI2_TransferModeGet
+                  0x005724                  _SYSTEM_Initialize
+                  0x003f5a                  _SatelliteProperties_Initialize
+                  0x003f78                  _Satellite_Initialize
+                  0x001972                  _SaveData
+                  0x001abe                  _Send
+                  0x001c10                  _SendData
+                  0x004198                  _SetAltitude
+                  0x0028ce                  _SetDuplexPower
+                  0x0028b8                  _SetGPSPower
+                  0x002880                  _SetLangmuirProbePower
+                  0x002896                  _SetMagnetometerPower
+                  0x0028a2                  _SetTemperaturePower
+                  0x004118                  _SetTime
+                  0x002232                  _SetTotalTime
+                  0x003f8a                  _ShouldUpdateMode
+                  0x00524c                  _TMR1_Counter16BitGet
+                  0x00523a                  _TMR1_Counter16BitSet
+                  0x005280                  _TMR1_GetElapsedThenClear
+                  0x005206                  _TMR1_Initialize
+                  0x005232                  _TMR1_Period16BitGet
+                  0x005220                  _TMR1_Period16BitSet
+                  0x0052a4                  _TMR1_SoftwareCounterClear
+                  0x005298                  _TMR1_SoftwareCounterGet
+                  0x005266                  _TMR1_Start
+                  0x005276                  _TMR1_Stop
+                  0x0052f6                  _TMR2_Counter16BitGet
+                  0x0052e4                  _TMR2_Counter16BitSet
+                  0x005322                  _TMR2_GetElapsedThenClear
+                  0x0052b0                  _TMR2_Initialize
+                  0x0052dc                  _TMR2_Period16BitGet
+                  0x0052ca                  _TMR2_Period16BitSet
+                  0x005346                  _TMR2_SoftwareCounterClear
+                  0x00533a                  _TMR2_SoftwareCounterGet
+                  0x005308                  _TMR2_Start
+                  0x005318                  _TMR2_Stop
+                  0x0054dc                  _TMR3_Counter16BitGet
+                  0x0054ca                  _TMR3_Counter16BitSet
+                  0x005506                  _TMR3_GetElapsedThenClear
+                  0x005496                  _TMR3_Initialize
+                  0x0054c2                  _TMR3_Period16BitGet
+                  0x0054b0                  _TMR3_Period16BitSet
+                  0x00552a                  _TMR3_SoftwareCounterClear
+                  0x00551e                  _TMR3_SoftwareCounterGet
+                  0x0054ec                  _TMR3_Start
+                  0x0054fc                  _TMR3_Stop
+                  0x005398                  _TMR4_Counter16BitGet
+                  0x005386                  _TMR4_Counter16BitSet
+                  0x0053c4                  _TMR4_GetElapsedThenClear
+                  0x005352                  _TMR4_Initialize
+                  0x00537e                  _TMR4_Period16BitGet
+                  0x00536c                  _TMR4_Period16BitSet
+                  0x0053e8                  _TMR4_SoftwareCounterClear
+                  0x0053dc                  _TMR4_SoftwareCounterGet
+                  0x0053aa                  _TMR4_Start
+                  0x0053ba                  _TMR4_Stop
+                  0x00543a                  _TMR5_Counter16BitGet
+                  0x005428                  _TMR5_Counter16BitSet
+                  0x005466                  _TMR5_GetElapsedThenClear
+                  0x0053f4                  _TMR5_Initialize
+                  0x005420                  _TMR5_Period16BitGet
+                  0x00540e                  _TMR5_Period16BitSet
+                  0x00548a                  _TMR5_SoftwareCounterClear
+                  0x00547e                  _TMR5_SoftwareCounterGet
+                  0x00544c                  _TMR5_Start
+                  0x00545c                  _TMR5_Stop
+                  0x0030a0                  _TakeGPSSample
+                  0x002f72                  _TakeHousekeepingSample
+                  0x002e54                  _TakeMagnetometerSample
+                  0x002d08                  _TakeProbeSample
+                  0x002eee                  _TakeTemperatureSample
+                  0x003760                  _TestADC
+                  0x003740                  _TestDACSPI
+                  0x002566                  _TogglePowerSwitches
+                  0x001e44                  _TransmitInstrumentDataToDuplex
+                  0x001d46                  _TransmitInstrumentDataToSimplex
+                  0x001b3c                  _TransmitPreamble
+                  0x001a5a                  _TransmitQueue
+                  0x002930                  _TryCalibrateLangmuirProbe
+                  0x0029ea                  _TrySampleGPS
+                  0x002a32                  _TrySampleHousekeeping
+                  0x0028e6                  _TrySampleLangmuirProbe
+                  0x002958                  _TrySampleMagnetometer
+                  0x0029a6                  _TrySampleTemperature
+                  0x0046c4                  _UART1_Initialize
+                  0x004810                  _UART1_Peek
+                  0x004702                  _UART1_Read
+                  0x004738                  _UART1_ReadBuffer
+                  0x004896                  _UART1_ReceiveBufferIsEmpty
+                  0x004838                  _UART1_ReceiveBufferSizeGet
+                  0x0048c6                  _UART1_StatusGet
+                  0x0047d4                  _UART1_TransferStatusGet
+                  0x0048ae                  _UART1_TransmitBufferIsFull
+                  0x004866                  _UART1_TransmitBufferSizeGet
+                  0x00476c                  _UART1_Write
+                  0x0047a2                  _UART1_WriteBuffer
+                  0x005644                  _UART2_Initialize
+                  0x005658                  _UART2_Read
+                  0x0056b2                  _UART2_StatusGet
+                  0x00569a                  _UART2_Write
+                  0x0055c2                  _UART3_Initialize
+                  0x0055d6                  _UART3_Read
+                  0x00563c                  _UART3_StatusGet
+                  0x005624                  _UART3_Write
+                  0x005778                  _UART4_Initialize
+                  0x00578c                  _UART4_Read
+                  0x0057c2                  _UART4_StatusGet
+                  0x0057aa                  _UART4_Write
+                  0x00402a                  _UpdateMode
+                  0x001902                  _VALUE_ARRAY_SIZE
                   0x000308                  __AddressError
                   0x0004fc                  __AltAddressError
                   0x000508                  __AltMathError
@@ -1068,34 +1078,34 @@ External Symbols in Program Memory (by name):
                   0x000f54                  __sprintf_cdnopuxX
                   0x000f92                  __vfprintf_cdnopsuxX
                   0x000f92                  __vfprintf_cdnopuxX
-                  0x003cdc                  _addValueByte
-                  0x003cfa                  _convertHexToDecimal
-                  0x003d3a                  _convertTime
-                  0x00179c                  _duplexCmdReceived
-                  0x0017a1                  _duplexDownlinkFilePoll
-                  0x0017a7                  _duplexDownlinkFileReady
-                  0x0017ad                  _duplexHousekeepingFilePoll
-                  0x00178c                  _duplexSyncBytes
-                  0x001790                  _duplexUplinkSMSPoll
-                  0x001796                  _duplexUplinkSMSReady
-                  0x0017b3                  _duplexWaitingFilesPoll
-                  0x001816                  _electronVoltage
+                  0x003e52                  _addValueByte
+                  0x003e70                  _convertHexToDecimal
+                  0x003eb0                  _convertTime
+                  0x001878                  _duplexCmdReceived
+                  0x00187d                  _duplexDownlinkFilePoll
+                  0x001883                  _duplexDownlinkFileReady
+                  0x001889                  _duplexHousekeepingFilePoll
+                  0x001868                  _duplexSyncBytes
+                  0x00186c                  _duplexUplinkSMSPoll
+                  0x001872                  _duplexUplinkSMSReady
+                  0x00188f                  _duplexWaitingFilesPoll
+                  0x0018f2                  _electronVoltage
                   0x000a70                  _expf
                   0x000e3a                  _free
-                  0x001818                  _ionVoltage
-                  0x001880                  _isDuplexOn
-                  0x00186a                  _isGPSOn
-                  0x001828                  _isLangmuirProbeOn
-                  0x00183e                  _isMagnetometerOn
-                  0x001854                  _isTemperatureOn
+                  0x0018f4                  _ionVoltage
+                  0x00195c                  _isDuplexOn
+                  0x001946                  _isGPSOn
+                  0x001904                  _isLangmuirProbeOn
+                  0x00191a                  _isMagnetometerOn
+                  0x001930                  _isTemperatureOn
                   0x000c36                  _ldexpf
                   0x000c7a                  _logf
-                  0x00549c                  _main
+                  0x0057e0                  _main
                   0x000d28                  _malloc
-                  0x00181a                  _maxSweepVoltage
+                  0x0018f6                  _maxSweepVoltage
                   0x000ed2                  _memcpy
                   0x000ee0                  _memset
-                  0x00181c                  _minSweepVoltage
+                  0x0018f8                  _minSweepVoltage
                   0x00086a                  _powf
                   0x000e50                  _realloc
                   0x000eee                  _strcat
@@ -1103,7 +1113,7 @@ External Symbols in Program Memory (by name):
                   0x000f02                  _strlen
                   0x001564                  _strncmp
                   0x000f0e                  _strstr
-                  0x0049d6                  _wait_for
+                  0x004cc8                  _wait_for
 
 Memory Configuration
 
@@ -1338,7 +1348,7 @@ __CONFIG1
 .comment
  *(.comment)
 
-.debug_info       0x000000       0xf660
+.debug_info       0x000000       0xf833
  *(.debug_info)
  .debug_info      0x000000        0x717 build/XC16_24FJ256GA110/production/mcc_generated_files/uart3.o
  .debug_info      0x000717        0x6b9 build/XC16_24FJ256GA110/production/mcc_generated_files/uart4.o
@@ -1359,18 +1369,18 @@ __CONFIG1
  .debug_info      0x008ebf         0xb9 build/XC16_24FJ256GA110/production/configuration_bits.o
  .debug_info      0x008f78        0x124 build/XC16_24FJ256GA110/production/interrupts.o
  .debug_info      0x00909c        0x1a6 build/XC16_24FJ256GA110/production/main.o
- .debug_info      0x009242        0x5bc build/XC16_24FJ256GA110/production/system.o
- .debug_info      0x0097fe        0x277 build/XC16_24FJ256GA110/production/traps.o
- .debug_info      0x009a75        0x135 build/XC16_24FJ256GA110/production/user.o
- .debug_info      0x009baa        0xb27 build/XC16_24FJ256GA110/production/adc1.o
- .debug_info      0x00a6d1        0x9c4 build/XC16_24FJ256GA110/production/SatelliteMode.o
- .debug_info      0x00b095       0x1cb9 build/XC16_24FJ256GA110/production/SampleManager.o
- .debug_info      0x00cd4e        0xc84 build/XC16_24FJ256GA110/production/CommandParser.o
- .debug_info      0x00d9d2        0x619 build/XC16_24FJ256GA110/production/SystemConfiguration.o
- .debug_info      0x00dfeb       0x1675 build/XC16_24FJ256GA110/production/TransmitManager.o
+ .debug_info      0x009242        0x63a build/XC16_24FJ256GA110/production/system.o
+ .debug_info      0x00987c        0x277 build/XC16_24FJ256GA110/production/traps.o
+ .debug_info      0x009af3        0x135 build/XC16_24FJ256GA110/production/user.o
+ .debug_info      0x009c28        0xb27 build/XC16_24FJ256GA110/production/adc1.o
+ .debug_info      0x00a74f        0xa59 build/XC16_24FJ256GA110/production/SatelliteMode.o
+ .debug_info      0x00b1a8       0x1d47 build/XC16_24FJ256GA110/production/SampleManager.o
+ .debug_info      0x00ceef        0xc84 build/XC16_24FJ256GA110/production/CommandParser.o
+ .debug_info      0x00db73        0x619 build/XC16_24FJ256GA110/production/SystemConfiguration.o
+ .debug_info      0x00e18c       0x16a7 build/XC16_24FJ256GA110/production/TransmitManager.o
  *(.gnu.linkonce.wi.*)
 
-.debug_abbrev     0x000000       0x215f
+.debug_abbrev     0x000000       0x217d
  *(.debug_abbrev)
  .debug_abbrev    0x000000        0x151 build/XC16_24FJ256GA110/production/mcc_generated_files/uart3.o
  .debug_abbrev    0x000151        0x118 build/XC16_24FJ256GA110/production/mcc_generated_files/uart4.o
@@ -1395,44 +1405,44 @@ __CONFIG1
  .debug_abbrev    0x00165f         0x7d build/XC16_24FJ256GA110/production/traps.o
  .debug_abbrev    0x0016dc         0x34 build/XC16_24FJ256GA110/production/user.o
  .debug_abbrev    0x001710        0x16d build/XC16_24FJ256GA110/production/adc1.o
- .debug_abbrev    0x00187d        0x1ee build/XC16_24FJ256GA110/production/SatelliteMode.o
- .debug_abbrev    0x001a6b        0x240 build/XC16_24FJ256GA110/production/SampleManager.o
- .debug_abbrev    0x001cab        0x17d build/XC16_24FJ256GA110/production/CommandParser.o
- .debug_abbrev    0x001e28         0xe6 build/XC16_24FJ256GA110/production/SystemConfiguration.o
- .debug_abbrev    0x001f0e        0x251 build/XC16_24FJ256GA110/production/TransmitManager.o
+ .debug_abbrev    0x00187d        0x20c build/XC16_24FJ256GA110/production/SatelliteMode.o
+ .debug_abbrev    0x001a89        0x240 build/XC16_24FJ256GA110/production/SampleManager.o
+ .debug_abbrev    0x001cc9        0x17d build/XC16_24FJ256GA110/production/CommandParser.o
+ .debug_abbrev    0x001e46         0xe6 build/XC16_24FJ256GA110/production/SystemConfiguration.o
+ .debug_abbrev    0x001f2c        0x251 build/XC16_24FJ256GA110/production/TransmitManager.o
 
-.debug_line       0x000000       0x219f
+.debug_line       0x000000       0x21e0
  *(.debug_line)
- .debug_line      0x000000        0x139 build/XC16_24FJ256GA110/production/mcc_generated_files/uart3.o
- .debug_line      0x000139        0x100 build/XC16_24FJ256GA110/production/mcc_generated_files/uart4.o
- .debug_line      0x000239         0xb4 build/XC16_24FJ256GA110/production/mcc_generated_files/interrupt_manager.o
- .debug_line      0x0002ed         0xfb build/XC16_24FJ256GA110/production/mcc_generated_files/mcc.o
- .debug_line      0x0003e8         0xd7 build/XC16_24FJ256GA110/production/mcc_generated_files/pin_manager.o
- .debug_line      0x0004bf        0x129 build/XC16_24FJ256GA110/production/mcc_generated_files/tmr2.o
- .debug_line      0x0005e8        0x112 build/XC16_24FJ256GA110/production/mcc_generated_files/traps.o
- .debug_line      0x0006fa        0x16d build/XC16_24FJ256GA110/production/mcc_generated_files/tmr3.o
- .debug_line      0x000867        0x129 build/XC16_24FJ256GA110/production/mcc_generated_files/tmr4.o
- .debug_line      0x000990        0x135 build/XC16_24FJ256GA110/production/mcc_generated_files/tmr5.o
- .debug_line      0x000ac5        0x194 build/XC16_24FJ256GA110/production/mcc_generated_files/uart1.o
- .debug_line      0x000c59        0x139 build/XC16_24FJ256GA110/production/mcc_generated_files/uart2.o
- .debug_line      0x000d92        0x15f build/XC16_24FJ256GA110/production/mcc_generated_files/tmr1.o
- .debug_line      0x000ef1        0x165 build/XC16_24FJ256GA110/production/mcc_generated_files/spi1.o
- .debug_line      0x001056        0x161 build/XC16_24FJ256GA110/production/mcc_generated_files/spi2.o
- .debug_line      0x0011b7         0xf6 build/XC16_24FJ256GA110/production/mcc_generated_files/crc16.o
- .debug_line      0x0012ad         0x1a build/XC16_24FJ256GA110/production/configuration_bits.o
- .debug_line      0x0012c7         0x1a build/XC16_24FJ256GA110/production/interrupts.o
- .debug_line      0x0012e1         0x95 build/XC16_24FJ256GA110/production/main.o
- .debug_line      0x001376        0x101 build/XC16_24FJ256GA110/production/system.o
- .debug_line      0x001477         0x99 build/XC16_24FJ256GA110/production/traps.o
- .debug_line      0x001510         0x34 build/XC16_24FJ256GA110/production/user.o
- .debug_line      0x001544        0x113 build/XC16_24FJ256GA110/production/adc1.o
- .debug_line      0x001657        0x1ca build/XC16_24FJ256GA110/production/SatelliteMode.o
- .debug_line      0x001821        0x346 build/XC16_24FJ256GA110/production/SampleManager.o
- .debug_line      0x001b67        0x1fe build/XC16_24FJ256GA110/production/CommandParser.o
- .debug_line      0x001d65         0xfd build/XC16_24FJ256GA110/production/SystemConfiguration.o
- .debug_line      0x001e62        0x33d build/XC16_24FJ256GA110/production/TransmitManager.o
+ .debug_line      0x000000        0x140 build/XC16_24FJ256GA110/production/mcc_generated_files/uart3.o
+ .debug_line      0x000140        0x100 build/XC16_24FJ256GA110/production/mcc_generated_files/uart4.o
+ .debug_line      0x000240         0xb4 build/XC16_24FJ256GA110/production/mcc_generated_files/interrupt_manager.o
+ .debug_line      0x0002f4         0xfb build/XC16_24FJ256GA110/production/mcc_generated_files/mcc.o
+ .debug_line      0x0003ef         0xd7 build/XC16_24FJ256GA110/production/mcc_generated_files/pin_manager.o
+ .debug_line      0x0004c6        0x129 build/XC16_24FJ256GA110/production/mcc_generated_files/tmr2.o
+ .debug_line      0x0005ef        0x112 build/XC16_24FJ256GA110/production/mcc_generated_files/traps.o
+ .debug_line      0x000701        0x16d build/XC16_24FJ256GA110/production/mcc_generated_files/tmr3.o
+ .debug_line      0x00086e        0x129 build/XC16_24FJ256GA110/production/mcc_generated_files/tmr4.o
+ .debug_line      0x000997        0x135 build/XC16_24FJ256GA110/production/mcc_generated_files/tmr5.o
+ .debug_line      0x000acc        0x194 build/XC16_24FJ256GA110/production/mcc_generated_files/uart1.o
+ .debug_line      0x000c60        0x139 build/XC16_24FJ256GA110/production/mcc_generated_files/uart2.o
+ .debug_line      0x000d99        0x15f build/XC16_24FJ256GA110/production/mcc_generated_files/tmr1.o
+ .debug_line      0x000ef8        0x165 build/XC16_24FJ256GA110/production/mcc_generated_files/spi1.o
+ .debug_line      0x00105d        0x161 build/XC16_24FJ256GA110/production/mcc_generated_files/spi2.o
+ .debug_line      0x0011be         0xf6 build/XC16_24FJ256GA110/production/mcc_generated_files/crc16.o
+ .debug_line      0x0012b4         0x1a build/XC16_24FJ256GA110/production/configuration_bits.o
+ .debug_line      0x0012ce         0x1a build/XC16_24FJ256GA110/production/interrupts.o
+ .debug_line      0x0012e8         0x95 build/XC16_24FJ256GA110/production/main.o
+ .debug_line      0x00137d        0x108 build/XC16_24FJ256GA110/production/system.o
+ .debug_line      0x001485         0x99 build/XC16_24FJ256GA110/production/traps.o
+ .debug_line      0x00151e         0x34 build/XC16_24FJ256GA110/production/user.o
+ .debug_line      0x001552        0x113 build/XC16_24FJ256GA110/production/adc1.o
+ .debug_line      0x001665        0x1ec build/XC16_24FJ256GA110/production/SatelliteMode.o
+ .debug_line      0x001851        0x350 build/XC16_24FJ256GA110/production/SampleManager.o
+ .debug_line      0x001ba1        0x1fe build/XC16_24FJ256GA110/production/CommandParser.o
+ .debug_line      0x001d9f         0xfd build/XC16_24FJ256GA110/production/SystemConfiguration.o
+ .debug_line      0x001e9c        0x344 build/XC16_24FJ256GA110/production/TransmitManager.o
 
-.debug_frame      0x000000       0x1aa0
+.debug_frame      0x000000       0x1ae6
  *(.debug_frame)
  .debug_frame     0x000000         0x84 build/XC16_24FJ256GA110/production/mcc_generated_files/uart3.o
  .debug_frame     0x000084         0x84 build/XC16_24FJ256GA110/production/mcc_generated_files/uart4.o
@@ -1451,17 +1461,17 @@ __CONFIG1
  .debug_frame     0x000d4e         0xd8 build/XC16_24FJ256GA110/production/mcc_generated_files/spi2.o
  .debug_frame     0x000e26         0x4c build/XC16_24FJ256GA110/production/mcc_generated_files/crc16.o
  .debug_frame     0x000e72         0x30 build/XC16_24FJ256GA110/production/main.o
- .debug_frame     0x000ea2         0xd8 build/XC16_24FJ256GA110/production/system.o
- .debug_frame     0x000f7a         0xa0 build/XC16_24FJ256GA110/production/traps.o
- .debug_frame     0x00101a         0x30 build/XC16_24FJ256GA110/production/user.o
- .debug_frame     0x00104a         0x84 build/XC16_24FJ256GA110/production/adc1.o
- .debug_frame     0x0010ce        0x138 build/XC16_24FJ256GA110/production/SatelliteMode.o
- .debug_frame     0x001206        0x3a0 build/XC16_24FJ256GA110/production/SampleManager.o
- .debug_frame     0x0015a6        0x100 build/XC16_24FJ256GA110/production/CommandParser.o
- .debug_frame     0x0016a6         0xd8 build/XC16_24FJ256GA110/production/SystemConfiguration.o
- .debug_frame     0x00177e        0x322 build/XC16_24FJ256GA110/production/TransmitManager.o
+ .debug_frame     0x000ea2         0xf4 build/XC16_24FJ256GA110/production/system.o
+ .debug_frame     0x000f96         0xa0 build/XC16_24FJ256GA110/production/traps.o
+ .debug_frame     0x001036         0x30 build/XC16_24FJ256GA110/production/user.o
+ .debug_frame     0x001066         0x84 build/XC16_24FJ256GA110/production/adc1.o
+ .debug_frame     0x0010ea        0x146 build/XC16_24FJ256GA110/production/SatelliteMode.o
+ .debug_frame     0x001230        0x3a0 build/XC16_24FJ256GA110/production/SampleManager.o
+ .debug_frame     0x0015d0        0x100 build/XC16_24FJ256GA110/production/CommandParser.o
+ .debug_frame     0x0016d0         0xd8 build/XC16_24FJ256GA110/production/SystemConfiguration.o
+ .debug_frame     0x0017a8        0x33e build/XC16_24FJ256GA110/production/TransmitManager.o
 
-.debug_str        0x000000       0x1135
+.debug_str        0x000000       0x11c3
  *(.debug_str)
  .debug_str       0x000000         0x28 build/XC16_24FJ256GA110/production/mcc_generated_files/uart3.o
  .debug_str       0x000028         0x15 build/XC16_24FJ256GA110/production/mcc_generated_files/uart4.o
@@ -1479,14 +1489,14 @@ __CONFIG1
  .debug_str       0x000285         0x66 build/XC16_24FJ256GA110/production/mcc_generated_files/spi1.o
  .debug_str       0x0002eb         0x5a build/XC16_24FJ256GA110/production/mcc_generated_files/spi2.o
  .debug_str       0x000345          0xb build/XC16_24FJ256GA110/production/mcc_generated_files/crc16.o
- .debug_str       0x000350         0x46 build/XC16_24FJ256GA110/production/system.o
- .debug_str       0x000396          0xc build/XC16_24FJ256GA110/production/traps.o
- .debug_str       0x0003a2         0xc4 build/XC16_24FJ256GA110/production/adc1.o
- .debug_str       0x000466        0x15a build/XC16_24FJ256GA110/production/SatelliteMode.o
- .debug_str       0x0005c0        0x55f build/XC16_24FJ256GA110/production/SampleManager.o
- .debug_str       0x000b1f        0x1d7 build/XC16_24FJ256GA110/production/CommandParser.o
- .debug_str       0x000cf6         0x2f build/XC16_24FJ256GA110/production/SystemConfiguration.o
- .debug_str       0x000d25        0x410 build/XC16_24FJ256GA110/production/TransmitManager.o
+ .debug_str       0x000350         0x4d build/XC16_24FJ256GA110/production/system.o
+ .debug_str       0x00039d          0xc build/XC16_24FJ256GA110/production/traps.o
+ .debug_str       0x0003a9         0xc4 build/XC16_24FJ256GA110/production/adc1.o
+ .debug_str       0x00046d        0x1a2 build/XC16_24FJ256GA110/production/SatelliteMode.o
+ .debug_str       0x00060f        0x59e build/XC16_24FJ256GA110/production/SampleManager.o
+ .debug_str       0x000bad        0x1d7 build/XC16_24FJ256GA110/production/CommandParser.o
+ .debug_str       0x000d84         0x2f build/XC16_24FJ256GA110/production/SystemConfiguration.o
+ .debug_str       0x000db3        0x410 build/XC16_24FJ256GA110/production/TransmitManager.o
 
 .debug_loc
  *(.debug_loc)
@@ -1495,7 +1505,7 @@ __CONFIG1
  *(.debug_macinfo)
 
 .debug_pubnames
-                  0x000000       0x2036
+                  0x000000       0x20ac
  *(.debug_pubnames)
  .debug_pubnames
                   0x000000         0x5a build/XC16_24FJ256GA110/production/mcc_generated_files/uart3.o
@@ -1532,23 +1542,23 @@ __CONFIG1
  .debug_pubnames
                   0x000b18         0x1b build/XC16_24FJ256GA110/production/main.o
  .debug_pubnames
-                  0x000b33         0x78 build/XC16_24FJ256GA110/production/system.o
+                  0x000b33         0x90 build/XC16_24FJ256GA110/production/system.o
  .debug_pubnames
-                  0x000bab         0x79 build/XC16_24FJ256GA110/production/traps.o
+                  0x000bc3         0x79 build/XC16_24FJ256GA110/production/traps.o
  .debug_pubnames
-                  0x000c24         0x1e build/XC16_24FJ256GA110/production/user.o
+                  0x000c3c         0x1e build/XC16_24FJ256GA110/production/user.o
  .debug_pubnames
-                  0x000c42         0x92 build/XC16_24FJ256GA110/production/adc1.o
+                  0x000c5a         0x92 build/XC16_24FJ256GA110/production/adc1.o
  .debug_pubnames
-                  0x000cd4        0x167 build/XC16_24FJ256GA110/production/SatelliteMode.o
+                  0x000cec        0x167 build/XC16_24FJ256GA110/production/SatelliteMode.o
  .debug_pubnames
-                  0x000e3b        0x849 build/XC16_24FJ256GA110/production/SampleManager.o
+                  0x000e53        0x894 build/XC16_24FJ256GA110/production/SampleManager.o
  .debug_pubnames
-                  0x001684        0x15c build/XC16_24FJ256GA110/production/CommandParser.o
+                  0x0016e7        0x15c build/XC16_24FJ256GA110/production/CommandParser.o
  .debug_pubnames
-                  0x0017e0        0x13f build/XC16_24FJ256GA110/production/SystemConfiguration.o
+                  0x001843        0x13f build/XC16_24FJ256GA110/production/SystemConfiguration.o
  .debug_pubnames
-                  0x00191f        0x717 build/XC16_24FJ256GA110/production/TransmitManager.o
+                  0x001982        0x72a build/XC16_24FJ256GA110/production/TransmitManager.o
 
 .debug_ranges
  *(.debug_ranges)
@@ -2841,10 +2851,11 @@ __c30_signature
                     0x084e                  _simplexTimeoutFlag
                     0x0850                  _currentDuplexConnectionWait
                     0x0852                  _duplexTimeoutFlag
-                    0x0853                  _temperaturePowerSwitch
-                    0x0854                  _langmuirMagPowerSwitch
-                    0x0855                  _gpsPowerSwitch
-                    0x0856                  _duplexPowerSwitch
+                    0x0853                  _isDuplexConnected
+                    0x0854                  _temperaturePowerSwitch
+                    0x0855                  _langmuirMagPowerSwitch
+                    0x0856                  _gpsPowerSwitch
+                    0x0857                  _duplexPowerSwitch
                     0x0858                  _b1Charge
                     0x085a                  _b2Charge
                     0x085c                  _b1Voltage
@@ -2918,8 +2929,7 @@ __c30_signature
                     0x08fa                  _temperatureFileCount
                     0x08fc                  _gpsFileCount
                     0x08fe                  _housekeepingFileCount
-                    0x0900                  _isDuplexConnected
-                    0x0901                  _commandBoardPowerSwitch
+                    0x0900                  _commandBoardPowerSwitch
 
 .nbss               0x0902          0x4
  .nbss              0x0902          0x4 build/XC16_24FJ256GA110/production/mcc_generated_files/tmr5.o
@@ -2943,81 +2953,84 @@ __c30_signature
  .nbss              0x0912          0x2 /Applications/microchip/xc16/v1.32/bin/bin/../../lib/libm-elf.a(errno.eo)
                     0x0912                  _errno
 
-.bss                0x0914        0xaa8
+.bss                0x0914        0xac8
  .bss               0x0914        0x81a build/XC16_24FJ256GA110/production/TransmitManager.o
                     0x0914                  _transmitQueue
                     0x10e4                  _commandString
                     0x1106                  _epsEcho
- .bss               0x112e        0x28e build/XC16_24FJ256GA110/production/SampleManager.o
+ .bss               0x112e        0x2ae build/XC16_24FJ256GA110/production/SampleManager.o
                     0x112e                  _langmuirProbeResults
                     0x114e                  _magnetometerResults
                     0x116e                  _temperatureResults
-                    0x118e                  _langmuirProbeBuffer
-                    0x12ba                  _magnetometerBuffer
-                    0x12db                  _temperatureBuffer
-                    0x12fb                  _gpsBuffer
-                    0x131c                  _housekeepingBuffer
-                    0x1338                  _unparsedGPSBuffer
-                    0x139c                  _res
+                    0x118e                  _langmuirProbeDiagData
+                    0x1198                  _magnetometerDiagData
+                    0x119e                  _temperatureDiagData
+                    0x11ae                  _langmuirProbeBuffer
+                    0x12da                  _magnetometerBuffer
+                    0x12fb                  _temperatureBuffer
+                    0x131b                  _gpsBuffer
+                    0x133c                  _housekeepingBuffer
+                    0x1358                  _unparsedGPSBuffer
+                    0x13bc                  _res
 
-.data               0x13bc         0x90
- .data              0x13bc         0x90 build/XC16_24FJ256GA110/production/SystemConfiguration.o
-                    0x13bc                  _LangmuirProbe
-                    0x13ec                  _Magnetometer
-                    0x141c                  _GPS
+.data               0x13dc        0x112
+ .data              0x13dc         0xc0 build/XC16_24FJ256GA110/production/SystemConfiguration.o
+                    0x13dc                  _LangmuirProbe
+                    0x140c                  _TemperatureSensors
+                    0x143c                  _Magnetometer
+                    0x146c                  _GPS
+ .data              0x149c         0x52 /Applications/microchip/xc16/v1.32/bin/bin/../../lib/libc-elf.a(doprnt_cdnopsuxX.XXeo)
 
-.bss                0x144c         0x60
- .bss               0x144c         0x60 build/XC16_24FJ256GA110/production/SystemConfiguration.o
-                    0x144c                  _TemperatureSensors
-                    0x147c                  _Housekeeping
+.bss                0x14ee         0x30
+ .bss               0x14ee         0x30 build/XC16_24FJ256GA110/production/SystemConfiguration.o
+                    0x14ee                  _Housekeeping
 
-.data               0x14ac         0xa8
- .data              0x14ac         0x52 /Applications/microchip/xc16/v1.32/bin/bin/../../lib/libc-elf.a(doprnt_cdnopsuxX.XXeo)
- .data              0x14fe         0x30 build/XC16_24FJ256GA110/production/TransmitManager.o
-                    0x14fe                  _simplexPackagePreamble
-                    0x1502                  _langmuirProbeFileName
-                    0x150a                  _magnetometerFileName
-                    0x1512                  _temperatureFileName
-                    0x151a                  _gpsFileName
-                    0x1522                  _housekeepingFileName
-                    0x152a                  _powerPackagePreamble
- .data              0x152e         0x26 /Applications/microchip/xc16/v1.32/bin/bin/../../lib/libc-elf.a(_iob.eo)
-                    0x152e                  __iob
-                    0x1552                  __Files
+.data               0x151e         0x56
+ .data              0x151e         0x30 build/XC16_24FJ256GA110/production/TransmitManager.o
+                    0x151e                  _simplexPackagePreamble
+                    0x1522                  _langmuirProbeFileName
+                    0x152a                  _magnetometerFileName
+                    0x1532                  _temperatureFileName
+                    0x153a                  _gpsFileName
+                    0x1542                  _housekeepingFileName
+                    0x154a                  _powerPackagePreamble
+ .data              0x154e         0x26 /Applications/microchip/xc16/v1.32/bin/bin/../../lib/libc-elf.a(_iob.eo)
+                    0x154e                  __iob
+                    0x1572                  __Files
 
-.bss                0x1554         0x20
- .bss               0x1554         0x20 build/XC16_24FJ256GA110/production/mcc_generated_files/traps.o
+.bss                0x1574         0x20
+ .bss               0x1574         0x20 build/XC16_24FJ256GA110/production/mcc_generated_files/traps.o
 
-.data               0x1574         0x1e
- .data              0x1574         0x1e build/XC16_24FJ256GA110/production/SampleManager.o
-                    0x1574                  _myFunString
+.data               0x1594         0x1e
+ .data              0x1594         0x1e build/XC16_24FJ256GA110/production/SampleManager.o
+                    0x1594                  _myFunString
 
-.bss                0x1592         0x3e
- .bss               0x1592         0x1a build/XC16_24FJ256GA110/production/mcc_generated_files/uart1.o
- .bss               0x15ac         0x10 /Applications/microchip/xc16/v1.32/bin/bin/../../lib/libc-elf.a(malloc.eo)
-                    0x15ac                  ___allocs
-                    0x15b4                  ___allocp
-                    0x15b6                  ___alloct
-                    0x15b8                  ___allocx
- .bss               0x15bc          0x6 /Applications/microchip/xc16/v1.32/bin/bin/../../lib/libc-elf.a(_iob.eo)
-                    0x15bc                  __outdone
-                    0x15bd                  __sibuf
-                    0x15bf                  __sobuf
- .bss               0x15c2          0x4 build/XC16_24FJ256GA110/production/CommandParser.o
-                    0x15c2                  _value
- .bss               0x15c6          0x2 build/XC16_24FJ256GA110/production/mcc_generated_files/tmr2.o
- .bss               0x15c8          0x2 build/XC16_24FJ256GA110/production/mcc_generated_files/tmr3.o
- .bss               0x15ca          0x2 build/XC16_24FJ256GA110/production/mcc_generated_files/tmr4.o
- .bss               0x15cc          0x2 build/XC16_24FJ256GA110/production/mcc_generated_files/tmr5.o
- .bss               0x15ce          0x2 build/XC16_24FJ256GA110/production/mcc_generated_files/tmr1.o
+.bss                0x15b2         0x3e
+ .bss               0x15b2         0x1a build/XC16_24FJ256GA110/production/mcc_generated_files/uart1.o
+ .bss               0x15cc         0x10 /Applications/microchip/xc16/v1.32/bin/bin/../../lib/libc-elf.a(malloc.eo)
+                    0x15cc                  ___allocs
+                    0x15d4                  ___allocp
+                    0x15d6                  ___alloct
+                    0x15d8                  ___allocx
+ .bss               0x15dc          0x6 /Applications/microchip/xc16/v1.32/bin/bin/../../lib/libc-elf.a(_iob.eo)
+                    0x15dc                  __outdone
+                    0x15dd                  __sibuf
+                    0x15df                  __sobuf
+ .bss               0x15e2          0x4 build/XC16_24FJ256GA110/production/CommandParser.o
+                    0x15e2                  _value
+ .bss               0x15e6          0x2 build/XC16_24FJ256GA110/production/mcc_generated_files/tmr2.o
+ .bss               0x15e8          0x2 build/XC16_24FJ256GA110/production/mcc_generated_files/tmr3.o
+ .bss               0x15ea          0x2 build/XC16_24FJ256GA110/production/mcc_generated_files/tmr4.o
+ .bss               0x15ec          0x2 build/XC16_24FJ256GA110/production/mcc_generated_files/tmr5.o
+ .bss               0x15ee          0x2 build/XC16_24FJ256GA110/production/mcc_generated_files/tmr1.o
 
-.data               0x15d0          0x2
- .data              0x15d0          0x2 /Applications/microchip/xc16/v1.32/bin/bin/../../lib/libpic30-elf.a(c30_uart.eo)
-                    0x15d0                  ___C30_UART
+.data               0x15f0          0x2
+ .data              0x15f0          0x2 /Applications/microchip/xc16/v1.32/bin/bin/../../lib/libpic30-elf.a(c30_uart.eo)
+                    0x15f0                  ___C30_UART
 
-.bss                0x15d2          0x2
- .bss               0x15d2          0x2 /Applications/microchip/xc16/v1.32/bin/bin/../../lib/libpic30-elf.a(brk.elo)
-                    0x15d2                  ___curbrk
+.bss                0x15f2          0x2
+ .bss               0x15f2          0x2 /Applications/microchip/xc16/v1.32/bin/bin/../../lib/libpic30-elf.a(brk.elo)
+                    0x15f2                  ___curbrk
 
 .config_JTAGEN    0x02abfe          0x2
  .config_JTAGEN
@@ -3109,261 +3122,263 @@ __c30_signature
  .aivt._AltMathError
                   0x00010c          0x2 build/XC16_24FJ256GA110/production/traps.o
 
-.const              0x9610        0x218 load address 0x001610  
- .const             0x9610        0x172 build/XC16_24FJ256GA110/production/SatelliteMode.o
- .const             0x9782         0x72 build/XC16_24FJ256GA110/production/TransmitManager.o
-                    0x9782                  _HEADER_SIZE
-                    0x9784                  _QUEUE_SIZE
-                    0x9786                  _PREAMBLE_LENGTH
-                    0x9788                  _SIM_RES_LENGTH
-                    0x978a                  _DUPLEX_SYNC_LENGTH
-                    0x978c                  _duplexSyncBytes
-                    0x978e                  _DUPLEX_PACK_BYTE_LENGTH
-                    0x9790                  _duplexUplinkSMSPoll
-                    0x9796                  _duplexUplinkSMSReady
-                    0x979c                  _duplexCmdReceived
-                    0x97a1                  _duplexDownlinkFilePoll
-                    0x97a7                  _duplexDownlinkFileReady
-                    0x97ad                  _duplexHousekeepingFilePoll
-                    0x97b3                  _duplexWaitingFilesPoll
-                    0x97ba                  _FILE_COUNT_INDEX
-                    0x97bc                  _DUPLEX_TIMEOUT
-                    0x97be                  _MAX_FILES_WAITING
-                    0x97c0                  _DUP_RES_LENGTH
-                    0x97c2                  _POWER_ECHO_LENGTH
- .const             0x97f4         0x20 build/XC16_24FJ256GA110/production/adc1.o
-                    0x97f4                  _ADC_CHANNEL_MAP
- .const             0x9814         0x12 build/XC16_24FJ256GA110/production/SampleManager.o
-                    0x9814                  _RESULTS_SIZE
-                    0x9816                  _electronVoltage
-                    0x9818                  _ionVoltage
-                    0x981a                  _maxSweepVoltage
-                    0x981c                  _minSweepVoltage
- .const             0x9826          0x2 build/XC16_24FJ256GA110/production/CommandParser.o
-                    0x9826                  _VALUE_ARRAY_SIZE
+.const              0x9610        0x2f4 load address 0x001610  
+ .const             0x9610        0x24e build/XC16_24FJ256GA110/production/SatelliteMode.o
+ .const             0x985e         0x72 build/XC16_24FJ256GA110/production/TransmitManager.o
+                    0x985e                  _HEADER_SIZE
+                    0x9860                  _QUEUE_SIZE
+                    0x9862                  _PREAMBLE_LENGTH
+                    0x9864                  _SIM_RES_LENGTH
+                    0x9866                  _DUPLEX_SYNC_LENGTH
+                    0x9868                  _duplexSyncBytes
+                    0x986a                  _DUPLEX_PACK_BYTE_LENGTH
+                    0x986c                  _duplexUplinkSMSPoll
+                    0x9872                  _duplexUplinkSMSReady
+                    0x9878                  _duplexCmdReceived
+                    0x987d                  _duplexDownlinkFilePoll
+                    0x9883                  _duplexDownlinkFileReady
+                    0x9889                  _duplexHousekeepingFilePoll
+                    0x988f                  _duplexWaitingFilesPoll
+                    0x9896                  _FILE_COUNT_INDEX
+                    0x9898                  _DUPLEX_TIMEOUT
+                    0x989a                  _MAX_FILES_WAITING
+                    0x989c                  _DUP_RES_LENGTH
+                    0x989e                  _POWER_ECHO_LENGTH
+ .const             0x98d0         0x20 build/XC16_24FJ256GA110/production/adc1.o
+                    0x98d0                  _ADC_CHANNEL_MAP
+ .const             0x98f0         0x12 build/XC16_24FJ256GA110/production/SampleManager.o
+                    0x98f0                  _RESULTS_SIZE
+                    0x98f2                  _electronVoltage
+                    0x98f4                  _ionVoltage
+                    0x98f6                  _maxSweepVoltage
+                    0x98f8                  _minSweepVoltage
+ .const             0x9902          0x2 build/XC16_24FJ256GA110/production/CommandParser.o
+                    0x9902                  _VALUE_ARRAY_SIZE
 
-.text             0x001828       0x299e
- .text            0x001828        0xfaa build/XC16_24FJ256GA110/production/TransmitManager.o
-                  0x001828                  _isLangmuirProbeOn
-                  0x00183e                  _isMagnetometerOn
-                  0x001854                  _isTemperatureOn
-                  0x00186a                  _isGPSOn
-                  0x001880                  _isDuplexOn
-                  0x001888                  _SaveData
-                  0x0018d6                  _PackageData
-                  0x001970                  _TransmitQueue
-                  0x0019d4                  _Send
-                  0x001a00                  _Read
-                  0x001a52                  _TransmitPreamble
-                  0x001a7c                  _PollDuplex
-                  0x001b26                  _SendData
-                  0x001c5c                  _TransmitInstrumentDataToSimplex
-                  0x001d5a                  _TransmitInstrumentDataToDuplex
-                  0x001f04                  _ReadACKForUnit
-                  0x001fbc                  _IsLineBusy
-                  0x001fd2                  _CreateFileHeader
-                  0x0020c2                  _GetWaitingFilesCount
-                  0x002148                  _SetTotalTime
-                  0x002248                  _HandleCommand
-                  0x00247c                  _TogglePowerSwitches
-                  0x0024f0                  _ReadPowerSwitches
-                  0x002784                  _SetLangmuirProbePower
-                  0x00279a                  _SetMagnetometerPower
-                  0x0027a6                  _SetTemperaturePower
-                  0x0027bc                  _SetGPSPower
- .text            0x0027d2        0xe52 build/XC16_24FJ256GA110/production/SampleManager.o
-                  0x0027d2                  _TrySampleLangmuirProbe
-                  0x00281c                  _TryCalibrateLangmuirProbe
-                  0x002844                  _TrySampleMagnetometer
-                  0x002892                  _TrySampleTemperature
-                  0x0028d6                  _TrySampleGPS
-                  0x00291e                  _TrySampleHousekeeping
-                  0x002950                  _EndLangmuirProbeSampling
-                  0x0029d4                  _EndLangmuirProbeCal
-                  0x0029e4                  _EndMagnetometerSampling
-                  0x002a18                  _EndTemperatureSensorSampling
-                  0x002a44                  _EndGPSSampling
-                  0x002a8c                  _EndHousekeepingSampling
-                  0x002ab8                  _ManageSweepingProgress
-                  0x002b34                  _CalLangmuirProbe
-                  0x002bd4                  _TakeProbeSample
-                  0x002d06                  _TakeMagnetometerSample
-                  0x002d8c                  _TakeTemperatureSample
-                  0x002dfc                  _TakeHousekeepingSample
-                  0x002eee                  _AppendToGPSBuffer
-                  0x002f2a                  _TakeGPSSample
-                  0x002f8c                  _CompressAscii
-                  0x0030ec                  _GetSubStringLength
-                  0x003110                  _CopySubstring
-                  0x003142                  _ParseDouble
-                  0x003272                  _AsciiFromInt
-                  0x00330e                  _GetDoubleFromSubString
-                  0x00335c                  _AppendIntToGPSBuffer
-                  0x003382                  _ParseGPSSample
-                  0x0035ca                  _TestDACSPI
-                  0x0035ea                  _TestADC
- .text            0x003624        0x7c0 build/XC16_24FJ256GA110/production/CommandParser.o
-                  0x003624                  _PerformCommands
-                  0x0036c2                  _EndMessage
-                  0x0036d0                  _ParseByte
-                  0x00373e                  _RunCommand
-                  0x003c2a                  _IsNextCommand
-                  0x003cdc                  _addValueByte
-                  0x003cfa                  _convertHexToDecimal
-                  0x003d3a                  _convertTime
- .text            0x003de4        0x3e2 build/XC16_24FJ256GA110/production/SatelliteMode.o
-                  0x003de4                  _SatelliteProperties_Initialize
-                  0x003dfc                  _Satellite_Initialize
-                  0x003e0e                  _ShouldUpdateMode
-                  0x003eae                  _UpdateMode
-                  0x003f1a                  _MainLoop
-                  0x003fa2                  _SetTime
-                  0x004022                  _SetAltitude
-                  0x004036                  _LogState
+.text             0x001904       0x2b94
+ .text            0x001904        0xfe2 build/XC16_24FJ256GA110/production/TransmitManager.o
+                  0x001904                  _isLangmuirProbeOn
+                  0x00191a                  _isMagnetometerOn
+                  0x001930                  _isTemperatureOn
+                  0x001946                  _isGPSOn
+                  0x00195c                  _isDuplexOn
+                  0x001972                  _SaveData
+                  0x0019c0                  _PackageData
+                  0x001a5a                  _TransmitQueue
+                  0x001abe                  _Send
+                  0x001aea                  _Read
+                  0x001b3c                  _TransmitPreamble
+                  0x001b66                  _PollDuplex
+                  0x001c10                  _SendData
+                  0x001d46                  _TransmitInstrumentDataToSimplex
+                  0x001e44                  _TransmitInstrumentDataToDuplex
+                  0x001fee                  _ReadACKForUnit
+                  0x0020a6                  _IsLineBusy
+                  0x0020bc                  _CreateFileHeader
+                  0x0021ac                  _GetWaitingFilesCount
+                  0x002232                  _SetTotalTime
+                  0x002332                  _HandleCommand
+                  0x002566                  _TogglePowerSwitches
+                  0x0025da                  _ReadPowerSwitches
+                  0x002880                  _SetLangmuirProbePower
+                  0x002896                  _SetMagnetometerPower
+                  0x0028a2                  _SetTemperaturePower
+                  0x0028b8                  _SetGPSPower
+                  0x0028ce                  _SetDuplexPower
+ .text            0x0028e6        0xeb4 build/XC16_24FJ256GA110/production/SampleManager.o
+                  0x0028e6                  _TrySampleLangmuirProbe
+                  0x002930                  _TryCalibrateLangmuirProbe
+                  0x002958                  _TrySampleMagnetometer
+                  0x0029a6                  _TrySampleTemperature
+                  0x0029ea                  _TrySampleGPS
+                  0x002a32                  _TrySampleHousekeeping
+                  0x002a64                  _EndLangmuirProbeSampling
+                  0x002aee                  _EndLangmuirProbeCal
+                  0x002afe                  _EndMagnetometerSampling
+                  0x002b32                  _EndTemperatureSensorSampling
+                  0x002b5e                  _EndGPSSampling
+                  0x002ba6                  _EndHousekeepingSampling
+                  0x002bd2                  _ManageSweepingProgress
+                  0x002c4e                  _CalLangmuirProbe
+                  0x002d08                  _TakeProbeSample
+                  0x002e54                  _TakeMagnetometerSample
+                  0x002eee                  _TakeTemperatureSample
+                  0x002f72                  _TakeHousekeepingSample
+                  0x003064                  _AppendToGPSBuffer
+                  0x0030a0                  _TakeGPSSample
+                  0x003102                  _CompressAscii
+                  0x003262                  _GetSubStringLength
+                  0x003286                  _CopySubstring
+                  0x0032b8                  _ParseDouble
+                  0x0033e8                  _AsciiFromInt
+                  0x003484                  _GetDoubleFromSubString
+                  0x0034d2                  _AppendIntToGPSBuffer
+                  0x0034f8                  _ParseGPSSample
+                  0x003740                  _TestDACSPI
+                  0x003760                  _TestADC
+ .text            0x00379a        0x7c0 build/XC16_24FJ256GA110/production/CommandParser.o
+                  0x00379a                  _PerformCommands
+                  0x003838                  _EndMessage
+                  0x003846                  _ParseByte
+                  0x0038b4                  _RunCommand
+                  0x003da0                  _IsNextCommand
+                  0x003e52                  _addValueByte
+                  0x003e70                  _convertHexToDecimal
+                  0x003eb0                  _convertTime
+ .text            0x003f5a        0x53e build/XC16_24FJ256GA110/production/SatelliteMode.o
+                  0x003f5a                  _SatelliteProperties_Initialize
+                  0x003f78                  _Satellite_Initialize
+                  0x003f8a                  _ShouldUpdateMode
+                  0x00402a                  _UpdateMode
+                  0x004096                  _MainLoop
+                  0x004118                  _SetTime
+                  0x004198                  _SetAltitude
+                  0x0041ac                  _LogState
 
-.dinit            0x0041c6        0x20c
- .dinit           0x0041c6        0x20c data_init
+.dinit            0x004498        0x22c
+ .dinit           0x004498        0x22c data_init
 
-.text             0x0043d2       0x10e2
- .text            0x0043d2        0x20a build/XC16_24FJ256GA110/production/mcc_generated_files/uart1.o
-                  0x0043d2                  _UART1_Initialize
-                  0x004410                  _UART1_Read
-                  0x004446                  _UART1_ReadBuffer
-                  0x00447a                  _UART1_Write
-                  0x0044b0                  _UART1_WriteBuffer
-                  0x0044e2                  _UART1_TransferStatusGet
-                  0x00451e                  _UART1_Peek
-                  0x004546                  _UART1_ReceiveBufferSizeGet
-                  0x004574                  _UART1_TransmitBufferSizeGet
-                  0x0045a4                  _UART1_ReceiveBufferIsEmpty
-                  0x0045bc                  _UART1_TransmitBufferIsFull
-                  0x0045d4                  _UART1_StatusGet
- .text            0x0045dc        0x1e8 build/XC16_24FJ256GA110/production/mcc_generated_files/spi1.o
-                  0x0045dc                  _SPI1_Initialize
-                  0x0045ee                  _SPI1_Exchange
-                  0x004656                  _SPI1_ExchangeBuffer
-                  0x004770                  _SPI1_Exchange16bit
-                  0x004780                  _SPI1_Exchange16bitBuffer
-                  0x004796                  _SPI1_TransferModeGet
-                  0x0047ac                  _SPI1_StatusGet
-                  0x0047b4                  _SPI1_Exchange8bit
- .text            0x0047c4        0x1d6 build/XC16_24FJ256GA110/production/mcc_generated_files/spi2.o
-                  0x0047c4                  _SPI2_Initialize
-                  0x0047d6                  _SPI2_Exchange
-                  0x00483e                  _SPI2_ExchangeBuffer
-                  0x004958                  _SPI2_Exchange8bit
-                  0x004968                  _SPI2_Exchange8bitBuffer
-                  0x00497c                  _SPI2_TransferModeGet
-                  0x004992                  _SPI2_StatusGet
- .text            0x00499a        0x196 build/XC16_24FJ256GA110/production/system.o
-                  0x00499a                  _ConfigureOscillator
-                  0x0049d6                  _wait_for
-                  0x004a18                  _Pow
-                  0x004a5c                  _ClearQueue
-                  0x004a86                  _Clear
-                  0x004ab4                  _CopyIntToByte
-                  0x004aee                  _CopyBytes
- .text            0x004b30        0x15c build/XC16_24FJ256GA110/production/SystemConfiguration.o
-                  0x004b30                  _GetSampleRate
-                  0x004b6c                  _GetSweepRate
-                  0x004baa                  _GetSweepDuration
-                  0x004be8                  _GetSystemHeaderID
-                  0x004c2c                  _GetDayTimeInMin
-                  0x004c44                  _GetTransmissionPackageLength
-                  0x004c58                  _GetTransmissionUnitForMode
- .text            0x004c8c        0x144 build/XC16_24FJ256GA110/production/adc1.o
-                  0x004c8c                  _InitializeADC1
-                  0x004cca                  _ADC1_GetResultFromChannels
-                  0x004d88                  _ADC1_ResultGetFromChannel
-                  0x004dc0                  _ADC1_ManualSampleForSec
- .text            0x004dd0        0x10a build/XC16_24FJ256GA110/production/mcc_generated_files/pin_manager.o
-                  0x004dd0                  _PIN_MANAGER_Initialize
- .text            0x004eda         0xaa build/XC16_24FJ256GA110/production/mcc_generated_files/tmr1.o
-                  0x004eda                  _TMR1_Initialize
-                  0x004ef4                  _TMR1_Period16BitSet
-                  0x004f06                  _TMR1_Period16BitGet
-                  0x004f0e                  _TMR1_Counter16BitSet
-                  0x004f20                  _TMR1_Counter16BitGet
-                  0x004f28                  _TMR1_CallBack
-                  0x004f3a                  _TMR1_Start
-                  0x004f4a                  _TMR1_Stop
-                  0x004f54                  _TMR1_GetElapsedThenClear
-                  0x004f6c                  _TMR1_SoftwareCounterGet
-                  0x004f78                  _TMR1_SoftwareCounterClear
- .text            0x004f84         0xa2 build/XC16_24FJ256GA110/production/mcc_generated_files/tmr2.o
-                  0x004f84                  _TMR2_Initialize
-                  0x004f9e                  _TMR2_Period16BitSet
-                  0x004fb0                  _TMR2_Period16BitGet
-                  0x004fb8                  _TMR2_Counter16BitSet
-                  0x004fca                  _TMR2_Counter16BitGet
-                  0x004fd2                  _TMR2_CallBack
-                  0x004fdc                  _TMR2_Start
-                  0x004fec                  _TMR2_Stop
-                  0x004ff6                  _TMR2_GetElapsedThenClear
-                  0x00500e                  _TMR2_SoftwareCounterGet
-                  0x00501a                  _TMR2_SoftwareCounterClear
- .text            0x005026         0xa2 build/XC16_24FJ256GA110/production/mcc_generated_files/tmr4.o
-                  0x005026                  _TMR4_Initialize
-                  0x005040                  _TMR4_Period16BitSet
-                  0x005052                  _TMR4_Period16BitGet
-                  0x00505a                  _TMR4_Counter16BitSet
-                  0x00506c                  _TMR4_Counter16BitGet
-                  0x005074                  _TMR4_CallBack
-                  0x00507e                  _TMR4_Start
-                  0x00508e                  _TMR4_Stop
-                  0x005098                  _TMR4_GetElapsedThenClear
-                  0x0050b0                  _TMR4_SoftwareCounterGet
-                  0x0050bc                  _TMR4_SoftwareCounterClear
- .text            0x0050c8         0xa2 build/XC16_24FJ256GA110/production/mcc_generated_files/tmr5.o
-                  0x0050c8                  _TMR5_Initialize
-                  0x0050e2                  _TMR5_Period16BitSet
-                  0x0050f4                  _TMR5_Period16BitGet
-                  0x0050fc                  _TMR5_Counter16BitSet
-                  0x00510e                  _TMR5_Counter16BitGet
-                  0x005116                  _TMR5_CallBack
-                  0x005120                  _TMR5_Start
-                  0x005130                  _TMR5_Stop
-                  0x00513a                  _TMR5_GetElapsedThenClear
-                  0x005152                  _TMR5_SoftwareCounterGet
-                  0x00515e                  _TMR5_SoftwareCounterClear
- .text            0x00516a         0xa0 build/XC16_24FJ256GA110/production/mcc_generated_files/tmr3.o
-                  0x00516a                  _TMR3_Initialize
-                  0x005184                  _TMR3_Period16BitSet
-                  0x005196                  _TMR3_Period16BitGet
-                  0x00519e                  _TMR3_Counter16BitSet
-                  0x0051b0                  _TMR3_Counter16BitGet
-                  0x0051b8                  _TMR3_CallBack
-                  0x0051c0                  _TMR3_Start
-                  0x0051d0                  _TMR3_Stop
-                  0x0051da                  _TMR3_GetElapsedThenClear
-                  0x0051f2                  _TMR3_SoftwareCounterGet
-                  0x0051fe                  _TMR3_SoftwareCounterClear
- .text            0x00520a         0x8c build/XC16_24FJ256GA110/production/mcc_generated_files/crc16.o
-                  0x00520a                  _CRC16_Initialize
-                  0x00521a                  _CRC16SendBytes
- .text            0x005296         0x76 build/XC16_24FJ256GA110/production/mcc_generated_files/uart2.o
-                  0x005296                  _UART2_Initialize
-                  0x0052aa                  _UART2_Read
-                  0x0052ec                  _UART2_Write
-                  0x005304                  _UART2_StatusGet
- .text            0x00530c         0x6c build/XC16_24FJ256GA110/production/mcc_generated_files/uart3.o
-                  0x00530c                  _UART3_Initialize
-                  0x005320                  _UART3_Read
-                  0x005358                  _UART3_Write
-                  0x005370                  _UART3_StatusGet
- .text            0x005378         0x6a build/XC16_24FJ256GA110/production/mcc_generated_files/interrupt_manager.o
-                  0x005378                  _INTERRUPT_Initialize
- .text            0x0053e2         0x52 build/XC16_24FJ256GA110/production/mcc_generated_files/uart4.o
-                  0x0053e2                  _UART4_Initialize
-                  0x0053f6                  _UART4_Read
-                  0x005414                  _UART4_Write
-                  0x00542c                  _UART4_StatusGet
- .text            0x005434         0x52 build/XC16_24FJ256GA110/production/mcc_generated_files/mcc.o
-                  0x005434                  _SYSTEM_Initialize
-                  0x00545a                  _OSCILLATOR_Initialize
- .text            0x005486         0x16 build/XC16_24FJ256GA110/production/mcc_generated_files/traps.o
-                  0x005486                  _TRAPS_halt_on_error
- .text            0x00549c         0x12 build/XC16_24FJ256GA110/production/main.o
-                  0x00549c                  _main
- .text            0x0054ae          0x6 build/XC16_24FJ256GA110/production/user.o
-                  0x0054ae                  _InitApp
+.text             0x0046c4       0x1134
+ .text            0x0046c4        0x20a build/XC16_24FJ256GA110/production/mcc_generated_files/uart1.o
+                  0x0046c4                  _UART1_Initialize
+                  0x004702                  _UART1_Read
+                  0x004738                  _UART1_ReadBuffer
+                  0x00476c                  _UART1_Write
+                  0x0047a2                  _UART1_WriteBuffer
+                  0x0047d4                  _UART1_TransferStatusGet
+                  0x004810                  _UART1_Peek
+                  0x004838                  _UART1_ReceiveBufferSizeGet
+                  0x004866                  _UART1_TransmitBufferSizeGet
+                  0x004896                  _UART1_ReceiveBufferIsEmpty
+                  0x0048ae                  _UART1_TransmitBufferIsFull
+                  0x0048c6                  _UART1_StatusGet
+ .text            0x0048ce        0x1e8 build/XC16_24FJ256GA110/production/mcc_generated_files/spi1.o
+                  0x0048ce                  _SPI1_Initialize
+                  0x0048e0                  _SPI1_Exchange
+                  0x004948                  _SPI1_ExchangeBuffer
+                  0x004a62                  _SPI1_Exchange16bit
+                  0x004a72                  _SPI1_Exchange16bitBuffer
+                  0x004a88                  _SPI1_TransferModeGet
+                  0x004a9e                  _SPI1_StatusGet
+                  0x004aa6                  _SPI1_Exchange8bit
+ .text            0x004ab6        0x1d6 build/XC16_24FJ256GA110/production/mcc_generated_files/spi2.o
+                  0x004ab6                  _SPI2_Initialize
+                  0x004ac8                  _SPI2_Exchange
+                  0x004b30                  _SPI2_ExchangeBuffer
+                  0x004c4a                  _SPI2_Exchange8bit
+                  0x004c5a                  _SPI2_Exchange8bitBuffer
+                  0x004c6e                  _SPI2_TransferModeGet
+                  0x004c84                  _SPI2_StatusGet
+ .text            0x004c8c        0x1d0 build/XC16_24FJ256GA110/production/system.o
+                  0x004c8c                  _ConfigureOscillator
+                  0x004cc8                  _wait_for
+                  0x004d0a                  _Pow
+                  0x004d4e                  _ClearQueue
+                  0x004d78                  _Clear
+                  0x004da6                  _CopyIntToByte
+                  0x004de0                  _CopyIntToDoubleByte
+                  0x004e1a                  _CopyBytes
+ .text            0x004e5c        0x15c build/XC16_24FJ256GA110/production/SystemConfiguration.o
+                  0x004e5c                  _GetSampleRate
+                  0x004e98                  _GetSweepRate
+                  0x004ed6                  _GetSweepDuration
+                  0x004f14                  _GetSystemHeaderID
+                  0x004f58                  _GetDayTimeInMin
+                  0x004f70                  _GetTransmissionPackageLength
+                  0x004f84                  _GetTransmissionUnitForMode
+ .text            0x004fb8        0x144 build/XC16_24FJ256GA110/production/adc1.o
+                  0x004fb8                  _InitializeADC1
+                  0x004ff6                  _ADC1_GetResultFromChannels
+                  0x0050b4                  _ADC1_ResultGetFromChannel
+                  0x0050ec                  _ADC1_ManualSampleForSec
+ .text            0x0050fc        0x10a build/XC16_24FJ256GA110/production/mcc_generated_files/pin_manager.o
+                  0x0050fc                  _PIN_MANAGER_Initialize
+ .text            0x005206         0xaa build/XC16_24FJ256GA110/production/mcc_generated_files/tmr1.o
+                  0x005206                  _TMR1_Initialize
+                  0x005220                  _TMR1_Period16BitSet
+                  0x005232                  _TMR1_Period16BitGet
+                  0x00523a                  _TMR1_Counter16BitSet
+                  0x00524c                  _TMR1_Counter16BitGet
+                  0x005254                  _TMR1_CallBack
+                  0x005266                  _TMR1_Start
+                  0x005276                  _TMR1_Stop
+                  0x005280                  _TMR1_GetElapsedThenClear
+                  0x005298                  _TMR1_SoftwareCounterGet
+                  0x0052a4                  _TMR1_SoftwareCounterClear
+ .text            0x0052b0         0xa2 build/XC16_24FJ256GA110/production/mcc_generated_files/tmr2.o
+                  0x0052b0                  _TMR2_Initialize
+                  0x0052ca                  _TMR2_Period16BitSet
+                  0x0052dc                  _TMR2_Period16BitGet
+                  0x0052e4                  _TMR2_Counter16BitSet
+                  0x0052f6                  _TMR2_Counter16BitGet
+                  0x0052fe                  _TMR2_CallBack
+                  0x005308                  _TMR2_Start
+                  0x005318                  _TMR2_Stop
+                  0x005322                  _TMR2_GetElapsedThenClear
+                  0x00533a                  _TMR2_SoftwareCounterGet
+                  0x005346                  _TMR2_SoftwareCounterClear
+ .text            0x005352         0xa2 build/XC16_24FJ256GA110/production/mcc_generated_files/tmr4.o
+                  0x005352                  _TMR4_Initialize
+                  0x00536c                  _TMR4_Period16BitSet
+                  0x00537e                  _TMR4_Period16BitGet
+                  0x005386                  _TMR4_Counter16BitSet
+                  0x005398                  _TMR4_Counter16BitGet
+                  0x0053a0                  _TMR4_CallBack
+                  0x0053aa                  _TMR4_Start
+                  0x0053ba                  _TMR4_Stop
+                  0x0053c4                  _TMR4_GetElapsedThenClear
+                  0x0053dc                  _TMR4_SoftwareCounterGet
+                  0x0053e8                  _TMR4_SoftwareCounterClear
+ .text            0x0053f4         0xa2 build/XC16_24FJ256GA110/production/mcc_generated_files/tmr5.o
+                  0x0053f4                  _TMR5_Initialize
+                  0x00540e                  _TMR5_Period16BitSet
+                  0x005420                  _TMR5_Period16BitGet
+                  0x005428                  _TMR5_Counter16BitSet
+                  0x00543a                  _TMR5_Counter16BitGet
+                  0x005442                  _TMR5_CallBack
+                  0x00544c                  _TMR5_Start
+                  0x00545c                  _TMR5_Stop
+                  0x005466                  _TMR5_GetElapsedThenClear
+                  0x00547e                  _TMR5_SoftwareCounterGet
+                  0x00548a                  _TMR5_SoftwareCounterClear
+ .text            0x005496         0xa0 build/XC16_24FJ256GA110/production/mcc_generated_files/tmr3.o
+                  0x005496                  _TMR3_Initialize
+                  0x0054b0                  _TMR3_Period16BitSet
+                  0x0054c2                  _TMR3_Period16BitGet
+                  0x0054ca                  _TMR3_Counter16BitSet
+                  0x0054dc                  _TMR3_Counter16BitGet
+                  0x0054e4                  _TMR3_CallBack
+                  0x0054ec                  _TMR3_Start
+                  0x0054fc                  _TMR3_Stop
+                  0x005506                  _TMR3_GetElapsedThenClear
+                  0x00551e                  _TMR3_SoftwareCounterGet
+                  0x00552a                  _TMR3_SoftwareCounterClear
+ .text            0x005536         0x8c build/XC16_24FJ256GA110/production/mcc_generated_files/crc16.o
+                  0x005536                  _CRC16_Initialize
+                  0x005546                  _CRC16SendBytes
+ .text            0x0055c2         0x82 build/XC16_24FJ256GA110/production/mcc_generated_files/uart3.o
+                  0x0055c2                  _UART3_Initialize
+                  0x0055d6                  _UART3_Read
+                  0x005624                  _UART3_Write
+                  0x00563c                  _UART3_StatusGet
+ .text            0x005644         0x76 build/XC16_24FJ256GA110/production/mcc_generated_files/uart2.o
+                  0x005644                  _UART2_Initialize
+                  0x005658                  _UART2_Read
+                  0x00569a                  _UART2_Write
+                  0x0056b2                  _UART2_StatusGet
+ .text            0x0056ba         0x6a build/XC16_24FJ256GA110/production/mcc_generated_files/interrupt_manager.o
+                  0x0056ba                  _INTERRUPT_Initialize
+ .text            0x005724         0x54 build/XC16_24FJ256GA110/production/mcc_generated_files/mcc.o
+                  0x005724                  _SYSTEM_Initialize
+                  0x00574a                  _OSCILLATOR_Initialize
+ .text            0x005778         0x52 build/XC16_24FJ256GA110/production/mcc_generated_files/uart4.o
+                  0x005778                  _UART4_Initialize
+                  0x00578c                  _UART4_Read
+                  0x0057aa                  _UART4_Write
+                  0x0057c2                  _UART4_StatusGet
+ .text            0x0057ca         0x16 build/XC16_24FJ256GA110/production/mcc_generated_files/traps.o
+                  0x0057ca                  _TRAPS_halt_on_error
+ .text            0x0057e0         0x12 build/XC16_24FJ256GA110/production/main.o
+                  0x0057e0                  _main
+ .text            0x0057f2          0x6 build/XC16_24FJ256GA110/production/user.o
+                  0x0057f2                  _InitApp

@@ -11,9 +11,9 @@
 
 
 TransmissionMode TransmissionUnitForMode = {
-    SimplexUnit,    // Startup mode
-    SimplexUnit,    // Interim mode
-    SimplexUnit,    // Science mode
+    SimplexOrDuplex,    // Startup mode
+    SimplexOrDuplex,    // Interim mode
+    SimplexOrDuplex,    // Science mode
     SimplexUnit         // Reentry mode
 };
 
@@ -50,10 +50,10 @@ Instrument GPS = {
 };
 
 Instrument Housekeeping = {
-    { 1, 0, 0},
-    { 1, 0, 0},
-    { 1, 0, 0},
-    { 1, 0, 0},
+    { 0, 0, 0},
+    { 0, 0, 0},
+    { 0, 0, 0},
+    { 0, 0, 0},
 };
 
 // Description: Getter for an instrument sample rate

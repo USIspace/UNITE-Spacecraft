@@ -67,7 +67,7 @@ int currentDuplexConnectionWait = 0;
 const int DUPLEX_TIMEOUT = 3;
 bool duplexTimeoutFlag = 0;
 const int MAX_FILES_WAITING = 5;
-bool isDuplexConnected = true;
+bool isDuplexConnected = false;
 
 
 const int DUP_RES_LENGTH = 11;
@@ -80,8 +80,8 @@ uint8_t epsEcho[39] = { NULL };
 const int POWER_ECHO_LENGTH = 39;
 uint8_t powerPackagePreamble[4] = {0x50, 0x50, 0x50, 0x0B}; // 0x50 0x50 0x50 0x0B
 uint8_t commandBoardPowerSwitch = 0xFF;         // SW1
-uint8_t temperaturePowerSwitch = 0x0;          // SW2
-uint8_t langmuirMagPowerSwitch = 0x0;          // SW3
+uint8_t temperaturePowerSwitch = 0x00;          // SW2
+uint8_t langmuirMagPowerSwitch = 0x00;          // SW3
 uint8_t gpsPowerSwitch = 0x00;                  // SW4
 uint8_t duplexPowerSwitch = 0x00;               // SW5
 
@@ -89,7 +89,7 @@ bool isLangmuirProbeOn() { return langmuirMagPowerSwitch == 0xFF; }
 bool isMagnetometerOn() { return langmuirMagPowerSwitch == 0xFF; }
 bool isTemperatureOn() { return temperaturePowerSwitch == 0xFF; }
 bool isGPSOn() { return gpsPowerSwitch == 0xFF; }
-bool isDuplexOn() { return true; }//duplexPowerSwitch == 0xFF; } 
+bool isDuplexOn() { return duplexPowerSwitch == 0xFF; } 
 
 // Housekeeping Data
 uint16_t b1Charge;
@@ -493,7 +493,7 @@ bool IsLineBusy() {
   Duplex Interfacing Methods
  ****************************/
 
-size_t CreateFileHeader(char *formattedString,uint8_t instrument, uint16_t dataLength) {
+size_t CreateFileHeader(char *formattedString, uint8_t instrument, uint16_t dataLength) {
     
     char esn[] = "0-453221";
     char fileName[20] = { NULL };
@@ -557,6 +557,7 @@ void SetTotalTime() {
     
     if (isDuplexOn()) {
         
+        // Change to a Do-While (!ReadACKForUnit(Duplex))
         PollDuplex(duplexHousekeepingFilePoll, 0);
 
         if (ReadACKForUnit(DuplexUnit)) {
@@ -744,7 +745,7 @@ void ReadPowerSwitches() {
                 case 35: duplexTemp += Read(SimplexUnit); break;                // Duplex Temp Low
                 case 36: epsTemp = Read(SimplexUnit); epsTemp <<= 8; break;           // EPS Temp High
                 case 37: epsTemp += Read(SimplexUnit); break;                   // EPS Temp Low
-//                case 38: isDuplexConnected = Read(SimplexUnit) > 0; break;
+                case 38: isDuplexConnected = Read(SimplexUnit) > 0; break;
                 default: Read(SimplexUnit); break;
             }
         }
@@ -768,4 +769,11 @@ void SetTemperaturePower(bool on) {
 void SetGPSPower(bool on) {
     if (on) gpsPowerSwitch = 0xFF;
     else gpsPowerSwitch = 0x00;
+}
+
+void SetDuplexPower(bool on) {
+    if (on) duplexPowerSwitch = 0xFF;
+    else duplexPowerSwitch = 0x00;
+    
+    TogglePowerSwitches();
 }

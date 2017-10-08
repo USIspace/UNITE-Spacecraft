@@ -76,6 +76,11 @@ extern bool shouldMagnetometerSample;
 // Did GPS obtain lock for last sample
 extern bool isGPSLocked;
 
+/* Diagnostic Data */
+extern uint16_t langmuirProbeDiagData[5];
+extern uint16_t magnetometerDiagData[3];
+extern uint16_t temperatureDiagData[8];
+
 /* Sampling Functions */
 
 // Start sampling instruments

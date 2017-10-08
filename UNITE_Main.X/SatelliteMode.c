@@ -82,7 +82,12 @@ void SatelliteProperties_Initialize() {
    _LATE4 = LED_ON;
    
    //Slave select 1
-   _LATG7 = 1;            
+   _LATG7 = 1;   
+   
+   //Set Satellite Time
+//   SetDuplexPower(1);
+   SetTotalTime();
+//   SetDuplexPower(0);
 }
 
  
@@ -223,7 +228,7 @@ void MainLoop() {
     
     // Log
     if (IS_DIAG) {
-        if (currentLogWait++ >= 5) { 
+        if (++currentLogWait >= 1) { 
             LogState();
             currentLogWait = 0;
             
@@ -315,6 +320,25 @@ void LogState() {
     
     strcat(log, newLine);
     
+    //Current Mode
+
+    switch (currentMode) {
+        case startup: strcat(log, "Current Mode: startup"); break;
+        case interim: strcat(log, "Current Mode: interim"); break;
+        case science: strcat(log, "Current Mode: science"); break;
+        case reentry: strcat(log, "Current Mode: reentry"); break;
+        default: break;
+    }
+    
+    strcat(log, newLine);
+    
+    //Altitude
+    char altitude[20];
+    sprintf(altitude, "Altitude: %u km", (unsigned int)lastAltitude);
+    strcat(log, altitude);
+    
+    strcat(log, newLine);
+    
     //Time 
     char timeString[50];
     sprintf(timeString, "Total runtime: %u h %d min\nTime of day: %d:%d UTC", (unsigned int)(totalTime / 3600), (int)(totalTime / 60), (int)(timeInMin / 60),(int)timeInMin % 60);
@@ -323,12 +347,42 @@ void LogState() {
     strcat(log, newLine);
     
     //Housekeeping
-    char housekeeping[500];
-    sprintf(housekeeping,
-            "Battery 1 Charge: %u \nBattery 2 Charge: %u \nBattery 1 Voltage: %u \nBattery 2 Voltage: %u \nBattery 1 Current: %u \nBattery 2 Current: %u \nBuss+ Voltage: %u \nSolar Panel 1 Voltage: %u \nSolar Panel 2 Voltage: %u \nSolar Panel 3 Voltage: %u \nSolar Panel 4 Voltage: %u \nSimplex Temp: %u \nDuplex Temp: %u \nEPS Temp: %u",
-            (unsigned int)b1Charge,(unsigned int)b2Charge,(unsigned int)b1Voltage,(unsigned int)b2Voltage,(unsigned int)b1Current,(unsigned int)b2Current,(unsigned int)bussPlusVoltage,(unsigned int)solar1Voltage,(unsigned int)solar2Voltage,(unsigned int)solar3Voltage,(unsigned int)solar4Voltage,(unsigned int)simplexTemp,(unsigned int)duplexTemp,(unsigned int)epsTemp);
+    char diagData[500];
+    sprintf(diagData,
+            "Battery 1 Charge: %u \nBattery 2 Charge: %u \nBattery 1 Voltage: %u \nBattery 2 Voltage: %u \nBattery 1 Current: %u \nBattery 2 Current: %u \nBuss+ Voltage: %u \nSolar Panel 1 Voltage: %u \nSolar Panel 2 Voltage: %u \nSolar Panel 3 Voltage: %u \nSolar Panel 4 Voltage: %u \nSimplex Temp: %u \nDuplex Temp: %u \nEPS Temp: %u \n\nLP Temp: %u \nLP Cal: %u, %u, %u, %u \nMagnetometer x: %u, y: %u, z: %u \nTemperature: %u, %u, %u, %u, %u, %u, %u, %u",
+            (unsigned int)b1Charge,
+            (unsigned int)b2Charge,
+            (unsigned int)b1Voltage,
+            (unsigned int)b2Voltage,
+            (unsigned int)b1Current,
+            (unsigned int)b2Current,
+            (unsigned int)bussPlusVoltage,
+            (unsigned int)solar1Voltage,
+            (unsigned int)solar2Voltage,
+            (unsigned int)solar3Voltage,
+            (unsigned int)solar4Voltage,
+            (unsigned int)simplexTemp,
+            (unsigned int)duplexTemp,
+            (unsigned int)epsTemp,
+            (unsigned int)langmuirProbeDiagData[0],
+            (unsigned int)langmuirProbeDiagData[1],
+            (unsigned int)langmuirProbeDiagData[2],
+            (unsigned int)langmuirProbeDiagData[3],
+            (unsigned int)langmuirProbeDiagData[4],
+            (unsigned int)magnetometerDiagData[0],
+            (unsigned int)magnetometerDiagData[1],
+            (unsigned int)magnetometerDiagData[2],
+            (unsigned int)temperatureDiagData[0],
+            (unsigned int)temperatureDiagData[1],
+            (unsigned int)temperatureDiagData[2],
+            (unsigned int)temperatureDiagData[3],
+            (unsigned int)temperatureDiagData[4],
+            (unsigned int)temperatureDiagData[5],
+            (unsigned int)temperatureDiagData[6],
+            (unsigned int)temperatureDiagData[7]);
     
-    strcat(log, housekeeping);
+    strcat(log, diagData);
+    
     strcat(log, newLine);
     strcat(log, endLine);
     

@@ -26,6 +26,7 @@ unsigned long Pow(int, int);
 void ClearQueue(uint8_t *,int,int);
 void Clear(void *,int,int);
 int CopyIntToByte(int *source, uint8_t *destination, int sourceStart, int destStart, int numberOfItems);
+int CopyIntToDoubleByte(int *source, uint16_t *destination, int sourceStart, int destStart, int numberOfItems);
 int CopyBytes(uint8_t *source, uint8_t *destination, int sourceStart, int destStart, int numberOfItems);
 int add_sec(unsigned long *);
 
