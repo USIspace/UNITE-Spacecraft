@@ -80,9 +80,9 @@ uint8_t epsEcho[39] = { NULL };
 const int POWER_ECHO_LENGTH = 39;
 uint8_t powerPackagePreamble[4] = {0x50, 0x50, 0x50, 0x0B}; // 0x50 0x50 0x50 0x0B
 uint8_t commandBoardPowerSwitch = 0xFF;         // SW1
-uint8_t temperaturePowerSwitch = 0x00;          // SW2
-uint8_t langmuirMagPowerSwitch = 0x00;          // SW3
-uint8_t gpsPowerSwitch = 0x00;                  // SW4
+uint8_t temperaturePowerSwitch = 0xFF;          // SW2
+uint8_t langmuirMagPowerSwitch = 0xFF;          // SW3
+uint8_t gpsPowerSwitch = 0xFF;                  // SW4
 uint8_t duplexPowerSwitch = 0x00;               // SW5
 
 bool isLangmuirProbeOn() { return langmuirMagPowerSwitch == 0xFF; }
@@ -713,8 +713,8 @@ void ReadPowerSwitches() {
         for (i = 0; i < POWER_ECHO_LENGTH; i++) {
 
             switch (i) {
-                case 3: temperaturePowerSwitch = Read(SimplexUnit); break;
-                case 5: langmuirMagPowerSwitch = Read(SimplexUnit); break;
+//                case 3: temperaturePowerSwitch = Read(SimplexUnit); break;
+//                case 5: langmuirMagPowerSwitch = Read(SimplexUnit); break;
                 case 7: gpsPowerSwitch = Read(SimplexUnit); break;
                 case 9: duplexPowerSwitch = Read(SimplexUnit); break;
                 case 10: b1Charge = Read(SimplexUnit); b1Charge <<= 8; break;   // Battery 1 Charge High
@@ -754,7 +754,7 @@ void ReadPowerSwitches() {
 
 void SetLangmuirProbePower(bool on) {
     if (on) langmuirMagPowerSwitch = 0xFF;
-    else langmuirMagPowerSwitch = 0x00;
+    else langmuirMagPowerSwitch = 0xFF;
 }
 
 void SetMagnetometerPower(bool on) {
@@ -763,7 +763,7 @@ void SetMagnetometerPower(bool on) {
 
 void SetTemperaturePower(bool on) {
     if (on) temperaturePowerSwitch = 0xFF;
-    else temperaturePowerSwitch = 0x00;
+    else temperaturePowerSwitch = 0xFF;
 }
 
 void SetGPSPower(bool on) {

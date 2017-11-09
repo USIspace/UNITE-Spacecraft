@@ -84,7 +84,7 @@ int currentMagnetometerOrbitProgress = 0;
 bool isLangmuirProbeSampling = false;
 bool isLangmuirProbeSweeping = false;
 
-bool isMagnetometerSweeping = false;
+bool isMagnetometerSampling = false;
 bool shouldMagnetometerSample = false;
 
 bool isLangmuirCalibrating = false;
@@ -181,7 +181,8 @@ void TrySampleMagnetometer() {
                  * Magnetometer Orbit Sampling
                  */
                 shouldMagnetometerSample = true;
-                TakeMagnetometerSample();
+                isMagnetometerSampling = true;
+//                TakeMagnetometerSample();
 
                 currentMagnetometerWait = 0;
             } else {
@@ -293,16 +294,13 @@ void EndLangmuirProbeCal() {
 }
 
 void EndMagnetometerSampling() {
-    TMR3_Stop();
-    currentMagnetometerSweepProgress = 0;
-    isMagnetometerSweeping = false;
+//    TMR3_Stop();
 
     PackageData(MAGSubSys, (int) timeInMin, magnetometerBuffer, MAG_BUFFER_SIZE);
     memset(magnetometerBuffer, 0, sizeof (magnetometerBuffer));
     currentMagnetometerBufferIndex = 0;
     currentMagnetometerWait = 0;
     //    MAG_BUFFER_SIZE = (GetSweepDuration(&Magnetometer) * convertTime(Sec, MilSec))/(GetSweepRate(&Magnetometer) * 100) * 3;
-
 }
 
 void EndTemperatureSensorSampling() {
@@ -345,6 +343,7 @@ void EndHousekeepingSampling() {
 
 void ManageSweepingProgress() {
 
+    // Langmuir Probe Sampling
     if (isLangmuirProbeSampling) {
 
         // Reset sweeping
@@ -373,12 +372,28 @@ void ManageSweepingProgress() {
         }
     }
 
-    /*
-    if (isMagnetometerSweeping) {
-        if (++currentMagnetometerSweepProgress > GetSweepDuration(&Magnetometer)) {
-            EndMagnetometerSampling();
+    // Magnetometer Sampling
+    if (isMagnetometerSampling) {
+        if (++currentMagnetometerSweepProgress > GetSweepRate(&Magnetometer)) {
+            
+            // Take sample
+            TakeMagnetometerSample();
+            
+            // Reset sweep rate
+            currentMagnetometerSweepProgress = 0;
+            
+            // Should end Magnetometer Orbit Sampling
+            if (currentMagnetometerOrbitProgress > GetSweepDuration(&Magnetometer)) {
+                EndMagnetometerSampling();
+                shouldMagnetometerSample = false;
+                isMagnetometerSampling = false;
+                currentMagnetometerOrbitProgress = 0;
+            } else {
+                // Increment Orbit progress
+                currentMagnetometerOrbitProgress += GetSweepRate(&Magnetometer);
+            }
         }
-    }*/
+    }
 }
 
 /***********************
@@ -508,11 +523,6 @@ void TakeMagnetometerSample() {
 
     if (currentMagnetometerBufferIndex >= MAG_BUFFER_SIZE) {
         EndMagnetometerSampling();
-
-        if (currentMagnetometerOrbitProgress++ > 9) {
-            shouldMagnetometerSample = false;
-            currentMagnetometerOrbitProgress = 0;
-        }
     }
 
 

@@ -226,8 +226,7 @@ void RunCommand(System system, Mode mode, Property property, Unit unit, unsigned
                 case LPSubSys: unitConversion = convertTime(unit, MilSec) / 5;
                     LP_BUFFER_SIZE = (modeProperties->sweepDuration * convertTime(Sec, MilSec))/(value * unitConversion * 5);
                     break;
-                case MAGSubSys: unitConversion = convertTime(unit, MilSec) / 100; 
-                    MAG_BUFFER_SIZE = (modeProperties->sweepDuration * convertTime(Sec, MilSec))/(value * unitConversion * 100);
+                case MAGSubSys: unitConversion = convertTime(unit, Sec); 
                     break;
                 default: break;
             }
