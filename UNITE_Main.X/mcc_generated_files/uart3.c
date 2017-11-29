@@ -87,9 +87,6 @@ uint8_t UART3_Read(void)
         // Simplex read timeout
 //        current = time(NULL);
         if (time(NULL) >= endWait && IS_SIM_TIMEOUT_ENABLED) simplexTimeoutFlag = 1;
-        if (time(NULL) >= endWait) {
-            while(1);
-        } 
     }
 
     if ((U3STAbits.OERR == 1))

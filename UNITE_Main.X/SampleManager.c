@@ -5,6 +5,7 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
+#include <limits.h>
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp */
 #include "CommandParser.h"
@@ -32,6 +33,8 @@ int temperatureResults[16];
 uint16_t langmuirProbeDiagData[5];
 uint16_t magnetometerDiagData[3];
 uint16_t temperatureDiagData[8];
+double gpsPosition[3];
+float gpsVelocity[3];
 
 uint8_t langmuirProbeBuffer[300] = {NULL};
 uint8_t magnetometerBuffer[33] = {NULL};
@@ -316,7 +319,8 @@ void EndGPSSampling() {
     IEC0bits.U1RXIE = 0;
 
     // Parse GPS sentence
-    ParseGPSSample(unparsedGPSBuffer);
+    ParseSBFGPSSample((uint8_t *)unparsedGPSBuffer);
+//    ParseGPSSample(unparsedGPSBuffer);
 
     //Only package and send if GPS is locked
     if (currentGPSBufferIndex > 15) {
@@ -679,6 +683,26 @@ int CompressAscii(char *string, int startIndex, int size, bool addTrailing) {
         return parsedIndex;
     }
 }
+    
+// Appends a double value to the GPS buffer 
+// double value -> value to append
+void AppendDoubleToGPSBuffer(double value) {
+    
+    long longValue = (long)value;
+    uint8_t bytes[] = { (uint8_t)(longValue >> 24), (uint8_t)(longValue >> 16), (uint8_t)(longValue >> 8), (uint8_t)(longValue) };
+    
+    AppendToGPSBuffer(bytes, sizeof(bytes));
+}
+
+// Appends a float value to the GPS buffer
+// float value -> value to append
+void AppendFloatToGPSBuffer(float value) {
+    
+    char *a = (char *)&value;
+    uint8_t bytes[4] = { (uint8_t)*a++, (uint8_t)*a++, (uint8_t)*a++, (uint8_t)*a++ };
+    
+    AppendToGPSBuffer(bytes, sizeof(bytes));
+}
 
 // Custom GPS decimal parser
 // char *originalString -> original ascii decimal string to parse (must be comma separated)
@@ -773,7 +797,6 @@ double ParseDouble(char *string, int length) {
     return numberValue;
 }
 
-double GetDoubleFromString;
 
 int AsciiFromInt(int integer, char *dest, int length) {
 
@@ -800,6 +823,48 @@ double GetDoubleFromSubString(char *src, int start, int length) {
     CopySubstring(src, subString, start, length);
     double value = ParseDouble(subString, length);
     return value;
+}
+
+// Returns a double value from a byte array
+// uint8_t *src -> source array
+// int start -> double starting index in array
+double GetDoubleFromByteArray(uint8_t *src, int start) {
+    
+    int i;
+    uint64_t v = 0;
+    double d;
+    char *addrDouble = (char *)&d, *addrInt = (char *)&v;
+    
+    for (i = 0; i < 8; i++) {
+        v = (v << 8) + src[i];
+    }
+    
+    for (i = 0; i < sizeof(d); i++) {
+        *addrDouble++ = *addrInt++;
+    }
+    
+    return d;
+}
+
+// Returns a float value from a byte array
+// uint8_t *src -> source array
+// int start -> float starting index in array
+float GetFloatFromByteArray(uint8_t *src, int start) {
+    
+    int i;
+    uint32_t v = 0;
+    float f;
+    char *addrFloat = (char *)&f, *addrInt = (char *)&v;
+    
+    for (i = 0; i < 4; i++) {
+        v = (v << 8) + src[i];
+    }
+    
+    for (i = 0; i < sizeof(f); i++) {
+        *addrFloat++ = *addrInt++;
+    }
+    
+    return f;
 }
 
 // Compresses and appends an integer value to GPS buffer
@@ -941,6 +1006,73 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
         }
     }
 }
+ 
+// SVT GPS parsing method
+// char *unparsedSentence -> PVTCartesian GPS sentence to parse (SBF)
+ void ParseSBFGPSSample(uint8_t *unparsedSentence) {
+     
+     // Local variables
+     int i;
+     char syncBytes[] = "$@";
+     uint16_t messageLength = unparsedSentence[7] + (unparsedSentence[8] << 8);
+     
+     double xPos;
+     double yPos;
+     double zPos;
+     
+     float xVel;
+     float yVel;
+     float zVel;
+     
+     // Check if sentence header matches expected output
+     char sentenceHeader[3] = {(char)unparsedSentence[0], (char)unparsedSentence[1]};
+     if (strcmp(sentenceHeader, syncBytes) != 0) return;
+     
+     // Parse Message Body
+     for (i = 8; i < messageLength; i++) {
+         switch (i) {
+             case 15: break; // error code
+             case 16: // x position
+                 xPos = GetDoubleFromByteArray(unparsedSentence, i);
+                 break; 
+             case 24: // y position
+                 yPos = GetDoubleFromByteArray(unparsedSentence, i);
+                 break;
+             case 32: // z position
+                 zPos = GetDoubleFromByteArray(unparsedSentence, i);
+                 break;
+             
+             case 44: // x velocity
+                 xVel = GetFloatFromByteArray(unparsedSentence, i);
+                 break;
+             case 48: // y velocity
+                 yVel = GetFloatFromByteArray(unparsedSentence, i);
+                 break;
+             case 52: // z velocity
+                 zVel = GetFloatFromByteArray(unparsedSentence, i);
+            
+             default: break;
+         }
+     }
+     
+     // Diagnostic Data
+     gpsPosition[0] = xPos;
+     gpsPosition[1] = yPos;
+     gpsPosition[2] = zPos;
+     
+     gpsVelocity[0] = xVel;
+     gpsVelocity[1] = yVel;
+     gpsVelocity[2] = zVel;
+     
+     // Append to GPS Buffer
+     AppendDoubleToGPSBuffer(xPos);
+     AppendDoubleToGPSBuffer(yPos);
+     AppendDoubleToGPSBuffer(zPos);
+     
+     AppendFloatToGPSBuffer(xVel);
+     AppendFloatToGPSBuffer(yVel);
+     AppendFloatToGPSBuffer(zVel);
+ }
 
 
 uint8_t spiTesting = 0x00;

@@ -80,6 +80,8 @@ extern bool isGPSLocked;
 extern uint16_t langmuirProbeDiagData[5];
 extern uint16_t magnetometerDiagData[3];
 extern uint16_t temperatureDiagData[8];
+extern double gpsPosition[3];
+extern float gpsVelocity[3];
 
 /* Sampling Functions */
 
@@ -110,6 +112,7 @@ int TakeGPSSample(int);
 
 // Parses a GPS sentence
 void ParseGPSSample();
+void ParseSBFGPSSample(uint8_t *);
 
 // Testing/Debugging Functions
 void TestADC();

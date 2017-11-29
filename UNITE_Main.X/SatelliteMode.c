@@ -349,7 +349,7 @@ void LogState() {
     //Housekeeping
     char diagData[500];
     sprintf(diagData,
-            "Battery 1 Charge: %u \nBattery 2 Charge: %u \nBattery 1 Voltage: %u \nBattery 2 Voltage: %u \nBattery 1 Current: %u \nBattery 2 Current: %u \nBuss+ Voltage: %u \nSolar Panel 1 Voltage: %u \nSolar Panel 2 Voltage: %u \nSolar Panel 3 Voltage: %u \nSolar Panel 4 Voltage: %u \nSimplex Temp: %u \nDuplex Temp: %u \nEPS Temp: %u \n\nLP Temp: %u \nLP Cal: %u, %u, %u, %u \nMagnetometer x: %u, y: %u, z: %u \nTemperature: %u, %u, %u, %u, %u, %u, %u, %u",
+            "Battery 1 Charge: %u \nBattery 2 Charge: %u \nBattery 1 Voltage: %u \nBattery 2 Voltage: %u \nBattery 1 Current: %u \nBattery 2 Current: %u \nBuss+ Voltage: %u \nSolar Panel 1 Voltage: %u \nSolar Panel 2 Voltage: %u \nSolar Panel 3 Voltage: %u \nSolar Panel 4 Voltage: %u \nSimplex Temp: %u \nDuplex Temp: %u \nEPS Temp: %u \n\nLP Temp: %u \nLP Cal: %u, %u, %u, %u \nMagnetometer x: %u, y: %u, z: %u \nTemperature: %u, %u, %u, %u, %u, %u, %u, %u\nGPS Position x: %.2f, y: %.2f, z: %.2f\nGPS Velocity x: %.2f, y: %.2f, z: %.2f",
             (unsigned int)b1Charge,
             (unsigned int)b2Charge,
             (unsigned int)b1Voltage,
@@ -379,7 +379,13 @@ void LogState() {
             (unsigned int)temperatureDiagData[4],
             (unsigned int)temperatureDiagData[5],
             (unsigned int)temperatureDiagData[6],
-            (unsigned int)temperatureDiagData[7]);
+            (unsigned int)temperatureDiagData[7],
+            (double)gpsPosition[0],
+            (double)gpsPosition[1],
+            (double)gpsPosition[2],
+            (double)gpsVelocity[0],
+            (double)gpsVelocity[1],
+            (double)gpsVelocity[2]);
     
     strcat(log, diagData);
     
