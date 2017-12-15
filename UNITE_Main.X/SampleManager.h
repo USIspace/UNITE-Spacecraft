@@ -82,6 +82,8 @@ extern uint16_t magnetometerDiagData[3];
 extern uint16_t temperatureDiagData[8];
 extern double gpsPosition[3];
 extern float gpsVelocity[3];
+extern int gpsError;
+extern uint8_t gpsDatum;
 
 /* Sampling Functions */
 

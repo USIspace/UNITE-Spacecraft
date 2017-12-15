@@ -35,6 +35,8 @@ uint16_t magnetometerDiagData[3];
 uint16_t temperatureDiagData[8];
 double gpsPosition[3];
 float gpsVelocity[3];
+int gpsError;
+uint8_t gpsDatum;
 
 uint8_t langmuirProbeBuffer[300] = {NULL};
 uint8_t magnetometerBuffer[33] = {NULL};
@@ -48,7 +50,8 @@ char myFunString[29] = "Hey, World! UNITE Rules Now!";
 bool isGPSReading = false;
 bool isGPSLocked = true;
 GPSDataIndex gpsIndex = 0;
-char unparsedGPSBuffer[100] = {NULL};
+char unparsedSBFGPSBuffer[200] = {NULL};
+char unparsedGGAGPSBuffer[100] = {NULL};
 int latDecPrecision = 4;
 int longDecPrecision = 4;
 
@@ -98,8 +101,9 @@ bool isProbeSweepPositive = true; // Initialize to true to correctly sweep probe
 const uint16_t electronVoltage = 0xE666; // 58982 = 4V
 const uint16_t ionVoltage = 0x1999; // 6553 = -4V
 const uint16_t maxSweepVoltage = 0xF333; // 62259 = 4.5V
-const uint16_t minSweepVoltage = 0x0CCD; // 3276 = -4.5V
-int currentLangmuirProbeVoltage = 0;
+const uint16_t minSweepVoltage = 0x0CCE; // 3277 = -4.5V
+bool isGPSSentenceSBF = false;
+uint16_t currentLangmuirProbeVoltage = 0;
 double preciseSweepVoltage = 0.0;
 
 /**************************
@@ -319,8 +323,8 @@ void EndGPSSampling() {
     IEC0bits.U1RXIE = 0;
 
     // Parse GPS sentence
-    ParseSBFGPSSample((uint8_t *)unparsedGPSBuffer);
-//    ParseGPSSample(unparsedGPSBuffer);
+    ParseSBFGPSSample((uint8_t *)unparsedSBFGPSBuffer);
+    if (unparsedGGAGPSBuffer[1] != 0) ParseGPSSample((uint8_t *)unparsedGGAGPSBuffer);
 
     //Only package and send if GPS is locked
     if (currentGPSBufferIndex > 15) {
@@ -366,7 +370,7 @@ void ManageSweepingProgress() {
         if (currentLangmuirProbeSweepProgress++ == sampleDuration) {
             isLangmuirProbeSweeping = true;
             currentLangmuirProbeVoltage = minSweepVoltage;
-            preciseSweepVoltage = 0.0;
+            preciseSweepVoltage = (double)minSweepVoltage;
             TMR4_Start();
         }
 
@@ -413,26 +417,26 @@ void CalLangmuirProbe() {
         //Still need to select which channel to get results from on ADC
         switch(i) {
             case 0: //1M Ohm
-                _LATE6 =0;
-                _LATE7 =0;
+                _LATE6 = 0;
+                _LATE7 = 0;
                 ADC1_GetResultFromChannels(langmuirProbeResults, lpADCConfig.channelSelect, lpADCConfig.channelCount);
                 break;
                 
             case 1: //10M Ohm
-                _LATE6 =0;
-                _LATE7 =1;
+                _LATE6 = 0;
+                _LATE7 = 1;
                 ADC1_GetResultFromChannels(langmuirProbeResults, lpADCConfig.channelSelect, lpADCConfig.channelCount);
                 break;
                 
             case 2: //100M Ohm
-                _LATE6 =1;
-                _LATE7 =0;
+                _LATE6 = 1;
+                _LATE7 = 0;
                 ADC1_GetResultFromChannels(langmuirProbeResults, lpADCConfig.channelSelect, lpADCConfig.channelCount);
                 break;
                 
             case 3: //1G Ohm
-                _LATE6 =1;
-                _LATE7 =1;
+                _LATE6 = 1;
+                _LATE7 = 1;
                 ADC1_GetResultFromChannels(langmuirProbeResults, lpADCConfig.channelSelect, lpADCConfig.channelCount);  
                 break;
                 
@@ -448,8 +452,6 @@ void CalLangmuirProbe() {
         
         CopyIntToByte(langmuirProbeResults, langmuirProbeBuffer, LP_VOLTAGE_CHL, currentLangmuirProbeBufferIndex, probeResultSize);
         currentLangmuirProbeBufferIndex += probeResultSize;
-        
-        
         
     }
     
@@ -494,16 +496,16 @@ void TakeProbeSample(bool isTemp) {
     if (isLangmuirProbeSweeping) {
 
         // Calculation for the voltage adjustment needed to sweep from min voltage to max voltage
-        // ~590 for a 1s sweep from -4.5 -> 4.5 -> -4.5
-        double voltageAdjustment = 655.3; // maxSweepVoltage * 4 / (convertTime(Sec, MilSec) / GetSweepRate(&LangmuirProbe) / 5) + 1;
+        // ~655 for a 1s sweep from -4.5 -> 4.5 -> -4.5
+        double voltageAdjustment = 655.36; // maxSweepVoltage * 4 / (convertTime(Sec, MilSec) / GetSweepRate(&LangmuirProbe) / 5) + 1;
         preciseSweepVoltage += isProbeSweepPositive ? voltageAdjustment : -voltageAdjustment;
         
         // Applies the voltage adjustment within range(minSweepVoltage, maxSweepVoltage)
-        currentLangmuirProbeVoltage = (int)preciseSweepVoltage;
+        currentLangmuirProbeVoltage = (uint16_t)preciseSweepVoltage;
 
         // Checks if the sweep should change from positive to negative
-        if (currentLangmuirProbeVoltage >= maxSweepVoltage - (voltageAdjustment / 2)) isProbeSweepPositive = false;
-        else if (currentLangmuirProbeVoltage <= minSweepVoltage + (voltageAdjustment / 2)) isProbeSweepPositive = true;
+        if (currentLangmuirProbeVoltage >= maxSweepVoltage - (voltageAdjustment / 4)) isProbeSweepPositive = false;
+        else if (currentLangmuirProbeVoltage <= minSweepVoltage + (voltageAdjustment / 4)) isProbeSweepPositive = true;
     }
 }
 
@@ -609,22 +611,45 @@ int TakeGPSSample(int samplePos) {
 
         if ('$' == nextChar) {
             samplePos++;
-            unparsedGPSBuffer[samplePos++] = nextChar;
+            unparsedSBFGPSBuffer[samplePos] = nextChar;
+            unparsedGGAGPSBuffer[samplePos++] = nextChar;
         }
 
+    } else if (samplePos == 1) {
+        
+        if ('@' == nextChar) {
+            isGPSSentenceSBF = true;
+            unparsedSBFGPSBuffer[samplePos++] = nextChar;
+        } else {
+            isGPSSentenceSBF = false;
+            unparsedGGAGPSBuffer[samplePos++] = nextChar;
+        }
+        
     } else {
 
-        if ('$' == nextChar)
-            samplePos = 0;
-        else if ('\n' == nextChar) {
+//        if ('$' == nextChar)
+//            samplePos = 0;
+//        else 
+        if ('\n' == nextChar) {
             samplePos = -1;
-            isGPSReading = false;
-            EndGPSSampling();
+            
+            if (isGPSSentenceSBF) { 
+                isGPSReading = false;
+                EndGPSSampling();
+            }
             
             return samplePos;
-        }
+            
+        } else {
 
-        unparsedGPSBuffer[samplePos++] = nextChar;
+            if (isGPSSentenceSBF) {
+                unparsedSBFGPSBuffer[min(samplePos, sizeof (unparsedSBFGPSBuffer))] = nextChar;
+                samplePos++;
+            } else {
+                unparsedGGAGPSBuffer[min(samplePos, sizeof (unparsedSBFGPSBuffer))] = nextChar;
+                samplePos++;
+            }
+        }
 
     }
 
@@ -703,43 +728,6 @@ void AppendFloatToGPSBuffer(float value) {
     
     AppendToGPSBuffer(bytes, sizeof(bytes));
 }
-
-// Custom GPS decimal parser
-// char *originalString -> original ascii decimal string to parse (must be comma separated)
-// int startIndex -> index to start parsing from
-// GPSDataIndex dataType -> checks what kind of decimal 
-
-//uint8_t ParseDecimal(char *originalString, int startIndex, GPSDataIndex dataType) {
-//    char semiparsedSentence[20] = {NULL};
-//    bool isDecimal = false;
-//    int parseProgress = 0;
-//    int copiedIndex = 0;
-//    int decPos = 0;
-//
-//    while (originalString[startIndex + parseProgress] != ',') {
-//        if (originalString[startIndex + parseProgress] == '.') {
-//            decPos = CompressAscii(semiparsedSentence, decPos, parseProgress, isDecimal);
-//            copiedIndex = decPos;
-//            isDecimal = true;
-//        }
-//
-//        semiparsedSentence[isDecimal ? copiedIndex++ : parseProgress] = originalString[startIndex + parseProgress];
-//        parseProgress++;
-//    }
-//
-//    copiedIndex = CompressAscii(semiparsedSentence, (decPos + 1), (copiedIndex) - decPos, isDecimal) + decPos;
-//
-//    if (dataType != Time) AppendToGPSBuffer((uint8_t *) semiparsedSentence, ++copiedIndex);
-//
-//    switch (dataType) {
-//        case Time: SetTime((uint8_t *) semiparsedSentence, ++copiedIndex);
-//            break;
-//        case Altitude: SetAltitude((uint8_t *) semiparsedSentence, copiedIndex);
-//            break;
-//        default: break;
-//    }
-//    return (parseProgress - 1);
-//}
 
 // Gets length of next GPS sentence subsection
 // char *src -> original ascii GPS sentence
@@ -833,15 +821,12 @@ double GetDoubleFromByteArray(uint8_t *src, int start) {
     int i;
     uint64_t v = 0;
     double d;
-    char *addrDouble = (char *)&d, *addrInt = (char *)&v;
     
-    for (i = 0; i < 8; i++) {
-        v = (v << 8) + src[i];
+    for (i = 7; i >= 0; i--) {
+        v = (v << 8) + src[i + start];
     }
     
-    for (i = 0; i < sizeof(d); i++) {
-        *addrDouble++ = *addrInt++;
-    }
+    memcpy(&d, &v, sizeof(d));
     
     return d;
 }
@@ -854,22 +839,19 @@ float GetFloatFromByteArray(uint8_t *src, int start) {
     int i;
     uint32_t v = 0;
     float f;
-    char *addrFloat = (char *)&f, *addrInt = (char *)&v;
     
-    for (i = 0; i < 4; i++) {
-        v = (v << 8) + src[i];
+    for (i = 3; i >= 0; i--) {
+        v = (v << 8) + src[i + start];
     }
     
-    for (i = 0; i < sizeof(f); i++) {
-        *addrFloat++ = *addrInt++;
-    }
+    memcpy(&f, &v, sizeof(f));
     
     return f;
 }
 
 // Compresses and appends an integer value to GPS buffer
 // int value -> integer to append
-// int digits -> number of digits to append (e.g. 12345 has 5 digits)
+// int length -> number of digits to append (e.g. 12345 has 5 digits)
 
 void AppendIntToGPSBuffer(char *ascii, int value, int length) {
 
@@ -916,69 +898,6 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
                 }
 
                 i += length - 1;
-                //                i += ParseDecimal(unparsedSentence, i, gpsIndex);
-
-            } else if (gpsIndex == Latitude) {
-
-                int length = GetSubStringLength(unparsedSentence, i);
-
-                if (length > 0) {
-
-                    double latitude = GetDoubleFromSubString(unparsedSentence, i, length);
-
-                    int latitudeWhole = (int)latitude;
-                    int latitudeFractional = (int)((latitude - latitudeWhole) * pow(10.0,(double)latDecPrecision));
-
-                    char ascii[4];
-                    AppendIntToGPSBuffer(ascii, latitudeWhole, sizeof(ascii));
-                    unit[0] = '.';
-                    AppendToGPSBuffer((uint8_t *) unit, 1);
-                    AppendIntToGPSBuffer(ascii, latitudeFractional, latDecPrecision);
-                }
-
-                i += length - 1;
-
-                unit[0] = ',';
-                AppendToGPSBuffer((uint8_t *) unit, 1);
-
-            } else if (gpsIndex == LatDirection) {
-
-                unit[0] = unparsedSentence[i];
-                AppendToGPSBuffer((uint8_t *) unit, 1);
-
-                unit[0] = ',';
-                AppendToGPSBuffer((uint8_t *) unit, 1);
-
-            } else if (gpsIndex == Longitude) {
-
-                int length = GetSubStringLength(unparsedSentence, i);
-
-                if (length > 0) {
-
-                    double longitude = GetDoubleFromSubString(unparsedSentence, i, length);
-
-                    int longWhole = (int) longitude;
-                    int longFractional = (int)((longitude - longWhole) * pow(10.0, (double)longDecPrecision));
-
-                    char ascii[4];
-                    AppendIntToGPSBuffer(ascii, longWhole, sizeof(ascii));
-                    unit[0] = '.';
-                    AppendToGPSBuffer((uint8_t *) unit, 1);
-                    AppendIntToGPSBuffer(ascii, longFractional, longDecPrecision);
-                }
-
-                i += length - 1;
-
-                unit[0] = ',';
-                AppendToGPSBuffer((uint8_t *) unit, 1);
-
-            } else if (gpsIndex == LongDirection) {
-
-                unit[0] = unparsedSentence[i];
-                AppendToGPSBuffer((uint8_t *) unit, 1);
-
-                unit[0] = ',';
-                AppendToGPSBuffer((uint8_t *) unit, 1);
 
             } else if (gpsIndex == Altitude) {
 
@@ -991,7 +910,7 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
                     altitude /= 1000.0; // m -> km
 
                     // Set Satellite altitude
-//                    SetAltitude(altitude);
+                    SetAltitude(altitude);
 
                     char ascii[3];
                     AppendIntToGPSBuffer(ascii, (int)altitude, sizeof(ascii));
@@ -1014,8 +933,11 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
      // Local variables
      int i;
      char syncBytes[] = "$@";
-     uint16_t messageLength = unparsedSentence[7] + (unparsedSentence[8] << 8);
-     
+     uint16_t messageLength = unparsedSentence[6] + ((uint16_t)unparsedSentence[7] << 8);
+    
+    int error;
+    uint8_t datum;
+    
      double xPos;
      double yPos;
      double zPos;
@@ -1031,7 +953,9 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
      // Parse Message Body
      for (i = 8; i < messageLength; i++) {
          switch (i) {
-             case 15: break; // error code
+             case 15: // error code
+                 error = unparsedSentence[15];
+                 break;
              case 16: // x position
                  xPos = GetDoubleFromByteArray(unparsedSentence, i);
                  break; 
@@ -1050,6 +974,8 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
                  break;
              case 52: // z velocity
                  zVel = GetFloatFromByteArray(unparsedSentence, i);
+             case 73: // Datum
+                 datum = unparsedSentence[i];
             
              default: break;
          }
@@ -1064,6 +990,9 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
      gpsVelocity[1] = yVel;
      gpsVelocity[2] = zVel;
      
+     gpsError = error;
+     gpsDatum = datum;
+     
      // Append to GPS Buffer
      AppendDoubleToGPSBuffer(xPos);
      AppendDoubleToGPSBuffer(yPos);
@@ -1072,6 +1001,9 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
      AppendFloatToGPSBuffer(xVel);
      AppendFloatToGPSBuffer(yVel);
      AppendFloatToGPSBuffer(zVel);
+     
+     uint8_t gpsComponents[2] = { (uint8_t)error, datum }; 
+     AppendToGPSBuffer( gpsComponents, 2);
  }
 
 

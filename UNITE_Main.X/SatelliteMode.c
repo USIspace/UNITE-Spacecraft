@@ -309,7 +309,7 @@ time_t logCount = 0;
 // Logging Method for Diagnostic Mode
 void LogState() {
     
-    char log[1000] = "UNITE Log #";
+    char log[1500] = "UNITE Log #";
     char newLine[] = "\n\n";
     char endLine[] = "EOF\n";
     
@@ -347,9 +347,9 @@ void LogState() {
     strcat(log, newLine);
     
     //Housekeeping
-    char diagData[500];
+    char diagData[700];
     sprintf(diagData,
-            "Battery 1 Charge: %u \nBattery 2 Charge: %u \nBattery 1 Voltage: %u \nBattery 2 Voltage: %u \nBattery 1 Current: %u \nBattery 2 Current: %u \nBuss+ Voltage: %u \nSolar Panel 1 Voltage: %u \nSolar Panel 2 Voltage: %u \nSolar Panel 3 Voltage: %u \nSolar Panel 4 Voltage: %u \nSimplex Temp: %u \nDuplex Temp: %u \nEPS Temp: %u \n\nLP Temp: %u \nLP Cal: %u, %u, %u, %u \nMagnetometer x: %u, y: %u, z: %u \nTemperature: %u, %u, %u, %u, %u, %u, %u, %u\nGPS Position x: %.2f, y: %.2f, z: %.2f\nGPS Velocity x: %.2f, y: %.2f, z: %.2f",
+            "Battery 1 Charge: %u \nBattery 2 Charge: %u \nBattery 1 Voltage: %u \nBattery 2 Voltage: %u \nBattery 1 Current: %u \nBattery 2 Current: %u \nBuss+ Voltage: %u \nSolar Panel 1 Voltage: %u \nSolar Panel 2 Voltage: %u \nSolar Panel 3 Voltage: %u \nSolar Panel 4 Voltage: %u \nSimplex Temp: %u \nDuplex Temp: %u \nEPS Temp: %u \n\nLP Temp: %u \nLP Cal: %u, %u, %u, %u \nMagnetometer x: %u, y: %u, z: %u \nTemperature: %u, %u, %u, %u, %u, %u, %u, %u\nGPS Position x: %.2f, y: %.2f, z: %.2f\nGPS Velocity x: %.3f, y: %.3f, z: %.3f\nGPS error code: %d, datum: %u",
             (unsigned int)b1Charge,
             (unsigned int)b2Charge,
             (unsigned int)b1Voltage,
@@ -385,7 +385,9 @@ void LogState() {
             (double)gpsPosition[2],
             (double)gpsVelocity[0],
             (double)gpsVelocity[1],
-            (double)gpsVelocity[2]);
+            (double)gpsVelocity[2],
+            (int)gpsError,
+            (unsigned int)gpsDatum);
     
     strcat(log, diagData);
     
