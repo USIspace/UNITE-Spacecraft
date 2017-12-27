@@ -37,6 +37,9 @@ extern "C" {
 // Constant for the duration of an orbit in minutes
 #define ORBIT_DUR_MIN 93
 
+// Set Main Loop Timer Interval
+#define MAIN_LOOP_TIMER_INTERVAL 10
+
 // Struct for instrument sampling properties
 typedef struct {
     unsigned long sampleRate;       // Minutes between each sample

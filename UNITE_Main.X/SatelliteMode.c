@@ -72,7 +72,7 @@ void SatelliteProperties_Initialize() {
     // Set Current Mode to interim on start
     currentMode = UpdateMode();
     TMR1_INTERRUPT_TICKER_FACTOR = 1;   // LANGMUIR PROBE CLOCK
-    TMR5_INTERRUPT_TICKER_FACTOR = 10;  // MAIN LOOP CLOCK
+    TMR5_INTERRUPT_TICKER_FACTOR = MAIN_LOOP_TIMER_INTERVAL;  // MAIN LOOP CLOCK
     
     // Initialize Debug light to on
    _LATE1 = LED_ON;
