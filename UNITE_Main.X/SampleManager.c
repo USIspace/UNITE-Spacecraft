@@ -37,6 +37,9 @@ double gpsPosition[3];
 float gpsVelocity[3];
 int gpsError;
 uint8_t gpsDatum;
+double gpsTime;
+double gpsAltitude;
+
 
 uint8_t langmuirProbeBuffer[300] = {NULL};
 uint8_t magnetometerBuffer[33] = {NULL};
@@ -47,7 +50,6 @@ uint8_t housekeepingBuffer[28] = {NULL};
 char myFunString[29] = "Hey, World! UNITE Rules Now!";
 
 // GPS Properties
-bool isGPSReading = false;
 bool isGPSLocked = true;
 GPSDataIndex gpsIndex = 0;
 char unparsedSBFGPSBuffer[200] = {NULL};
@@ -196,7 +198,7 @@ void TrySampleMagnetometer() {
                 SetMagnetometerPower(1);
             }
         } else SetMagnetometerPower(0);
-    }
+    } else SetMagnetometerPower(0);
 }
 
 void TrySampleTemperature() {
@@ -216,7 +218,7 @@ void TrySampleTemperature() {
                 SetTemperaturePower(1);
             }
         } else SetTemperaturePower(0);
-    }
+    } else SetTemperaturePower(0);
 
 }
 
@@ -234,14 +236,14 @@ void TrySampleGPS() {
                 memset(gpsBuffer, 0, sizeof(gpsBuffer));
 
                 // Turn on GPS Interrupt
-                IEC0bits.U1RXIE = 1;
+                _U1RXIE = 1;
 
             } else {
                 SetGPSPower(1);
             }
 
         } else SetGPSPower(0);
-    }
+    } else SetGPSPower(0);
 
 }
 
@@ -319,23 +321,23 @@ void EndTemperatureSensorSampling() {
 
 void EndGPSSampling() {
 
-    // Turn off GPS interrupt
-    IEC0bits.U1RXIE = 0;
-
     // Parse GPS sentence
     ParseSBFGPSSample((uint8_t *)unparsedSBFGPSBuffer);
     if (unparsedGGAGPSBuffer[1] != 0) ParseGPSSample((uint8_t *)unparsedGGAGPSBuffer);
 
     //Only package and send if GPS is locked
-    if (currentGPSBufferIndex > 15) {
+    if (currentGPSBufferIndex > 10) {
         PackageData(GPSSubSys, (int)timeInMin, gpsBuffer, GPS_BUFFER_SIZE);
         isGPSLocked = true;
     } else isGPSLocked = false;
 
+    memset(unparsedSBFGPSBuffer, 0, sizeof(unparsedSBFGPSBuffer));
+    memset(unparsedGGAGPSBuffer, 0, sizeof(unparsedGGAGPSBuffer));
     memset(gpsBuffer, 0, sizeof(gpsBuffer));
     if (isGPSLocked) currentGPSWait = 0;
     currentGPSBufferIndex = 0;
     gpsIndex = 0;
+    U1STAbits.OERR = 0; // Clear any errors
 }
 
 void EndHousekeepingSampling() {
@@ -634,7 +636,10 @@ int TakeGPSSample(int samplePos) {
             samplePos = -1;
             
             if (isGPSSentenceSBF) { 
-                isGPSReading = false;
+                                
+                // Turn off GPS interrupt
+                _U1RXIE = 0;
+    
                 EndGPSSampling();
             }
             
@@ -891,10 +896,10 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
 
                 if (length > 0) {
 
-                    double time = GetDoubleFromSubString(unparsedSentence, i, length);
-
+                    gpsTime = GetDoubleFromSubString(unparsedSentence, i, length);
+                    
                     // Set satellite's current time
-                    SetTime(time);
+                    SetTime(gpsTime);
                 }
 
                 i += length - 1;
@@ -906,14 +911,15 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
                 if (length > 0) {
 
                     //Get altitude value from GPS substring
-                    double altitude = GetDoubleFromSubString(unparsedSentence, i, length);
-                    altitude /= 1000.0; // m -> km
+                    gpsAltitude = GetDoubleFromSubString(unparsedSentence, i, length);
+                    gpsAltitude /= 1000.0; // m -> km
 
+                    
                     // Set Satellite altitude
-                    SetAltitude(altitude);
+                    SetAltitude(gpsAltitude);
 
                     char ascii[3];
-                    AppendIntToGPSBuffer(ascii, (int)altitude, sizeof(ascii));
+                    AppendIntToGPSBuffer(ascii, (int)gpsAltitude, sizeof(ascii));
                 }
 
                 i += length - 1;

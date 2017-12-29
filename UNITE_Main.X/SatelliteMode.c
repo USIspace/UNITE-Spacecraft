@@ -234,10 +234,7 @@ void MainLoop() {
             
             SetAltitude(0.0);
         }
-    }
-    
-//    TestDACSPI();
-    
+    }    
     
 }
 
@@ -349,7 +346,7 @@ void LogState() {
     //Housekeeping
     char diagData[700];
     sprintf(diagData,
-            "Battery 1 Charge: %u \nBattery 2 Charge: %u \nBattery 1 Voltage: %u \nBattery 2 Voltage: %u \nBattery 1 Current: %u \nBattery 2 Current: %u \nBuss+ Voltage: %u \nSolar Panel 1 Voltage: %u \nSolar Panel 2 Voltage: %u \nSolar Panel 3 Voltage: %u \nSolar Panel 4 Voltage: %u \nSimplex Temp: %u \nDuplex Temp: %u \nEPS Temp: %u \n\nLP Temp: %u \nLP Cal: %u, %u, %u, %u \nMagnetometer x: %u, y: %u, z: %u \nTemperature: %u, %u, %u, %u, %u, %u, %u, %u\nGPS Position x: %.2f, y: %.2f, z: %.2f\nGPS Velocity x: %.3f, y: %.3f, z: %.3f\nGPS error code: %d, datum: %u",
+            "Battery 1 Charge: %u \nBattery 2 Charge: %u \nBattery 1 Voltage: %u \nBattery 2 Voltage: %u \nBattery 1 Current: %u \nBattery 2 Current: %u \nBuss+ Voltage: %u \nSolar Panel 1 Voltage: %u \nSolar Panel 2 Voltage: %u \nSolar Panel 3 Voltage: %u \nSolar Panel 4 Voltage: %u \nSimplex Temp: %u \nDuplex Temp: %u \nEPS Temp: %u \n\nLP Temp: %u \nLP Cal: %u, %u, %u, %u \nMagnetometer x: %u, y: %u, z: %u \nTemperature: %u, %u, %u, %u, %u, %u, %u, %u\nGPS Position x: %.2f, y: %.2f, z: %.2f\nGPS Velocity x: %.3f, y: %.3f, z: %.3f\nGPS error code: %d, datum: %u\nGPS altitude: %.2f",
             (unsigned int)b1Charge,
             (unsigned int)b2Charge,
             (unsigned int)b1Voltage,
@@ -387,7 +384,8 @@ void LogState() {
             (double)gpsVelocity[1],
             (double)gpsVelocity[2],
             (int)gpsError,
-            (unsigned int)gpsDatum);
+            (unsigned int)gpsDatum,
+            (double)gpsAltitude);
     
     strcat(log, diagData);
     

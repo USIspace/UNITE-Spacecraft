@@ -22,24 +22,24 @@ TransmissionMode TransmissionUnitForMode = {
 unsigned long lpSamplesPerCalibration = 1;
 
 Instrument LangmuirProbe = {
-    { 10, 1, 16 },   // Startup mode: Sample every 1 minute, sample a sweep every 5 ms, sample for 16 sec
-    { 10, 1, 16 },  // Interim mode: Sample every 60 minutes, sample a sweep every 5 ms, sample for 16 sec
-    { 10, 1, 16 },  // Science mode: Sample every 30 minutes, sample a sweep every 5 ms, sample for 16 sec
-    { 10, 1, 16 }   // Reentry mode: Sample every 15 minutes, sample a sweep every 5 ms, sample for 16 sec
+    { 0, 1, 16 },   // Startup mode: Sample every 1 minute, sample a sweep every 5 ms, sample for 16 sec
+    { 0, 1, 16 },  // Interim mode: Sample every 60 minutes, sample a sweep every 5 ms, sample for 16 sec
+    { 0, 1, 16 },  // Science mode: Sample every 30 minutes, sample a sweep every 5 ms, sample for 16 sec
+    { 0, 1, 16 }   // Reentry mode: Sample every 15 minutes, sample a sweep every 5 ms, sample for 16 sec
 };
 
 Instrument TemperatureSensors = {
-    { 1, 0, 0 },    // Startup mode: Sample every 1 minute //30
-    { 1, 0, 0 },    // Interim mode: Sample every 4 minutes
-    { 1, 0, 0 },    // Science mode: Sample every 2 minutes  
-    { 1, 0, 0 }     // Reentry mode: Sample every 1 minute
+    { 0, 0, 0 },    // Startup mode: Sample every 1 minute //30
+    { 0, 0, 0 },    // Interim mode: Sample every 4 minutes
+    { 0, 0, 0 },    // Science mode: Sample every 2 minutes  
+    { 0, 0, 0 }     // Reentry mode: Sample every 1 minute
 };
 
 Instrument Magnetometer = {
-    { 1, 10, 5580 },   // Startup Mode: Sample every 1 minute, sample every 10 s, sample for 93 min
-    { 1, 10, 5580 },  // Interim Mode: Sample every 60 minutes, sample every 10 s, sample for 93 min
-    { 1, 10, 5580 },  // Science Mode: Sample every 30 minutes, sample every 10 s, sample for 93 min
-    { 1, 10, 5580 }   // Reentry Mode: Sample every 15 minutes, sample every 10 s, sample for 93 min
+    { 0, 10, 5580 },   // Startup Mode: Sample every 1 minute, sample every 10 s, sample for 93 min
+    { 0, 10, 5580 },  // Interim Mode: Sample every 60 minutes, sample every 10 s, sample for 93 min
+    { 0, 10, 5580 },  // Science Mode: Sample every 30 minutes, sample every 10 s, sample for 93 min
+    { 0, 10, 5580 }   // Reentry Mode: Sample every 15 minutes, sample every 10 s, sample for 93 min
 };
 
 Instrument GPS = {

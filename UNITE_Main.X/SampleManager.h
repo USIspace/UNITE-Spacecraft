@@ -84,6 +84,8 @@ extern double gpsPosition[3];
 extern float gpsVelocity[3];
 extern int gpsError;
 extern uint8_t gpsDatum;
+extern double gpsTime;
+extern double gpsAltitude;
 
 /* Sampling Functions */
 

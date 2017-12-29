@@ -15,12 +15,10 @@
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/SatelliteMode.c</file>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/TransmitManager.c</file>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/SampleManager.c</file>
-            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/adc1.c</file>
+            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/system.h</file>
+            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/mcc_generated_files/uart3.c</file>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/SampleManager.h</file>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/main.c</file>
-            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/mcc_generated_files/uart4.c</file>
-            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/mcc_generated_files/uart2.c</file>
-            <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/mcc_generated_files/uart1.c</file>
             <file>file:/Users/zacksnyder/Documents/UNITE-Spacecraft/UNITE_Main.X/SystemConfiguration.c</file>
         </group>
     </open-files>
