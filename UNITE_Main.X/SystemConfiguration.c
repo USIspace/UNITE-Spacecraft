@@ -43,10 +43,10 @@ Instrument Magnetometer = {
 };
 
 Instrument GPS = {
-    { 1, 0, 0 },    // Startup Mode: Sample every 1 minute
-    { 1, 0, 0 },    // Interim Mode: Sample every 4 minutes
-    { 1, 0, 0 },    // Science Mode: Sample every 6 minutes
-    { 1, 0, 0 }     // Reentry Mode: Sample every 3 minutes
+    { 2, 0, 0 },    // Startup Mode: Sample every 1 minute
+    { 2, 0, 0 },    // Interim Mode: Sample every 4 minutes
+    { 2, 0, 0 },    // Science Mode: Sample every 6 minutes
+    { 2, 0, 0 }     // Reentry Mode: Sample every 3 minutes
 };
 
 Instrument Housekeeping = {

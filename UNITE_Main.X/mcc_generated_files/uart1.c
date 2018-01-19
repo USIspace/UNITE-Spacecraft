@@ -133,6 +133,9 @@ void UART1_Initialize (void)
    U1MODE = (0x8008 & ~(1<<15));  // disabling UARTEN bit   
    // UTXISEL0 TX_ONE_CHAR; UTXINV disabled; OERR NO_ERROR_cleared; URXISEL RX_ONE_CHAR; UTXBRK COMPLETED; UTXEN disabled; ADDEN disabled; 
    U1STA = 0x0000;
+//   // Generate an interrupt when buffer is full
+//   U1STAbits.URXISEL1 = 0b1;
+//   U1STAbits.UTXISEL0 = 0b1;
    // BaudRate = 115200; Frequency = 16000000 Hz; BRG 416; 
    U1BRG = 0x0022;
 
@@ -141,7 +144,7 @@ void UART1_Initialize (void)
 
     //Make sure to set LAT bit corresponding to TxPin as high before UART initialization
    U1MODEbits.UARTEN = 1;  // enabling UART ON bit
-   U1STAbits.UTXEN = 1;
+   U1STAbits.UTXEN = 0;
    
    
 
@@ -193,6 +196,8 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U1TXInterrupt ( void )
     }
 }
 
+int GPSDataPos = 0;
+
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _U1RXInterrupt( void )
 {
 
@@ -221,11 +226,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U1RXInterrupt( void )
     }
     
     if (U1STAbits.OERR == 1) U1STAbits.OERR = 0;
-    else {
-        static volatile int GPSDataPos = -1;
-    
-        GPSDataPos = TakeGPSSample(GPSDataPos);
-    }
+    else GPSDataPos = TakeGPSSample(GPSDataPos);
     
     IFS0bits.U1RXIF = false;
    
@@ -238,7 +239,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U1ErrInterrupt ( void )
     {
         U1STAbits.OERR = 0;
     }
-
+    
     IFS4bits.U1ERIF = false;
 }
 

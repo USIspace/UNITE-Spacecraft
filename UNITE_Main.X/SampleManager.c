@@ -54,6 +54,7 @@ bool isGPSLocked = true;
 GPSDataIndex gpsIndex = 0;
 char unparsedSBFGPSBuffer[200] = {NULL};
 char unparsedGGAGPSBuffer[100] = {NULL};
+int gpsSBFMessageLength = 0;
 int latDecPrecision = 4;
 int longDecPrecision = 4;
 
@@ -236,7 +237,7 @@ void TrySampleGPS() {
                 memset(gpsBuffer, 0, sizeof(gpsBuffer));
 
                 // Turn on GPS Interrupt
-                _U1RXIE = 1;
+                IEC0bits.U1RXIE = 1;
 
             } else {
                 SetGPSPower(1);
@@ -326,7 +327,7 @@ void EndGPSSampling() {
     if (unparsedGGAGPSBuffer[1] != 0) ParseGPSSample((uint8_t *)unparsedGGAGPSBuffer);
 
     //Only package and send if GPS is locked
-    if (currentGPSBufferIndex > 10) {
+    if (currentGPSBufferIndex > 0 /*10*/) {
         PackageData(GPSSubSys, (int)timeInMin, gpsBuffer, GPS_BUFFER_SIZE);
         isGPSLocked = true;
     } else isGPSLocked = false;
@@ -416,7 +417,6 @@ void CalLangmuirProbe() {
     int i = 0;
 
     for(i = 0; i < 4; i++) {
-        //Still need to select which channel to get results from on ADC
         switch(i) {
             case 0: //1M Ohm
                 _LATE6 = 0;
@@ -609,10 +609,9 @@ int TakeGPSSample(int samplePos) {
 
     char nextChar = Read(GPSUnit);
 
-    if (samplePos == -1) {
+    if (samplePos == 0) {
 
         if ('$' == nextChar) {
-            samplePos++;
             unparsedSBFGPSBuffer[samplePos] = nextChar;
             unparsedGGAGPSBuffer[samplePos++] = nextChar;
         }
@@ -626,39 +625,43 @@ int TakeGPSSample(int samplePos) {
             isGPSSentenceSBF = false;
             unparsedGGAGPSBuffer[samplePos++] = nextChar;
         }
+    } else if (samplePos == 6 && isGPSSentenceSBF) {
+        
+        gpsSBFMessageLength = nextChar;
+        unparsedSBFGPSBuffer[samplePos++] = nextChar;
         
     } else {
 
-//        if ('$' == nextChar)
-//            samplePos = 0;
-//        else 
-        if ('\n' == nextChar) {
-            samplePos = -1;
+        
+        if ('\n' == nextChar || ((samplePos == gpsSBFMessageLength) && isGPSSentenceSBF)) {
+            samplePos = 0;
             
             if (isGPSSentenceSBF) { 
                                 
                 // Turn off GPS interrupt
-                _U1RXIE = 0;
+                IEC0bits.U1RXIE = 0;
     
                 EndGPSSampling();
             }
             
             return samplePos;
             
+        } else if ('$' == nextChar) {
+            samplePos = 0;
         } else {
 
             if (isGPSSentenceSBF) {
                 unparsedSBFGPSBuffer[min(samplePos, sizeof (unparsedSBFGPSBuffer))] = nextChar;
                 samplePos++;
             } else {
-                unparsedGGAGPSBuffer[min(samplePos, sizeof (unparsedSBFGPSBuffer))] = nextChar;
+                unparsedGGAGPSBuffer[min(samplePos, sizeof (unparsedGGAGPSBuffer))] = nextChar;
                 samplePos++;
             }
         }
 
     }
 
-    return samplePos;
+    return samplePos % (int)(isGPSSentenceSBF ? sizeof(unparsedSBFGPSBuffer) : sizeof(unparsedGGAGPSBuffer));
 }
 
 // GPS ASCII compression algorithm
