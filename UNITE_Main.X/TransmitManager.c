@@ -62,12 +62,12 @@ int temperatureFileCount = 1;
 int gpsFileCount = 1;
 int housekeepingFileCount = 1;
 
-
+// State Variables
 int currentDuplexConnectionWait = 0;
 const int DUPLEX_TIMEOUT = 3;
 bool duplexTimeoutFlag = 0;
-const int MAX_FILES_WAITING = 5;
 bool isDuplexConnected = false;
+uint16_t waitingFilesCount = 0;
 
 
 const int DUP_RES_LENGTH = 11;
@@ -175,9 +175,9 @@ void TransmitQueue() {
     if (!isSending && transmitQueueLength > 0) {
         
         TransmissionUnit unit = GetTransmissionUnitForMode();
-        uint16_t waitingFilesCount = GetWaitingFilesCount();
+        waitingFilesCount = GetWaitingFilesCount();
         
-        if (unit > 0 && currentDuplexConnectionWait < DUPLEX_TIMEOUT && isDuplexOn() && waitingFilesCount < MAX_FILES_WAITING) {
+        if (unit > 0 && currentDuplexConnectionWait < DUPLEX_TIMEOUT && isDuplexOn() && waitingFilesCount < MAX_DUP_FILES_WAITING) {
             if (isDuplexConnected == false) currentDuplexConnectionWait++;
             else {
                 SendData(transmitQueue, transmitQueueLength, unit);
@@ -696,6 +696,8 @@ void TogglePowerSwitches() {
         }
         
         ReadPowerSwitches();
+        
+        
     } else {
         
     }
@@ -754,7 +756,7 @@ void ReadPowerSwitches() {
 
 void SetLangmuirProbePower(bool on) {
     if (on) langmuirMagPowerSwitch = 0xFF;
-    else langmuirMagPowerSwitch = 0xFF;
+    else langmuirMagPowerSwitch = 0xFF; //0x00;
 }
 
 void SetMagnetometerPower(bool on) {
@@ -763,12 +765,12 @@ void SetMagnetometerPower(bool on) {
 
 void SetTemperaturePower(bool on) {
     if (on) temperaturePowerSwitch = 0xFF;
-    else temperaturePowerSwitch = 0xFF;
+    else temperaturePowerSwitch = 0xFF; //0x00;
 }
 
 void SetGPSPower(bool on) {
     if (on) gpsPowerSwitch = 0xFF;
-    else gpsPowerSwitch = 0x00;
+    else gpsPowerSwitch = 0xFF; //0x00;
 }
 
 void SetDuplexPower(bool on) {

@@ -33,10 +33,10 @@ int temperatureResults[16];
 uint16_t langmuirProbeDiagData[5];
 uint16_t magnetometerDiagData[3];
 uint16_t temperatureDiagData[8];
-double gpsPosition[3];
-float gpsVelocity[3];
-int gpsError;
-uint8_t gpsDatum;
+volatile double gpsPosition[3];
+volatile float gpsVelocity[3];
+volatile int gpsError;
+volatile uint8_t gpsDatum;
 double gpsTime;
 double gpsAltitude;
 
@@ -50,10 +50,10 @@ uint8_t housekeepingBuffer[28] = {NULL};
 char myFunString[29] = "Hey, World! UNITE Rules Now!";
 
 // GPS Properties
-bool isGPSLocked = true;
+uint8_t gpsLockAttempts = 0;
 GPSDataIndex gpsIndex = 0;
-char unparsedSBFGPSBuffer[200] = {NULL};
-char unparsedGGAGPSBuffer[100] = {NULL};
+volatile char unparsedSBFGPSBuffer[200] = {NULL};
+volatile char unparsedGGAGPSBuffer[100] = {NULL};
 int gpsSBFMessageLength = 0;
 int latDecPrecision = 4;
 int longDecPrecision = 4;
@@ -329,13 +329,14 @@ void EndGPSSampling() {
     //Only package and send if GPS is locked
     if (currentGPSBufferIndex > 0 /*10*/) {
         PackageData(GPSSubSys, (int)timeInMin, gpsBuffer, GPS_BUFFER_SIZE);
-        isGPSLocked = true;
-    } else isGPSLocked = false;
+        gpsLockAttempts = 0;
+    } else gpsLockAttempts++;
 
+    // Reset buffer variables
     memset(unparsedSBFGPSBuffer, 0, sizeof(unparsedSBFGPSBuffer));
     memset(unparsedGGAGPSBuffer, 0, sizeof(unparsedGGAGPSBuffer));
     memset(gpsBuffer, 0, sizeof(gpsBuffer));
-    if (isGPSLocked) currentGPSWait = 0;
+    if (gpsLockAttempts == 0) currentGPSWait = 0;
     currentGPSBufferIndex = 0;
     gpsIndex = 0;
     U1STAbits.OERR = 0; // Clear any errors
@@ -731,8 +732,11 @@ void AppendDoubleToGPSBuffer(double value) {
 // float value -> value to append
 void AppendFloatToGPSBuffer(float value) {
     
-    char *a = (char *)&value;
-    uint8_t bytes[4] = { (uint8_t)*a++, (uint8_t)*a++, (uint8_t)*a++, (uint8_t)*a++ };
+//    char *a = (char *)&value;
+    uint8_t bytes[4];
+    
+    memcpy(&value, bytes, sizeof(bytes));
+//     = { (uint8_t)*a, (uint8_t)*a, (uint8_t)*a, (uint8_t)*a };
     
     AppendToGPSBuffer(bytes, sizeof(bytes));
 }
@@ -877,7 +881,7 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
  void ParseGPSSample(char *unparsedSentence) {
 
     int i;
-    char unit[1] = {','};
+//    char unit[1] = {','};
     char header[] = "$GPGGA";
     char *sentenceHeader;
 
@@ -921,14 +925,14 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
                     // Set Satellite altitude
                     SetAltitude(gpsAltitude);
 
-                    char ascii[3];
-                    AppendIntToGPSBuffer(ascii, (int)gpsAltitude, sizeof(ascii));
+//                    char ascii[3];
+//                    AppendIntToGPSBuffer(ascii, (int)gpsAltitude, sizeof(ascii));
                 }
 
                 i += length - 1;
 
-                unit[0] = ',';
-                AppendToGPSBuffer((uint8_t *) unit, 1);
+//                unit[0] = ',';
+//                AppendToGPSBuffer((uint8_t *) unit, 1);
                 
             }
         }

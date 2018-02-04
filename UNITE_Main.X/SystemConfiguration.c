@@ -22,38 +22,43 @@ TransmissionMode TransmissionUnitForMode = {
 unsigned long lpSamplesPerCalibration = 1;
 
 Instrument LangmuirProbe = {
-    { 0, 1, 16 },   // Startup mode: Sample every 1 minute, sample a sweep every 5 ms, sample for 16 sec
-    { 0, 1, 16 },  // Interim mode: Sample every 60 minutes, sample a sweep every 5 ms, sample for 16 sec
-    { 0, 1, 16 },  // Science mode: Sample every 30 minutes, sample a sweep every 5 ms, sample for 16 sec
-    { 0, 1, 16 }   // Reentry mode: Sample every 15 minutes, sample a sweep every 5 ms, sample for 16 sec
+    { 0, 1, 16 },  // First Week Mode: Sample every 1 minute, sample a sweep every 5 ms, sample for 16 sec
+    { 0, 1, 16 },  // Interim Mode: Sample every 60 minutes, sample a sweep every 5 ms, sample for 16 sec
+    { 0, 1, 16 },  // Science Mode: Sample every 30 minutes, sample a sweep every 5 ms, sample for 16 sec
+    { 0, 1, 16 },  // Reentry Mode: Sample every 15 minutes, sample a sweep every 5 ms, sample for 16 sec
+    { 0, 1, 16 }   // Fallback Mode: Sample every __ minutes, sample a sweep every 5 ms, sample for 16 sec
 };
 
 Instrument TemperatureSensors = {
-    { 0, 0, 0 },    // Startup mode: Sample every 1 minute //30
-    { 0, 0, 0 },    // Interim mode: Sample every 4 minutes
-    { 0, 0, 0 },    // Science mode: Sample every 2 minutes  
-    { 0, 0, 0 }     // Reentry mode: Sample every 1 minute
+    { 0, 0, 0 },    // First Week Mode: Sample every 1 minute //30
+    { 0, 0, 0 },    // Interim Mode: Sample every 4 minutes
+    { 0, 0, 0 },    // Science Mode: Sample every 2 minutes  
+    { 0, 0, 0 },    // Reentry Mode: Sample every 1 minute
+    { 0, 0, 0 }     // Fallback Mode: Sample every __ minutes
 };
 
 Instrument Magnetometer = {
-    { 0, 10, 5580 },   // Startup Mode: Sample every 1 minute, sample every 10 s, sample for 93 min
-    { 0, 10, 5580 },  // Interim Mode: Sample every 60 minutes, sample every 10 s, sample for 93 min
-    { 0, 10, 5580 },  // Science Mode: Sample every 30 minutes, sample every 10 s, sample for 93 min
-    { 0, 10, 5580 }   // Reentry Mode: Sample every 15 minutes, sample every 10 s, sample for 93 min
+    { 0, 10, 5580 },    // First Week Mode: Sample every 1 minute, sample every 10 s, sample for 93 min
+    { 0, 10, 5580 },    // Interim Mode: Sample every 60 minutes, sample every 10 s, sample for 93 min
+    { 0, 10, 5580 },    // Science Mode: Sample every 30 minutes, sample every 10 s, sample for 93 min
+    { 0, 10, 5580 },    // Reentry Mode: Sample every 15 minutes, sample every 10 s, sample for 93 min
+    { 0, 10, 5580 }     // Fallback Mode: Sample every __ minutes, sample every 10 s, sample for 93 min
 };
 
 Instrument GPS = {
-    { 2, 0, 0 },    // Startup Mode: Sample every 1 minute
-    { 2, 0, 0 },    // Interim Mode: Sample every 4 minutes
-    { 2, 0, 0 },    // Science Mode: Sample every 6 minutes
-    { 2, 0, 0 }     // Reentry Mode: Sample every 3 minutes
+    { 3, 0, 0 },        // First Week Mode: Sample every 1 minute
+    { 3, 0, 0 },        // Interim Mode: Sample every 4 minutes
+    { 3, 0, 0 },        // Science Mode: Sample every 6 minutes
+    { 3, 0, 0 },        // Reentry Mode: Sample every 3 minutes
+    { 3, 0, 0 }         // Fallback Mode: Sample every __ minutes
 };
 
 Instrument Housekeeping = {
-    { 0, 0, 0},
-    { 0, 0, 0},
-    { 0, 0, 0},
-    { 0, 0, 0},
+    { 0, 0, 0},     // First Week Mode: Sample every 0 minutes
+    { 0, 0, 0},     // Interim Mode: Sample every 0 minutes 
+    { 0, 0, 0},     // Science Mode: Sample every 0 minutes
+    { 0, 0, 0},     // Reentry Mode: Sample every 0 minutes
+    { 0, 0, 0}      // Fallback Mode: Sample every 0 minutes
 };
 
 // Description: Getter for an instrument sample rate
@@ -62,7 +67,7 @@ Instrument Housekeeping = {
 unsigned long GetSampleRate(Instrument *instrument) {
     
     switch (currentMode) {
-        case startup: return instrument->Startup.sampleRate;
+        case firstWeek: return instrument->FirstWeek.sampleRate;
         case interim: return instrument->Interim.sampleRate;
         case science: return instrument->Science.sampleRate;
         case reentry: return instrument->ReEntry.sampleRate;
@@ -75,7 +80,7 @@ unsigned long GetSampleRate(Instrument *instrument) {
 unsigned long GetSweepRate(Instrument *instrument) {
     
     switch (currentMode) {
-        case startup: return instrument->Startup.sweepRate;
+        case firstWeek: return instrument->FirstWeek.sweepRate;
         case interim: return instrument->Interim.sweepRate;
         case science: return instrument->Science.sweepRate;
         case reentry: return instrument->ReEntry.sweepRate;
@@ -88,7 +93,7 @@ unsigned long GetSweepRate(Instrument *instrument) {
 unsigned long GetSweepDuration(Instrument *instrument) {
     
     switch (currentMode) {
-        case startup: return instrument->Startup.sweepDuration;
+        case firstWeek: return instrument->FirstWeek.sweepDuration;
         case interim: return instrument->Interim.sweepDuration;
         case science: return instrument->Science.sweepDuration;
         case reentry: return instrument->ReEntry.sweepDuration;
@@ -134,7 +139,7 @@ uint8_t GetTransmissionPackageLength(TransmissionUnit unit) {
 // Return: TransmissionUnit for the current mode
 TransmissionUnit GetTransmissionUnitForMode() {
     switch (currentMode) {
-        case startup: return TransmissionUnitForMode.startup;
+        case firstWeek: return TransmissionUnitForMode.firstWeek;
         case interim: return TransmissionUnitForMode.interim;
         case science: return TransmissionUnitForMode.science;
         case reentry: return TransmissionUnitForMode.reentry;

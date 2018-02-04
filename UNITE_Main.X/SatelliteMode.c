@@ -34,7 +34,7 @@ int currentLogWait = 0;
   Satellite Mode Configurations
  *******************************/
 
-SatelliteMode StartupMode = {
+SatelliteMode FirstWeekMode = {
     400,    // Altitude to begin sampling in this mode
     390,    // Altitude to end sampling and switch to new mode
     5       // Days until needs to switch mode
@@ -118,11 +118,13 @@ void Satellite_Initialize() {
 // Return: Boolean for whether a mode switch should occur
 bool ShouldUpdateMode(unsigned long time, unsigned long altitude) {
 
+    if ((gpsLockAttempts > GPS_LOCK_FAILURE || waitingFilesCount >= MAX_DUP_FILES_WAITING) && !IS_DIAG) return true;
+    
     switch (currentMode) {
         case safe: return true;
-        case startup: 
-            if (time > StartupMode.stopTime) return true;
-            else if ((altitude) <= StartupMode.endAltitudeInKm) return true;
+        case firstWeek: 
+            if (time > FirstWeekMode.stopTime) return true;
+            else if ((altitude) <= FirstWeekMode.endAltitudeInKm) return true;
         case interim:
             if (time > InterimMode.stopTime) return true;
             else if ((altitude) <= InterimMode.endAltitudeInKm) return true;
@@ -132,6 +134,8 @@ bool ShouldUpdateMode(unsigned long time, unsigned long altitude) {
         case reentry: break;
             if (time > ReEntryMode.stopTime) return true;
             else if ((altitude) <= ReEntryMode.endAltitudeInKm) return true;
+        case fallback: break;
+            
     }
     return false;
 }
@@ -142,15 +146,17 @@ UNITEMode UpdateMode() {
 
     if (ShouldUpdateMode(totalTime / 3600, lastAltitude)) {
         
-        /*
-        int i;
-        for (i = 0; i < 8; i++) {
-            UART3_Write(255); 
-            UART3_Write(0);
-        }*/
+        if ((gpsLockAttempts > GPS_LOCK_FAILURE || waitingFilesCount >= MAX_DUP_FILES_WAITING) && !IS_DIAG) {
+            
+            _LATE2 = LED_ON;
+            _LATE3 = LED_OFF;
+            _LATE4 = LED_ON;
+            
+            return fallback;
+        }
         
         switch (currentMode) {
-            case startup: 
+            case firstWeek: 
                 
                 _LATE2 = LED_ON;
                 _LATE3 = LED_OFF;
@@ -175,13 +181,17 @@ UNITEMode UpdateMode() {
                 
                 return currentMode; // Never leave reentry mode
 
+            case fallback:
+                
+                return interim;
+                
             case safe:
 
                 _LATE2 = LED_OFF;
                 _LATE3 = LED_OFF;
                 _LATE4 = LED_OFF;
                 
-                return startup;
+                return firstWeek;
         }
     }
     
@@ -320,10 +330,11 @@ void LogState() {
     //Current Mode
 
     switch (currentMode) {
-        case startup: strcat(log, "Current Mode: startup"); break;
+        case firstWeek: strcat(log, "Current Mode: firstWeek"); break;
         case interim: strcat(log, "Current Mode: interim"); break;
         case science: strcat(log, "Current Mode: science"); break;
         case reentry: strcat(log, "Current Mode: reentry"); break;
+        case fallback: strcat(log, "Current Mode: fallback"); break;
         default: break;
     }
     

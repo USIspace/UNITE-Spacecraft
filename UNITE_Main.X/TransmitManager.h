@@ -32,11 +32,12 @@ extern "C" {
 extern bool isSending;
 
 // Global variable to track when Duplex is connected
-//bool isDuplexConnected;
+//extern bool isDuplexConnected;
 
 // Timeout flags
 extern bool simplexTimeoutFlag;
 extern bool duplexTimeoutFlag;
+extern uint16_t waitingFilesCount;
 
 extern uint16_t b1Charge;
 extern uint16_t b2Charge;

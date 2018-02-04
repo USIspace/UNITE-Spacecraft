@@ -70,9 +70,11 @@ typedef enum {
 
 // Defines the Mode for the second byte of a command
 typedef enum {
-    Interim = 1,
+    FirstWeek = 1,
+    Interim,
     Science,
     ReEntry,
+    Fallback,
     Global
 } Mode;
 

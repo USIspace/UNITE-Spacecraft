@@ -74,16 +74,16 @@ extern bool isMagnetometerSweeping;
 extern bool shouldMagnetometerSample;
 
 // Did GPS obtain lock for last sample
-extern bool isGPSLocked;
+extern uint8_t gpsLockAttempts;
 
 /* Diagnostic Data */
 extern uint16_t langmuirProbeDiagData[5];
 extern uint16_t magnetometerDiagData[3];
 extern uint16_t temperatureDiagData[8];
-extern double gpsPosition[3];
-extern float gpsVelocity[3];
-extern int gpsError;
-extern uint8_t gpsDatum;
+extern volatile double gpsPosition[3];
+extern volatile float gpsVelocity[3];
+extern volatile int gpsError;
+extern volatile uint8_t gpsDatum;
 extern double gpsTime;
 extern double gpsAltitude;
 

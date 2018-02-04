@@ -32,13 +32,19 @@ extern "C" {
 #define IS_DUP_TIMEOUT_ENABLED true
 
 // Set to true is Simplex shoule timeout when waiting for input
-#define IS_SIM_TIMEOUT_ENABLED true
+#define IS_SIM_TIMEOUT_ENABLED false
 
 // Constant for the duration of an orbit in minutes
 #define ORBIT_DUR_MIN 93
 
 // Set Main Loop Timer Interval
 #define MAIN_LOOP_TIMER_INTERVAL 10
+
+// Set GPS Lock Failure
+#define GPS_LOCK_FAILURE 30
+
+// Set Maximum file buffer for Duplex
+#define MAX_DUP_FILES_WAITING 5
 
 // Struct for instrument sampling properties
 typedef struct {
@@ -49,10 +55,11 @@ typedef struct {
 
 // Struct to store instrument properties for each mode
 typedef struct {
-    Properties Startup;
+    Properties FirstWeek;
     Properties Interim;
     Properties Science;
     Properties ReEntry;
+    Properties Fallback;
 } Instrument;
 
 // Defines types for transmission and UART communication lines 
@@ -66,10 +73,11 @@ typedef enum {
 
 // Struct to store transmission units for each mode
 typedef struct {
-    TransmissionUnit startup;
+    TransmissionUnit firstWeek;
     TransmissionUnit interim;
     TransmissionUnit science;
     TransmissionUnit reentry;
+    TransmissionUnit fallback;
 
 } TransmissionMode;
 

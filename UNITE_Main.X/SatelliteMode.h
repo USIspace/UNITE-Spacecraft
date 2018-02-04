@@ -23,10 +23,11 @@ extern "C" {
 
 // Defines the operational modes
 typedef enum {
-    startup,
+    firstWeek,
     interim,
     science,
     reentry,
+    fallback,
     safe
 } UNITEMode;
 

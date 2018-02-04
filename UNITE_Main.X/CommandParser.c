@@ -157,6 +157,10 @@ void RunCommand(System system, Mode mode, Property property, Unit unit, unsigned
 
     // Choose Satellite Mode
     switch (mode) {
+        case FirstWeek:
+            
+            if (isInstrument) modeProperties = &instrument->FirstWeek;
+            else if (isTransmission) unitForMode = &transMode->firstWeek;
         case Interim:
 
             if (isInstrument) modeProperties = &instrument->Interim;
