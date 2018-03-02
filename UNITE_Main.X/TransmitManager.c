@@ -30,9 +30,8 @@ const uint16_t QUEUE_SIZE = 2000;
 
 // Simplex Comm Configs
 const int PREAMBLE_LENGTH = 4;
-uint8_t simplexPackagePreamble[] = {0x50, 0x50, 0x50, 0x0C}; // 0x50 0x50 0x50 0x0C
+uint8_t simplexPackagePreamble[] = {0x50, 0x50, 0x50, 0x0C};
 const int SIM_RES_LENGTH = 3;
-bool simplexTimeoutFlag = 0;
 
 // Duplex Comm Configs
 const int DUPLEX_SYNC_LENGTH = 2;
@@ -65,10 +64,13 @@ int housekeepingFileCount = 1;
 // State Variables
 int currentDuplexConnectionWait = 0;
 const int DUPLEX_TIMEOUT = 3;
-bool duplexTimeoutFlag = 0;
 bool isDuplexConnected = false;
 uint16_t waitingFilesCount = 0;
 
+// Timeout
+bool simplexTimeoutFlag = 0;
+bool duplexTimeoutFlag = 0;
+bool gpsTimeoutFlag = 0;
 
 const int DUP_RES_LENGTH = 11;
 
@@ -80,9 +82,9 @@ uint8_t epsEcho[39] = { NULL };
 const int POWER_ECHO_LENGTH = 39;
 uint8_t powerPackagePreamble[4] = {0x50, 0x50, 0x50, 0x0B}; // 0x50 0x50 0x50 0x0B
 uint8_t commandBoardPowerSwitch = 0xFF;         // SW1
-uint8_t temperaturePowerSwitch = 0xFF;          // SW2
-uint8_t langmuirMagPowerSwitch = 0xFF;          // SW3
-uint8_t gpsPowerSwitch = 0xFF;                  // SW4
+uint8_t temperaturePowerSwitch = 0x00;          // SW2
+uint8_t langmuirMagPowerSwitch = 0x00;          // SW3
+uint8_t gpsPowerSwitch = 0x00;                  // SW4
 uint8_t duplexPowerSwitch = 0x00;               // SW5
 
 bool isLangmuirProbeOn() { return langmuirMagPowerSwitch == 0xFF; }
@@ -225,7 +227,16 @@ uint8_t Read(TransmissionUnit unit) {
                 if (!duplexTimeoutFlag) return dupData;
                 else return 0;
                 
-            case GPSUnit: return UART1_Read();
+            case GPSUnit: 
+                
+                // Reset Timeout
+                gpsTimeoutFlag = false;
+                
+                uint8_t gpsData = UART1_Read();
+                
+                if (!gpsTimeoutFlag) return gpsData;
+                else return 0;
+                
             case DiagUnit: return UART4_Read();
             default: return 0xFF;
         }
@@ -558,33 +569,38 @@ void SetTotalTime() {
     if (isDuplexOn()) {
         
         // Change to a Do-While (!ReadACKForUnit(Duplex))
-        PollDuplex(duplexHousekeepingFilePoll, 0);
+        bool isAck = false;
+        
+        do {
+            PollDuplex(duplexHousekeepingFilePoll, 0);
+            isAck = ReadACKForUnit(DuplexUnit);
+        } while (duplexTimeoutFlag);
 
-        if (ReadACKForUnit(DuplexUnit)) {
+        if (!isAck) return;
+        
+        while (Read(DuplexUnit) != 0x47) { if (duplexTimeoutFlag) { return; } }
+        while (Read(DuplexUnit) != 0x55) { if (duplexTimeoutFlag) { return; } }
 
-            while (Read(DuplexUnit) != 0x47) { if (duplexTimeoutFlag) { return; } }
-            while (Read(DuplexUnit) != 0x55) { if (duplexTimeoutFlag) { return; } }
+        int i;
+        int responseLength = 13;
 
-            int i;
-            int responseLength = 13;
+        unsigned long epoch[4];
+        unsigned long totalEpoch;
 
-            unsigned long epoch[4];
-            unsigned long totalEpoch;
-
-            for (i = 0; i < responseLength; i++) {
-                switch (i) {
-                    case 10: epoch[0] = Read(DuplexUnit);
-                        break;
-                    case 11: epoch[1] = Read(DuplexUnit);
-                        break;
-                    case 12: epoch[2] = Read(DuplexUnit);
-                        break;
-                    case 13: epoch[3] = Read(DuplexUnit);
-                        break;
-                    default: Read(DuplexUnit);
-                        break;
-                }
+        for (i = 0; i < responseLength; i++) {
+            switch (i) {
+                case 10: epoch[0] = Read(DuplexUnit);
+                    break;
+                case 11: epoch[1] = Read(DuplexUnit);
+                    break;
+                case 12: epoch[2] = Read(DuplexUnit);
+                    break;
+                case 13: epoch[3] = Read(DuplexUnit);
+                    break;
+                default: Read(DuplexUnit);
+                    break;
             }
+            
 
             totalEpoch = epoch[3] << 24 | epoch[2] << 16 | epoch[1] << 8 | epoch[0];
             totalTime = (time_t)((double)(totalEpoch - DUPLEX_EPOCH_OFFSET) / 3.0 * 3600 * 24);
@@ -715,8 +731,8 @@ void ReadPowerSwitches() {
         for (i = 0; i < POWER_ECHO_LENGTH; i++) {
 
             switch (i) {
-//                case 3: temperaturePowerSwitch = Read(SimplexUnit); break;
-//                case 5: langmuirMagPowerSwitch = Read(SimplexUnit); break;
+                case 3: temperaturePowerSwitch = Read(SimplexUnit); break;
+                case 5: langmuirMagPowerSwitch = Read(SimplexUnit); break;
                 case 7: gpsPowerSwitch = Read(SimplexUnit); break;
                 case 9: duplexPowerSwitch = Read(SimplexUnit); break;
                 case 10: b1Charge = Read(SimplexUnit); b1Charge <<= 8; break;   // Battery 1 Charge High
@@ -756,7 +772,7 @@ void ReadPowerSwitches() {
 
 void SetLangmuirProbePower(bool on) {
     if (on) langmuirMagPowerSwitch = 0xFF;
-    else langmuirMagPowerSwitch = 0xFF; //0x00;
+    else langmuirMagPowerSwitch = 0x00;
 }
 
 void SetMagnetometerPower(bool on) {
@@ -765,12 +781,12 @@ void SetMagnetometerPower(bool on) {
 
 void SetTemperaturePower(bool on) {
     if (on) temperaturePowerSwitch = 0xFF;
-    else temperaturePowerSwitch = 0xFF; //0x00;
+    else temperaturePowerSwitch = 0x00;
 }
 
 void SetGPSPower(bool on) {
     if (on) gpsPowerSwitch = 0xFF;
-    else gpsPowerSwitch = 0xFF; //0x00;
+    else gpsPowerSwitch = 0x00;
 }
 
 void SetDuplexPower(bool on) {

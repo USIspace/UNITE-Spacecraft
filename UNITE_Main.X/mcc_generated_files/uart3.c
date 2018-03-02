@@ -79,13 +79,11 @@ void UART3_Initialize(void)
 
 uint8_t UART3_Read(void)
 {
-//    time_t current = time(NULL);
     time_t endWait = time(NULL) + SIMPLEX_RES_TIMEOUT;
     
     while(!(U3STAbits.URXDA == 1) && !simplexTimeoutFlag)
     {
         // Simplex read timeout
-//        current = time(NULL);
         if (time(NULL) >= endWait && IS_SIM_TIMEOUT_ENABLED) simplexTimeoutFlag = 1;
     }
 

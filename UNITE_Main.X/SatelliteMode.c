@@ -24,7 +24,7 @@
 // Used as a switch for the satellite to change modes
 UNITEMode currentMode = safe;
 bool shouldChangeMode = false;
-unsigned long lastAltitude = 400; // 400 km
+double lastAltitude = 400.0; // 400 km
 unsigned long totalTime = 0; // Keeps track of overall mission clock
 double timeInMin = 0.0;      // Time in Min since 00:00
 
@@ -42,20 +42,26 @@ SatelliteMode FirstWeekMode = {
 
 SatelliteMode InterimMode = {
     390,  
+    325, 
     300, 
-    380, 
+};
+
+SatelliteMode StabilizeMode = {
+    325,
+    300,
+    380
 };
 
 SatelliteMode ScienceMode = {
     300,
     225,
-    420
+    400
 };
 
 SatelliteMode ReEntryMode = {
     225,
     0,
-    500
+    1000000
 };
 
 SatelliteMode SafeMode = {
@@ -87,7 +93,7 @@ void SatelliteProperties_Initialize() {
    //Set Satellite Time
 //   SetDuplexPower(1);
    SetTotalTime();
-//   SetDuplexPower(0);
+   SetDuplexPower(0);
 }
 
  
@@ -118,7 +124,7 @@ void Satellite_Initialize() {
 // Return: Boolean for whether a mode switch should occur
 bool ShouldUpdateMode(unsigned long time, unsigned long altitude) {
 
-    if ((gpsLockAttempts > GPS_LOCK_FAILURE || waitingFilesCount >= MAX_DUP_FILES_WAITING) && !IS_DIAG) return true;
+    if ((gpsLockAttempts > GPS_LOCK_FAILURE && waitingFilesCount >= MAX_DUP_FILES_WAITING) && !IS_DIAG) return true;
     
     switch (currentMode) {
         case safe: return true;
@@ -128,13 +134,19 @@ bool ShouldUpdateMode(unsigned long time, unsigned long altitude) {
         case interim:
             if (time > InterimMode.stopTime) return true;
             else if ((altitude) <= InterimMode.endAltitudeInKm) return true;
+        case stabilize: 
+            if (time > StabilizeMode.stopTime) return true;
+            else if ((altitude) <= StabilizeMode.endAltitudeInKm) return true;
         case science:
             if (time > ScienceMode.stopTime) return true;
             else if ((altitude) <= ScienceMode.endAltitudeInKm) return true;
         case reentry: break;
             if (time > ReEntryMode.stopTime) return true;
             else if ((altitude) <= ReEntryMode.endAltitudeInKm) return true;
-        case fallback: break;
+        case fallback: //break;
+            if (gpsLockAttempts < GPS_LOCK_FAILURE) return true;
+            if (waitingFilesCount < MAX_DUP_FILES_WAITING) return true;
+            
             
     }
     return false;
@@ -144,7 +156,7 @@ bool ShouldUpdateMode(unsigned long time, unsigned long altitude) {
 
 UNITEMode UpdateMode() {
 
-    if (ShouldUpdateMode(totalTime / 3600, lastAltitude)) {
+    if (ShouldUpdateMode(totalTime / 3600, (int)lastAltitude)) {
         
         if ((gpsLockAttempts > GPS_LOCK_FAILURE || waitingFilesCount >= MAX_DUP_FILES_WAITING) && !IS_DIAG) {
             
@@ -165,11 +177,20 @@ UNITEMode UpdateMode() {
                 return interim;
             case interim:
                 
-                _LATE2 = LED_OFF;
+                _LATE2 = LED_ON;
                 _LATE3 = LED_ON;
                 _LATE4 = LED_OFF;
 
+                return stabilize;
+                
+            case stabilize:
+                
+                _LATE2 = LED_OFF;
+                _LATE3 = LED_ON;
+                _LATE4 = LED_OFF;
+                
                 return science;
+                
             case science:
                 
                 _LATE2 = LED_OFF;
@@ -177,6 +198,7 @@ UNITEMode UpdateMode() {
                 _LATE4 = LED_ON;
 
                 return reentry;
+                
             case reentry:
                 
                 return currentMode; // Never leave reentry mode
@@ -259,64 +281,18 @@ void SetTime(double formattedTime) {
     timeInMin = hours + min + sec;
 }
 
-//void SetTime(uint8_t *time, int arrayLength) {
-//
-//    int hours = 0;
-//    int mins = 0;
-//    
-//    // Convert string to int    
-//    int i;
-//    for (i = 0; i < arrayLength; i++) {
-//        switch (i) {
-//            case 0: 
-//                hours += time[i] & 0x0F;
-//                hours += ((time[i] & 0xF0) >> 4) * 10;
-//                break;
-//            case 1: 
-//                mins += time[i] & 0x0F;
-//                mins += ((time[i] & 0xF0) >> 4) * 10;
-//                break;
-//            default: break;
-//        }
-//    }
-//    
-//    timeInMin = ((hours * 60) + mins);
-//}
-
 void SetAltitude(double alt) {
     
-     lastAltitude -= 1;
-//    lastAltitude = (int)alt;
+     lastAltitude -= 0.25;
+//    lastAltitude = alt;
 }
 
-/*
-void SetAltitude(uint8_t *alt, int arrayLength) {
-    
-    unsigned long convertedAltitude = 0;
-
-    char *altString = (char *)alt;
-    char *decimal = strrchr(altString, '.');
-    int decimals = (int)&alt - (int)&decimal;
-    
-    // Convert string to int
-    int altIntLength = (arrayLength- decimals);
-    
-    int i;
-    for (i = 0; i < altIntLength; i++) {
-        int exp = ((altIntLength) - (i * 2));
-        convertedAltitude += (alt[i] & 0x0F) * Pow(10, exp);
-        convertedAltitude += ((alt[i] & 0xF0) >> 4) * 10 * Pow(10,exp);
-    }
-    
-    if (convertedAltitude > 0) lastAltitude = convertedAltitude;
-}*/
-
-time_t logCount = 0;
+time_t logCount = 1;
 
 // Logging Method for Diagnostic Mode
 void LogState() {
     
-    char log[1500] = "UNITE Log #";
+    char log[1000] = "UNITE Log #";
     char newLine[] = "\n\n";
     char endLine[] = "EOF\n";
     
@@ -332,6 +308,7 @@ void LogState() {
     switch (currentMode) {
         case firstWeek: strcat(log, "Current Mode: firstWeek"); break;
         case interim: strcat(log, "Current Mode: interim"); break;
+        case stabilize: strcat(log, "Current Mode: stabilize"); break;
         case science: strcat(log, "Current Mode: science"); break;
         case reentry: strcat(log, "Current Mode: reentry"); break;
         case fallback: strcat(log, "Current Mode: fallback"); break;
@@ -342,7 +319,7 @@ void LogState() {
     
     //Altitude
     char altitude[20];
-    sprintf(altitude, "Altitude: %u km", (unsigned int)lastAltitude);
+    sprintf(altitude, "Altitude: %.2f km", lastAltitude);
     strcat(log, altitude);
     
     strcat(log, newLine);
@@ -354,10 +331,56 @@ void LogState() {
     
     strcat(log, newLine);
     
+    // Conversions
+    double convertedMagDiagData[3];
+    double convertedTempDiagData[8];
+    
+    // Magnetometer
+    int i;
+    for (i = 0; i < 3; i++) {
+        convertedMagDiagData[i] = (double) magnetometerDiagData[i]*(4.0 / 1023.0) - 2.0;
+    }
+    
+    // Temperature
+    for (i = 0; i < 8; i++) {
+
+        double convertedTemp, unconvertedTemp = (double) temperatureDiagData[i] / 4.0;
+
+
+        switch (i) {
+            case 0: // MAG
+                convertedTemp = 0.80691 * (unconvertedTemp + 270.1) - 272.67;
+                break;
+            case 1: // -Z
+                convertedTemp = 0.80405 * (unconvertedTemp + 271.6) - 273.19;
+                break;
+            case 2: // -Y
+                convertedTemp = 0.80528 * (unconvertedTemp + 270.88) - 273.18;
+                break;
+            case 3: // -X
+                convertedTemp = 0.80697 * (unconvertedTemp + 270.3) - 273.63;
+                break;
+            case 4: // +Z
+                convertedTemp = 0.81446 * (unconvertedTemp + 267.89) - 273.51;
+                break;
+            case 5: // +Y
+                convertedTemp = 0.80379 * (unconvertedTemp + 271.37) - 273.71;
+                break;
+            case 6: // +X
+                convertedTemp = 0.80103 * (unconvertedTemp + 272.5) - 273.7;
+                break;
+            case 7: // CMD
+                convertedTemp = 0.80887 * (unconvertedTemp + 268.74) - 274.05;
+                break;
+        }
+
+        convertedTempDiagData[i] = convertedTemp;
+    }
+    
     //Housekeeping
-    char diagData[700];
+    char diagData[800];
     sprintf(diagData,
-            "Battery 1 Charge: %u \nBattery 2 Charge: %u \nBattery 1 Voltage: %u \nBattery 2 Voltage: %u \nBattery 1 Current: %u \nBattery 2 Current: %u \nBuss+ Voltage: %u \nSolar Panel 1 Voltage: %u \nSolar Panel 2 Voltage: %u \nSolar Panel 3 Voltage: %u \nSolar Panel 4 Voltage: %u \nSimplex Temp: %u \nDuplex Temp: %u \nEPS Temp: %u \n\nLP Temp: %u \nLP Cal: %u, %u, %u, %u \nMagnetometer x: %u, y: %u, z: %u \nTemperature: %u, %u, %u, %u, %u, %u, %u, %u\nGPS Position x: %.2f, y: %.2f, z: %.2f\nGPS Velocity x: %.3f, y: %.3f, z: %.3f\nGPS error code: %d, datum: %u\nGPS altitude: %.2f",
+            "Battery 1 Charge: %u \nBattery 2 Charge: %u \nBattery 1 Voltage: %u \nBattery 2 Voltage: %u \nBattery 1 Current: %u \nBattery 2 Current: %u \nBuss+ Voltage: %u \nSolar Panel 1 Voltage: %u \nSolar Panel 2 Voltage: %u \nSolar Panel 3 Voltage: %u \nSolar Panel 4 Voltage: %u \nSimplex Temp: %u \nDuplex Temp: %u \nEPS Temp: %u \n\nLP Temp: %u \nLP Cal: %u, %u, %u, %u \nMagnetometer x: %.2f G (%u), y: %.2f G (%u), z: %.2f G (%u)\nTemperature: MAG: %.2f C (%u), -Z: %.2f C (%u), -Y: %.2f C (%u), -X: %.2f C (%u),\n\t+Z: %.2f C (%u), +Y: %.2f C (%u), +X: %.2f C (%u), CMD: %.2f C (%u)\nGPS Position x: %.2f, y: %.2f, z: %.2f\nGPS Velocity x: %.3f, y: %.3f, z: %.3f\nGPS error code: %d, datum: %u\nGPS altitude: %.2f\nGPS Lock Attempts: %u",
             (unsigned int)b1Charge,
             (unsigned int)b2Charge,
             (unsigned int)b1Voltage,
@@ -377,16 +400,27 @@ void LogState() {
             (unsigned int)langmuirProbeDiagData[2],
             (unsigned int)langmuirProbeDiagData[3],
             (unsigned int)langmuirProbeDiagData[4],
+            (double)convertedMagDiagData[0],
             (unsigned int)magnetometerDiagData[0],
+            (double)convertedMagDiagData[1],
             (unsigned int)magnetometerDiagData[1],
+            (double)convertedMagDiagData[2],
             (unsigned int)magnetometerDiagData[2],
+            (double)convertedTempDiagData[0],
             (unsigned int)temperatureDiagData[0],
+            (double)convertedTempDiagData[1],
             (unsigned int)temperatureDiagData[1],
+            (double)convertedTempDiagData[2],
             (unsigned int)temperatureDiagData[2],
+            (double)convertedTempDiagData[3],
             (unsigned int)temperatureDiagData[3],
+            (double)convertedTempDiagData[4],
             (unsigned int)temperatureDiagData[4],
+            (double)convertedTempDiagData[5],
             (unsigned int)temperatureDiagData[5],
+            (double)convertedTempDiagData[6],
             (unsigned int)temperatureDiagData[6],
+            (double)convertedTempDiagData[7],
             (unsigned int)temperatureDiagData[7],
             (double)gpsPosition[0],
             (double)gpsPosition[1],
@@ -396,7 +430,8 @@ void LogState() {
             (double)gpsVelocity[2],
             (int)gpsError,
             (unsigned int)gpsDatum,
-            (double)gpsAltitude);
+            (double)gpsAltitude,
+            (unsigned int)gpsLockAttempts);
     
     strcat(log, diagData);
     
@@ -404,8 +439,8 @@ void LogState() {
     strcat(log, endLine);
     
     uint16_t length = strlen(log);
-    int i;
     for (i = 0; i < length; i++) {
-        Send((uint8_t)log[i], DiagUnit);
+        Send((uint8_t)(log[i]), DiagUnit);
     }
+    
 }

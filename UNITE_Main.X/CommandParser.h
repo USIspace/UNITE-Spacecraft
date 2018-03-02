@@ -72,6 +72,7 @@ typedef enum {
 typedef enum {
     FirstWeek = 1,
     Interim,
+    Stabilize,
     Science,
     ReEntry,
     Fallback,

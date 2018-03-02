@@ -24,6 +24,7 @@ extern "C" {
 // Timeout values in seconds - Subject to change
 #define SIMPLEX_RES_TIMEOUT     4000000 // 4 sec -> 4*10^6 ns
 #define DUPLEX_RES_TIMEOUT      4000000
+#define GPS_RES_TIMEOUT         4000000
 
 // Number of times the Duplex has restarted before launch
 #define DUPLEX_EPOCH_OFFSET     0
@@ -37,6 +38,7 @@ extern bool isSending;
 // Timeout flags
 extern bool simplexTimeoutFlag;
 extern bool duplexTimeoutFlag;
+extern bool gpsTimeoutFlag;
 extern uint16_t waitingFilesCount;
 
 extern uint16_t b1Charge;
@@ -92,6 +94,7 @@ void SetLangmuirProbePower(bool);
 void SetMagnetometerPower(bool);
 void SetTemperaturePower(bool);
 void SetGPSPower(bool);
+void SetDuplexPower(bool);
 
 // Power switch getters
 bool isLangmuirProbeOn(void);

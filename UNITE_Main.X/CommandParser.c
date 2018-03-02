@@ -166,6 +166,13 @@ void RunCommand(System system, Mode mode, Property property, Unit unit, unsigned
             if (isInstrument) modeProperties = &instrument->Interim;
             else if (isTransmission) unitForMode = &transMode->interim;
             break;
+            
+        case Stabilize:
+            
+            if (isInstrument) modeProperties = &instrument->Stabilize;
+            else if (isTransmission) unitForMode = &transMode->stabilize;
+            break;
+            
         case Science:
 
             if (isInstrument) modeProperties = &instrument->Science;
@@ -176,6 +183,13 @@ void RunCommand(System system, Mode mode, Property property, Unit unit, unsigned
             if (isInstrument) modeProperties = &instrument->ReEntry;
             else if (isTransmission) unitForMode = &transMode->reentry;
             break;
+            
+        case Fallback:
+            
+            if (isInstrument) modeProperties = &instrument->Fallback;
+            else if (isTransmission) unitForMode = &transMode->fallback;
+            break;
+            
         case Global:
 
             if (isInstrument) {

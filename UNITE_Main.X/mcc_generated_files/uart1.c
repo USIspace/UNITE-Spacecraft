@@ -48,7 +48,12 @@
 */
 
 #include "uart1.h"
+#include <time.h>
+#include "../CommandParser.h"
+#include "../SystemConfiguration.h"
 #include "../SampleManager.h"
+#include "../SatelliteMode.h"
+#include "../TransmitManager.h"
 
 
 /**
@@ -136,8 +141,8 @@ void UART1_Initialize (void)
 //   // Generate an interrupt when buffer is full
 //   U1STAbits.URXISEL1 = 0b1;
 //   U1STAbits.UTXISEL0 = 0b1;
-   // BaudRate = 115200; Frequency = 16000000 Hz; BRG 416; 
-   U1BRG = 0x0022;
+   // BaudRate = 38400; Frequency = 16000000 Hz; BRG 416; 
+   U1BRG = 0x0067; //0x0022;
 
 
    IEC0bits.U1RXIE = 0;
@@ -226,7 +231,9 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U1RXInterrupt( void )
     }
     
     if (U1STAbits.OERR == 1) U1STAbits.OERR = 0;
-    else GPSDataPos = TakeGPSSample(GPSDataPos);
+    else if (IS_GPS_INTERRUPT_ENABLED) GPSDataPos = TakeGPSSample(GPSDataPos);
+    
+    if (!IS_GPS_INTERRUPT_ENABLED) isGPSReadReady = true;
     
     IFS0bits.U1RXIF = false;
    
@@ -249,25 +256,42 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U1ErrInterrupt ( void )
 
 uint8_t UART1_Read( void)
 {
-    uint8_t data = 0;
-
-    data = *uart1_obj.rxHead;
     
-    uart1_obj.rxHead++;
+    if (IS_GPS_INTERRUPT_ENABLED) {
+        
+        uint8_t data = 0;
 
-    if (uart1_obj.rxHead == (uart1_rxByteQ + UART1_CONFIG_RX_BYTEQ_LENGTH))
-    {
-        uart1_obj.rxHead = uart1_rxByteQ;
+        data = *uart1_obj.rxHead;
+
+        uart1_obj.rxHead++;
+
+        if (uart1_obj.rxHead == (uart1_rxByteQ + UART1_CONFIG_RX_BYTEQ_LENGTH)) {
+            uart1_obj.rxHead = uart1_rxByteQ;
+        }
+
+        if (uart1_obj.rxHead == uart1_obj.rxTail) {
+            uart1_obj.rxStatus.s.empty = true;
+        }
+
+        uart1_obj.rxStatus.s.full = false;
+
+        return data;
+        
+    } else {
+        
+        time_t endWait = time(NULL) + GPS_RES_TIMEOUT;
+
+        while (!(U1STAbits.URXDA == 1) && !simplexTimeoutFlag) {
+            // Simplex read timeout
+            if (time(NULL) >= endWait && IS_GPS_TIMEOUT_ENABLED) gpsTimeoutFlag = 1;
+        }
+
+        if ((U1STAbits.OERR == 1)) {
+            U1STAbits.OERR = 0;
+        }
+
+        return U1RXREG;
     }
-
-    if (uart1_obj.rxHead == uart1_obj.rxTail)
-    {
-        uart1_obj.rxStatus.s.empty = true;
-    }
-
-    uart1_obj.rxStatus.s.full = false;
-
-    return data;
 }
 
 

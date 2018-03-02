@@ -31,14 +31,20 @@ extern "C" {
 // Set to true if Duplex should timeout when waiting for input
 #define IS_DUP_TIMEOUT_ENABLED true
 
-// Set to true is Simplex shoule timeout when waiting for input
-#define IS_SIM_TIMEOUT_ENABLED false
+// Set to true is Simplex should timeout when waiting for input
+#define IS_SIM_TIMEOUT_ENABLED true
+
+// Set to true if GPS should timeout when waiting for input
+#define IS_GPS_TIMEOUT_ENABLED true
 
 // Constant for the duration of an orbit in minutes
 #define ORBIT_DUR_MIN 93
 
 // Set Main Loop Timer Interval
-#define MAIN_LOOP_TIMER_INTERVAL 10
+#define MAIN_LOOP_TIMER_INTERVAL 60
+
+// Set to true if GPS should be interrupt driven
+#define IS_GPS_INTERRUPT_ENABLED false
 
 // Set GPS Lock Failure
 #define GPS_LOCK_FAILURE 30
@@ -57,6 +63,7 @@ typedef struct {
 typedef struct {
     Properties FirstWeek;
     Properties Interim;
+    Properties Stabilize;
     Properties Science;
     Properties ReEntry;
     Properties Fallback;
@@ -75,6 +82,7 @@ typedef enum {
 typedef struct {
     TransmissionUnit firstWeek;
     TransmissionUnit interim;
+    TransmissionUnit stabilize;
     TransmissionUnit science;
     TransmissionUnit reentry;
     TransmissionUnit fallback;

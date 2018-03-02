@@ -25,6 +25,7 @@ extern "C" {
 typedef enum {
     firstWeek,
     interim,
+    stabilize,
     science,
     reentry,
     fallback,
@@ -46,7 +47,7 @@ extern unsigned long totalTime;
 // Global variable for time in minutes since 00:00 UTC
 extern double timeInMin;
 // Global variable to track the last GPS altitude reading
-extern unsigned long lastAltitude;
+extern double lastAltitude;
 
 // Intializes configuration values and main loop timer
 void Satellite_Initialize(void);
