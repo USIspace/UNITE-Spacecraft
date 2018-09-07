@@ -44,9 +44,9 @@ double gpsAltitude;
 
 
 uint8_t langmuirProbeBuffer[300] = {NULL};
-uint8_t magnetometerBuffer[33] = {NULL};
+uint8_t magnetometerBuffer[30] = {NULL};
 uint8_t temperatureBuffer[32] = {NULL};
-uint8_t gpsBuffer[33] = {NULL};
+uint8_t gpsBuffer[48] = {NULL};
 uint8_t housekeepingBuffer[28] = {NULL};
 
 char myFunString[29] = "Hey, World! UNITE Rules Now!";
@@ -68,9 +68,9 @@ int currentGPSBufferIndex = 0;
 int currentHousekeepingBufferIndex = 0;
 
 uint16_t LP_BUFFER_SIZE = 300;
-uint16_t MAG_BUFFER_SIZE = 33;
+uint16_t MAG_BUFFER_SIZE = 30;
 uint16_t TMP_BUFFER_SIZE = 32;
-uint16_t GPS_BUFFER_SIZE = 33;
+uint16_t GPS_BUFFER_SIZE = 48;
 uint16_t HOUSE_BUFFER_SIZE = 28;
 
 /******************************
@@ -467,10 +467,13 @@ void CalLangmuirProbe() {
         // Diagnostic Data -> Calibration Value
         CopyIntToDoubleByte(langmuirProbeResults, langmuirProbeDiagData, LP_VOLTAGE_CHL, i + 1, probeResultSize);
         
-        langmuirProbeResults[LP_VOLTAGE_CHL] /= 4; // Trim to size of a byte
+//        langmuirProbeResults[LP_VOLTAGE_CHL] /= 4; // Trim to size of a byte
         
-        CopyIntToByte(langmuirProbeResults, langmuirProbeBuffer, LP_VOLTAGE_CHL, currentLangmuirProbeBufferIndex, probeResultSize);
-        currentLangmuirProbeBufferIndex += probeResultSize;
+//        CopyIntToByte(langmuirProbeResults, langmuirProbeBuffer, LP_VOLTAGE_CHL, currentLangmuirProbeBufferIndex, probeResultSize);
+//        currentLangmuirProbeBufferIndex += probeResultSize;
+        
+        currentLangmuirProbeBufferIndex += CopyIntToByteArray(langmuirProbeResults, langmuirProbeBuffer, LP_VOLTAGE_CHL, currentLangmuirProbeBufferIndex, probeResultSize);
+
         
     }
     
@@ -498,11 +501,10 @@ void TakeProbeSample(bool isTemp) {
     // Diagnostic Data -> Temperature Value
     if (isTemp) {
         memset(langmuirProbeDiagData, 0, sizeof(langmuirProbeDiagData));
-//        langmuirProbeDiagData[0] = (uint16_t)langmuirProbeResults[LP_TEMP_CHL];
         CopyIntToDoubleByte(langmuirProbeResults, langmuirProbeDiagData, LP_TEMP_CHL, 0, 1);
     }
     
-    // Manipulate Data Here
+    // Uncomment to scale data down to a byte
     int i;
     for (i = 0; i < RESULTS_SIZE; i++) {
         langmuirProbeResults[i] /= 4;
@@ -512,6 +514,10 @@ void TakeProbeSample(bool isTemp) {
     CopyIntToByte(langmuirProbeResults, langmuirProbeBuffer, isTemp ? LP_TEMP_CHL : LP_VOLTAGE_CHL, currentLangmuirProbeBufferIndex, probeResultSize);
     currentLangmuirProbeBufferIndex += probeResultSize;
 
+//    int probeResultSize = 1;
+//    CopyIntToByte(langmuirProbeResults, langmuirProbeBuffer, isTemp ? LP_TEMP_CHL : LP_VOLTAGE_CHL, currentLangmuirProbeBufferIndex, probeResultSize);
+
+    
     // Sweeping Algorithm
     if (isLangmuirProbeSweeping) {
 
@@ -537,7 +543,7 @@ void TakeMagnetometerSample() {
     memset(magnetometerDiagData, 0, sizeof(magnetometerDiagData));
     CopyIntToDoubleByte(magnetometerResults, magnetometerDiagData, 0, 0, sizeof(magnetometerDiagData));
     
-    // Scale Results down to a byte
+    // Uncomment to scale results down to a byte
     int i;
     for (i = 0; i < RESULTS_SIZE; i++) {
         magnetometerResults[i] = (magnetometerResults[i] - 520) / 2;
@@ -547,6 +553,9 @@ void TakeMagnetometerSample() {
     CopyIntToByte(magnetometerResults, magnetometerBuffer, 0, currentMagnetometerBufferIndex, magnetometerResultSize);
     currentMagnetometerBufferIndex += magnetometerResultSize;
 
+//    int magnetometerResultSize = 3;
+//    currentMagnetometerBufferIndex += CopyIntToByteArray(magnetometerResults, magnetometerBuffer, 0, currentMagnetometerBufferIndex, magnetometerResultSize);
+    
     if (currentMagnetometerBufferIndex >= MAG_BUFFER_SIZE) {
         EndMagnetometerSampling();
     }
@@ -562,15 +571,19 @@ void TakeTemperatureSample() {
     memset(temperatureDiagData, 0, sizeof(temperatureDiagData));
     CopyIntToDoubleByte(temperatureResults, temperatureDiagData, 0, 0, sizeof(temperatureDiagData));
     
-    // Scale Results down to a byte
+    // Uncomment to Scale Results down to a byte
     int i;
     for (i = 0; i < RESULTS_SIZE; i++) {
         temperatureResults[i] = temperatureResults[i] / 4;
     }
-
+    
     int temperatureResultSize = 8;
     CopyIntToByte(temperatureResults, temperatureBuffer, 0, currentTemperatureBufferIndex, temperatureResultSize);
     currentTemperatureBufferIndex += temperatureResultSize;
+    
+//    int temperatureResultSize = 8;
+//    currentTemperatureBufferIndex += CopyIntToByteArray(temperatureResults, temperatureBuffer, 0, currentTemperatureBufferIndex, temperatureResultSize);
+    
 
     if (currentTemperatureBufferIndex >= TMP_BUFFER_SIZE) {
         EndTemperatureSensorSampling();
@@ -799,28 +812,37 @@ int CompressAscii(char *string, int startIndex, int size, bool addTrailing) {
     
 // Appends a double value to the GPS buffer 
 // double value -> value to append
-void AppendDoubleToGPSBuffer(double value) {
+void AppendDoubleToGPSBuffer(long double value) {
     
-    uint32_t longValue = (uint32_t)value;
-    uint8_t bytes[4];
+    union {
+        long double d;
+        char bytes[sizeof(long double)];
+    } u;
     
-    memcpy(bytes, &longValue, sizeof(bytes));
-//    uint8_t bytes[] = { (uint8_t)(longValue >> 24), (uint8_t)(longValue >> 16), (uint8_t)(longValue >> 8), (uint8_t)(longValue) };
+    u.d = value;
     
-    AppendToGPSBuffer(bytes, sizeof(bytes));
+//    uint8_t bytes[8];
+//    
+//    memcpy(bytes, &value, sizeof(double));
+    
+    AppendToGPSBuffer(u.bytes, sizeof(long double));
 }
 
 // Appends a float value to the GPS buffer
 // float value -> value to append
 void AppendFloatToGPSBuffer(float value) {
     
-//    char *a = (char *)&value;
-    uint8_t bytes[4];
+    union {
+        float f;
+        char bytes[sizeof(float)];
+    } u;
     
-    memcpy(bytes, &value, sizeof(bytes));
-//     = { (uint8_t)*a, (uint8_t)*a, (uint8_t)*a, (uint8_t)*a };
+    u.f = value;
+//    uint8_t bytes[4] = { NULL };
+//    
+//    memcpy(bytes, &value, sizeof(bytes));
     
-    AppendToGPSBuffer(bytes, sizeof(bytes));
+    AppendToGPSBuffer(u.bytes, sizeof(float));
 }
 
 // Gets length of next GPS sentence subsection
@@ -909,15 +931,15 @@ double GetDoubleFromSubString(char *src, int start, int length) {
 
 // Returns a double value from a byte array
 // uint8_t *src -> source array
-// int start -> double starting index in array
-double GetDoubleFromByteArray(uint8_t *src, int start) {
+// int offset -> double starting index in source
+double GetDoubleFromByteArray(uint8_t *src, int offset) {
     
     int i;
     uint64_t v = 0;
-    double d;
+    long double d;
     
     for (i = 7; i >= 0; i--) {
-        v = (v << 8) + src[i + start];
+        v = (v << 8) + src[i + offset];
     }
     
     memcpy(&d, &v, sizeof(d));
@@ -987,7 +1009,7 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
                     gpsTime = GetDoubleFromSubString(unparsedSentence, i, length);
                     
                     // Set satellite's current time
-//                    SetTime(gpsTime);
+                    SetTime(gpsTime);
                 }
 
                 i += length - 1;
@@ -1004,7 +1026,7 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
 
                     
                     // Set Satellite altitude
-//                    SetAltitude(gpsAltitude);
+                    SetAltitude(gpsAltitude);
 
                 }
 
@@ -1025,13 +1047,13 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
      char syncBytes[] = "$@";
      uint16_t messageLength = unparsedSentence[6] + ((uint16_t)unparsedSentence[7] << 8);
     
-    int error;
-    uint8_t time[2] = {NULL};
-    uint8_t datum;
+     int error;
+     uint8_t time[2] = {NULL};
+     uint8_t datum;
     
-     double xPos;
-     double yPos;
-     double zPos;
+     long double xPos;
+     long double yPos;
+     long double zPos;
      
      float xVel;
      float yVel;
@@ -1070,11 +1092,14 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
                  zVel = GetFloatFromByteArray(unparsedSentence, i);
              case 73: // Datum
                  datum = unparsedSentence[i];
-            
+            // ADD NUMBER OF CONNECTED SATELLITES
              default: break;
          }
      }
      
+    uint8_t gpsComponents[4] = { datum, (uint8_t)error, sizeof(xPos), sizeof(xVel) }; 
+    uint8_t gpsFiller[5] = { NULL };
+    
      // Diagnostic Data
      gpsPosition[0] = xPos;
      gpsPosition[1] = yPos;
@@ -1087,18 +1112,24 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
      gpsError = error;
      gpsDatum = datum;
      
-     // Append to GPS Buffer     
+     // Append to GPS Buffer 
+     
+     // GPS Packet 1
      AppendDoubleToGPSBuffer(xPos);
      AppendDoubleToGPSBuffer(yPos);
      AppendDoubleToGPSBuffer(zPos);
      
+     AppendToGPSBuffer(time, 2);
+     AppendToGPSBuffer(gpsComponents, 4);
+     AppendToGPSBuffer(gpsFiller, 5);
+     
+     // GPS Packet 2
      AppendFloatToGPSBuffer(xVel);
      AppendFloatToGPSBuffer(yVel);
      AppendFloatToGPSBuffer(zVel);
      
-     uint8_t gpsComponents[2] = { (uint8_t)error, datum }; 
-     AppendToGPSBuffer( gpsComponents, 2);
      AppendToGPSBuffer( time, 2);
+     AppendToGPSBuffer( gpsComponents, 2);
  }
 
 

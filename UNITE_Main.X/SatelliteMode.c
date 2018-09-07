@@ -248,8 +248,8 @@ void MainLoop() {
     TransmitQueue();
  
     // Update Time    
-    totalTime += TMR5_INTERRUPT_TICKER_FACTOR;
-    timeInMin += (double)TMR5_INTERRUPT_TICKER_FACTOR / 60.0;
+    totalTime += MAIN_LOOP_TIMER_INTERVAL;
+    timeInMin += (double)MAIN_LOOP_TIMER_INTERVAL / 60.0;
     if (timeInMin > 1440) timeInMin -= 1440;
     
     // Update SatelliteMode
@@ -338,39 +338,39 @@ void LogState() {
     // Magnetometer
     int i;
     for (i = 0; i < 3; i++) {
-        convertedMagDiagData[i] = (double) magnetometerDiagData[i]*(4.0 / 1023.0) - 2.0;
+        convertedMagDiagData[i] = ((double)magnetometerDiagData[i]*(4.0 / 1023.0) - 2.0) * 100000.0;
     }
     
     // Temperature
     for (i = 0; i < 8; i++) {
 
-        double convertedTemp, unconvertedTemp = (double) temperatureDiagData[i] / 4.0;
+        double convertedTemp, unconvertedTemp = (double) temperatureDiagData[i];
 
 
         switch (i) {
             case 0: // MAG
-                convertedTemp = 0.80691 * (unconvertedTemp + 270.1) - 272.67;
+                convertedTemp = (0.178813745211130 * unconvertedTemp) - 51.4007; //0.80691 * (unconvertedTemp + 270.1) - 272.67;
                 break;
             case 1: // -Z
-                convertedTemp = 0.80405 * (unconvertedTemp + 271.6) - 273.19;
+                convertedTemp = 0.80405 * (unconvertedTemp / 4.0 + 271.6) - 273.19;
                 break;
             case 2: // -Y
-                convertedTemp = 0.80528 * (unconvertedTemp + 270.88) - 273.18;
+                convertedTemp = 0.80528 * (unconvertedTemp / 4.0 + 270.88) - 273.18;
                 break;
             case 3: // -X
-                convertedTemp = 0.80697 * (unconvertedTemp + 270.3) - 273.63;
+                convertedTemp = 0.80697 * (unconvertedTemp / 4.0 + 270.3) - 273.63;
                 break;
             case 4: // +Z
-                convertedTemp = 0.81446 * (unconvertedTemp + 267.89) - 273.51;
+                convertedTemp = 0.81446 * (unconvertedTemp / 4.0 + 267.89) - 273.51;
                 break;
             case 5: // +Y
-                convertedTemp = 0.80379 * (unconvertedTemp + 271.37) - 273.71;
+                convertedTemp = 0.80379 * (unconvertedTemp / 4.0 + 271.37) - 273.71;
                 break;
             case 6: // +X
-                convertedTemp = 0.80103 * (unconvertedTemp + 272.5) - 273.7;
+                convertedTemp = 0.80103 * (unconvertedTemp / 4.0 + 272.5) - 273.7;
                 break;
             case 7: // CMD
-                convertedTemp = 0.80887 * (unconvertedTemp + 268.74) - 274.05;
+                convertedTemp = 0.80887 * (unconvertedTemp / 4.0 + 268.74) - 274.05;
                 break;
         }
 
@@ -378,9 +378,9 @@ void LogState() {
     }
     
     //Housekeeping
-    char diagData[800];
+    char diagData[900];
     sprintf(diagData,
-            "Battery 1 Charge: %u \nBattery 2 Charge: %u \nBattery 1 Voltage: %u \nBattery 2 Voltage: %u \nBattery 1 Current: %u \nBattery 2 Current: %u \nBuss+ Voltage: %u \nSolar Panel 1 Voltage: %u \nSolar Panel 2 Voltage: %u \nSolar Panel 3 Voltage: %u \nSolar Panel 4 Voltage: %u \nSimplex Temp: %u \nDuplex Temp: %u \nEPS Temp: %u \n\nLP Temp: %u \nLP Cal: %u, %u, %u, %u \nMagnetometer x: %.2f G (%u), y: %.2f G (%u), z: %.2f G (%u)\nTemperature: MAG: %.2f C (%u), -Z: %.2f C (%u), -Y: %.2f C (%u), -X: %.2f C (%u),\n\t+Z: %.2f C (%u), +Y: %.2f C (%u), +X: %.2f C (%u), CMD: %.2f C (%u)\nGPS Position x: %.2f, y: %.2f, z: %.2f\nGPS Velocity x: %.3f, y: %.3f, z: %.3f\nGPS error code: %d, datum: %u\nGPS altitude: %.2f\nGPS Lock Attempts: %u",
+            "Battery 1 Charge: %u \nBattery 2 Charge: %u \nBattery 1 Voltage: %u \nBattery 2 Voltage: %u \nBattery 1 Current: %u \nBattery 2 Current: %u \nBuss+ Voltage: %u \nSolar Panel 1 Voltage: %u \nSolar Panel 2 Voltage: %u \nSolar Panel 3 Voltage: %u \nSolar Panel 4 Voltage: %u \nSimplex Temp: %u \nDuplex Temp: %u \nEPS Temp: %u \n\nLP Temp: %u \nLP Cal: %u, %u, %u, %u \nMagnetometer x: %.2f nT (%u), y: %.2f nT (%u), z: %.2f nT (%u)\nTemperature: MAG: %.2f C (%u), -Z: %.2f C (%u), -Y: %.2f C (%u), -X: %.2f C (%u),\n\t+Z: %.2f C (%u), +Y: %.2f C (%u), +X: %.2f C (%u), CMD: %.2f C (%u)\nGPS Position x: %.2f, y: %.2f, z: %.2f\nGPS Velocity x: %.3f, y: %.3f, z: %.3f\nGPS error code: %d, datum: %u\nGPS altitude: %.2f\nGPS Lock Attempts: %u",
             (unsigned int)b1Charge,
             (unsigned int)b2Charge,
             (unsigned int)b1Voltage,

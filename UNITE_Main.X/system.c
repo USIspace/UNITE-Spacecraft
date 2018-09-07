@@ -152,6 +152,17 @@ int CopyIntToDoubleByte(int *source, uint16_t *destination, int sourceStart, int
     return numberOfItems;
 }
 
+int CopyIntToByteArray(int *source, uint8_t *destination, int sourceStart, int destStart, int numberOfItems) {
+    
+    int i;
+    for (i = 0; i < numberOfItems; i++) {
+        destination[2*i + destStart] = (uint8_t)(source[i + sourceStart] >> 8);
+        destination[2*i + 1 + destStart] = (uint8_t)(source[i + sourceStart] & 0xFF);
+    }
+    
+    return i*2;
+}
+
 int CopyBytes(uint8_t *source, uint8_t *destination, int sourceStart, int destStart, int numberOfItems) {
     
     int i;

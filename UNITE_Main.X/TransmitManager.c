@@ -240,7 +240,7 @@ uint8_t Read(TransmissionUnit unit) {
             case DiagUnit: return UART4_Read();
             default: return 0xFF;
         }
-    }
+    } return 0;
 }
 
 /**********************
@@ -329,7 +329,7 @@ void SendData(uint8_t *queue, int queueLength, TransmissionUnit unit) {
                     break;
             }
 
-            queueLength = max(queueLength - HEADER_SIZE - dataLength, 0);
+            queueLength = max_s(queueLength - HEADER_SIZE - dataLength, 0);
         }
     }   
     
@@ -341,7 +341,7 @@ void TransmitInstrumentDataToSimplex(uint8_t *queue, uint8_t headerByte1, uint8_
     // Update Queue position properties
     ClearQueue(transmitQueue, HEADER_SIZE, transmitQueueStartIndex);
     transmitQueueStartIndex = (transmitQueueStartIndex + HEADER_SIZE) % QUEUE_SIZE;
-    transmitQueueLength = max(transmitQueueLength - HEADER_SIZE, 0);
+    transmitQueueLength = max_s(transmitQueueLength - HEADER_SIZE, 0);
 
     // Send data in packages
     int i = 0;
@@ -374,7 +374,7 @@ void TransmitInstrumentDataToSimplex(uint8_t *queue, uint8_t headerByte1, uint8_
         if (ReadACKForUnit(SimplexUnit)) {
             ClearQueue(transmitQueue, min(packageLength, dataLength - i), transmitQueueStartIndex);
             transmitQueueStartIndex = (transmitQueueStartIndex + min(j, dataLength - i)) % QUEUE_SIZE;
-            transmitQueueLength = max(transmitQueueLength - j, 0);
+            transmitQueueLength = max_s(transmitQueueLength - j, 0);
             i = i + j;
         }
 
@@ -463,16 +463,16 @@ bool ReadACKForUnit(TransmissionUnit unit) {
         switch (unit) {
             case SimplexUnit:
                 
-                while (Read(unit) != 0xAA ) if (simplexTimeoutFlag) return true;
-                while (Read(unit) != 0x05) if (simplexTimeoutFlag) return true;
+                while (Read(unit) != 0xAA ) { if (simplexTimeoutFlag) return true; }
+                while (Read(unit) != 0x05) { if (simplexTimeoutFlag) return true; }
                 
                 isACK = (Read(unit) == 0);
                 break;
                 
             case DuplexUnit:
                 
-                while (Read(unit) != 0x47) if (duplexTimeoutFlag) return false;
-                while (Read(unit) != 0x55) if (duplexTimeoutFlag) return false;
+                while (Read(unit) != 0x47) { if (duplexTimeoutFlag) return false; }
+                while (Read(unit) != 0x55) { if (duplexTimeoutFlag) return false; }
                 
                 for (i = 0; i < DUP_RES_LENGTH - DUPLEX_SYNC_LENGTH; i++) {
                     switch (i) {
@@ -695,7 +695,7 @@ void HandleCommand() {
 void TogglePowerSwitches() {
            
     while(IsLineBusy());
-    if (!isSending) {
+    if (!isSending && !IS_DEBUG) {
         
         TransmitPreamble(powerPackagePreamble);
                 
