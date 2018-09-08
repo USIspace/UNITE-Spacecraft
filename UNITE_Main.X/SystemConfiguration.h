@@ -41,7 +41,7 @@ extern "C" {
 #define ORBIT_DUR_MIN 1 //93
 
 // Set Main Loop Timer Interval
-#define MAIN_LOOP_TIMER_INTERVAL 10
+#define MAIN_LOOP_TIMER_INTERVAL 60
 
 // Set to true if GPS should be interrupt driven
 #define IS_GPS_INTERRUPT_ENABLED false

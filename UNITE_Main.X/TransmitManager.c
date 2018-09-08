@@ -25,7 +25,9 @@ bool isSending = false;
 uint8_t transmitQueue[2000];
 int transmitQueueStartIndex = 0;
 int transmitQueueLength = 0;
-const int HEADER_SIZE = 5;
+const int PACKAGE_LIMIT = 4;
+const int HEADER_SIZE = 4; // 5
+const int DATA_SIZE = 33;
 const uint16_t QUEUE_SIZE = 2000;
 
 // Simplex Comm Configs
@@ -150,23 +152,59 @@ void SaveData(uint8_t *package, uint16_t packageSize) {
 
 uint16_t PackageData(System system, uint16_t time, uint8_t *buffer, uint16_t bufferSize) {
 
-    int packageSize = bufferSize + HEADER_SIZE;
-    uint8_t package[packageSize];
+    int i;
+    int packages = bufferSize / DATA_SIZE;
     
+    // Setup temporary package structure
+    int packageSize = DATA_SIZE + HEADER_SIZE;
+    uint8_t package[packageSize];
+
     // Setup Package Header
     package[0] = GetSystemHeaderID(system);
     package[1] = time >> 8;
     package[2] = time & 0x00FF;
-    package[3] = bufferSize >> 8;
-    package[4] = bufferSize & 0x00FF;
+    package[3] = DATA_SIZE;
     
-    int i;
-    for (i = 0; i < bufferSize; i++) {
-        package[HEADER_SIZE + i] = buffer[i];
+    
+    // If more than one packet is included
+    for (i = 0; i < packages; i++) {
+        
+        int j;
+        for (j = 0; j < DATA_SIZE; j++) {
+            package[HEADER_SIZE + j] = buffer[j + i * DATA_SIZE];
+        }
+
+        SaveData(package, packageSize);
     }
     
-    SaveData(package, bufferSize + HEADER_SIZE);    
-    return i;
+    // Reduced size for last packet
+    package[3] = bufferSize % DATA_SIZE;
+    
+    // If only one packet is included
+    int j;
+    for (j = 0; j < bufferSize % DATA_SIZE; j++) {
+        package[j + HEADER_SIZE] = buffer[j + i * DATA_SIZE];
+    }
+    
+    SaveData(package, HEADER_SIZE + bufferSize % DATA_SIZE);    
+    
+//    int packageSize = bufferSize + HEADER_SIZE;
+//    uint8_t package[packageSize];
+//    
+//    // Setup Package Header
+//    package[0] = GetSystemHeaderID(system);
+//    package[1] = time >> 8;
+//    package[2] = time & 0x00FF;
+//    package[3] = bufferSize >> 8;
+//    package[4] = bufferSize & 0x00FF;
+//    
+//    int i;
+//    for (i = 0; i < bufferSize; i++) {
+//        package[HEADER_SIZE + i] = buffer[i];
+//    }
+    
+//    SaveData(package, packageSize);    
+    return packages + 1;
 }
 
 /*********************
@@ -291,12 +329,15 @@ void SendData(uint8_t *queue, int queueLength, TransmissionUnit unit) {
     
     isSending = true;
     
-    while (queueLength > 0) {
+//    while (queueLength > 0) {
+    int packets;
+    const int maxPackets = 4;
+    for (packets = 0; packets < maxPackets; packets++) {
         // System Header Parser
         uint8_t sysID = queue[transmitQueueStartIndex];
         uint8_t timeH = queue[(transmitQueueStartIndex + 1)%QUEUE_SIZE];
         uint8_t timeL = queue[(transmitQueueStartIndex + 2)%QUEUE_SIZE];
-        uint16_t dataLength = (queue[(transmitQueueStartIndex + 3)%QUEUE_SIZE] << 8) | queue[(transmitQueueStartIndex + 4)%QUEUE_SIZE];
+        uint16_t dataLength = (queue[(transmitQueueStartIndex + 3)%QUEUE_SIZE]); // << 8) | queue[(transmitQueueStartIndex + 4)%QUEUE_SIZE];
         
         if (dataLength > QUEUE_SIZE) {
             
@@ -314,7 +355,7 @@ void SendData(uint8_t *queue, int queueLength, TransmissionUnit unit) {
         uint8_t headerByte1 = sysID + timeH;
         uint8_t headerByte2 = timeL;
         
-        if (!isError && !IsLineBusy()) {
+        if (!isError) {
             
             switch (unit) {
                 case SimplexUnit: TransmitInstrumentDataToSimplex(queue, headerByte1, headerByte2, dataLength);

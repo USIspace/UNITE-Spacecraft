@@ -65,7 +65,7 @@ extern int langmuirProbeCallbackCount;
 extern int magnetometerCallbackCount;
 
 // Sampling progress
-extern unsigned long currentLangmuirProbeSweepProgress;
+extern unsigned long currentLangmuirProbeSampleProgress;
 extern unsigned long currentMagnetometerSweepProgress;
 
 // Sampling state

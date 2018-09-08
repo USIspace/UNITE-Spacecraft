@@ -276,7 +276,7 @@ void RunCommand(System system, Mode mode, Property property, Unit unit, unsigned
                 
                 int changeInDuration = modeProperties->sweepDuration - (value * convertTime(unit, Sec));
                 switch (system) {
-                    case LPSubSys: currentLangmuirProbeSweepProgress = currentLangmuirProbeSweepProgress + changeInDuration;
+                    case LPSubSys: currentLangmuirProbeSampleProgress = currentLangmuirProbeSampleProgress + changeInDuration;
                         break;
                     case MAGSubSys: currentMagnetometerSweepProgress = currentMagnetometerSweepProgress + changeInDuration;
                         break;

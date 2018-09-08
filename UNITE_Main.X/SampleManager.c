@@ -87,8 +87,9 @@ unsigned long currentHousekeepingWait = 0;
 int langmuirProbeCallbackCount = 0;
 int magnetometerCallbackCount = 0;
 
-unsigned long currentLangmuirProbeSweepProgress = 0;
+unsigned long currentLangmuirProbeSampleProgress = 0;
 unsigned long currentMagnetometerSweepProgress = 0;
+double currentLangmuirProbeSweepPercentage = 0.0; // Can be between 0.0-1.0
 
 int currentMagnetometerOrbitProgress = 0;
 
@@ -100,7 +101,7 @@ bool shouldMagnetometerSample = false;
 
 bool isLangmuirCalibrating = false;
 
-
+int langmuirProbePacketNumber = 0;
 bool isProbeVoltagePositive = true;
 bool isProbeSweepPositive = true; // Initialize to true to correctly sweep probe halfway through
 const uint16_t electronVoltage = 0xE666; // 58982 = 4V
@@ -292,7 +293,9 @@ void EndLangmuirProbeSampling() {
     // Try Calibrate Probe Tip
     TryCalibrateLangmuirProbe();
     
-    currentLangmuirProbeSweepProgress = 0;
+    langmuirProbePacketNumber = 0;
+    currentLangmuirProbeSampleProgress = 0;
+    currentLangmuirProbeSweepPercentage = 0.0;
     isLangmuirProbeSampling = false;
     isProbeVoltagePositive = true;
     isProbeSweepPositive = true;
@@ -393,11 +396,7 @@ void ManageSweepingProgress() {
     }
     
     // Langmuir Probe Sampling
-    if (isLangmuirProbeSampling) {
-
-        // Reset sweeping
-        isLangmuirProbeSweeping = false;
-        TMR4_Stop();
+    if (isLangmuirProbeSampling && !isLangmuirProbeSweeping) {
 
         // Set correct voltage for sample
         currentLangmuirProbeVoltage = isProbeVoltagePositive ? electronVoltage : ionVoltage;
@@ -408,17 +407,18 @@ void ManageSweepingProgress() {
 
         // Take a sweep when halfway through the sample
         unsigned long sampleDuration = (GetSweepDuration(&LangmuirProbe) / 2);
-        if (currentLangmuirProbeSweepProgress++ == sampleDuration) {
+        if (currentLangmuirProbeSampleProgress++ == sampleDuration && currentLangmuirProbeSweepPercentage == 0.0) {
             isLangmuirProbeSweeping = true;
             currentLangmuirProbeVoltage = minSweepVoltage;
-            preciseSweepVoltage = (double)minSweepVoltage;
+            preciseSweepVoltage = (double) minSweepVoltage;
             TMR4_Start();
         }
 
-        if (currentLangmuirProbeSweepProgress >= GetSweepDuration(&LangmuirProbe)) {
+        if (currentLangmuirProbeSampleProgress >= GetSweepDuration(&LangmuirProbe)) {
             TakeProbeSample(true);
             EndLangmuirProbeSampling();
         }
+
     }
 
     
@@ -509,6 +509,8 @@ void TakeProbeSample(bool isTemp) {
     for (i = 0; i < RESULTS_SIZE; i++) {
         langmuirProbeResults[i] /= 4;
     }
+    
+    if (currentLangmuirProbeBufferIndex % 33 == 0) langmuirProbeBuffer[currentLangmuirProbeBufferIndex++] = ++langmuirProbePacketNumber;
 
     int probeResultSize = 1;
     CopyIntToByte(langmuirProbeResults, langmuirProbeBuffer, isTemp ? LP_TEMP_CHL : LP_VOLTAGE_CHL, currentLangmuirProbeBufferIndex, probeResultSize);
@@ -521,6 +523,16 @@ void TakeProbeSample(bool isTemp) {
     // Sweeping Algorithm
     if (isLangmuirProbeSweeping) {
 
+        // If sweep has finished
+        if (currentLangmuirProbeSweepPercentage >= 1.0) {
+
+            isLangmuirProbeSweeping = false;
+            TMR4_Stop();
+        }
+        
+        // Update percentage
+        currentLangmuirProbeSweepPercentage += (0.005 * GetSweepRate(&LangmuirProbe) / 2.0); // Adds Incremental Percentage
+        
         // Calculation for the voltage adjustment needed to sweep from min voltage to max voltage
         // ~655 for a 1s sweep from -4.5 -> 4.5 -> -4.5
         double voltageAdjustment = 655.36; // maxSweepVoltage * 4 / (convertTime(Sec, MilSec) / GetSweepRate(&LangmuirProbe) / 5) + 1;
