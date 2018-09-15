@@ -277,7 +277,7 @@ void SetTime(double formattedTime) {
     formattedTime = (int)formattedTime % 10000;                     // formattedTime = 56min 24sec
     int min = formattedTime / 100;              // min = 56min
     formattedTime = (int)formattedTime % 100;                       // formattedTime = 24sec
-    double sec = formattedTime / 60;            // sec = 0.40 min
+    double sec = formattedTime / 60.0;            // sec = 0.40 min
     timeInMin = hours + min + sec;
 }
 
@@ -326,8 +326,15 @@ void LogState() {
     
     //Time 
     char timeString[50];
-    sprintf(timeString, "Total runtime: %u h %d min\nTime of day: %d:%d UTC", (unsigned int)(totalTime / 3600), (int)(totalTime / 60), (int)(timeInMin / 60),(int)timeInMin % 60);
+    sprintf(timeString, "Total runtime: %u h %2d min\nTime of day: %d:%2d UTC", (unsigned int)(totalTime / 3600), (int)(totalTime / 60) % 60, (int)(timeInMin / 60),(int)timeInMin % 60);
     strcat(log, timeString);
+    
+    strcat(log, newLine);
+    
+    // Queue
+    char queueString[30];
+    sprintf(queueString, "Transmit Queue Size: %d", (int)transmitQueueLength);
+    strcat(log, queueString);
     
     strcat(log, newLine);
     

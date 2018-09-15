@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="62">
+<configurationDescriptor version="65">
   <logicalFolder name="root" displayName="root" projectFiles="true">
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
@@ -102,6 +102,9 @@
         <languageToolchainVersion>1.32</languageToolchainVersion>
         <platform>4</platform>
       </toolsSet>
+      <packs>
+        <pack name="PIC24F-GA-GB_DFP" vendor="Microchip" version="1.0.28"/>
+      </packs>
       <compileType>
         <linkerTool>
           <linkerLibItems>
@@ -705,6 +708,9 @@
         <languageToolchainVersion>3_31</languageToolchainVersion>
         <platform>4</platform>
       </toolsSet>
+      <packs>
+        <pack name="PIC24F-GA-GB_DFP" vendor="Microchip" version="1.0.28"/>
+      </packs>
       <compileType>
         <linkerTool>
           <linkerLibItems>
@@ -1141,6 +1147,9 @@
         <languageToolchainVersion>1.30</languageToolchainVersion>
         <platform>4</platform>
       </toolsSet>
+      <packs>
+        <pack name="PIC24F-KA-KL-KM_DFP" vendor="Microchip" version="1.0.9"/>
+      </packs>
       <compileType>
         <linkerTool>
           <linkerLibItems>
@@ -1675,6 +1684,9 @@
         <languageToolchainVersion>3_31</languageToolchainVersion>
         <platform>4</platform>
       </toolsSet>
+      <packs>
+        <pack name="PIC24F-KA-KL-KM_DFP" vendor="Microchip" version="1.0.9"/>
+      </packs>
       <compileType>
         <linkerTool>
           <linkerLibItems>
@@ -2111,6 +2123,9 @@
         <languageToolchainVersion>1.30</languageToolchainVersion>
         <platform>4</platform>
       </toolsSet>
+      <packs>
+        <pack name="PIC24F-GC_DFP" vendor="Microchip" version="1.0.7"/>
+      </packs>
       <compileType>
         <linkerTool>
           <linkerLibItems>
@@ -2645,6 +2660,9 @@
         <languageToolchainVersion>3_31</languageToolchainVersion>
         <platform>4</platform>
       </toolsSet>
+      <packs>
+        <pack name="PIC24F-GC_DFP" vendor="Microchip" version="1.0.7"/>
+      </packs>
       <compileType>
         <linkerTool>
           <linkerLibItems>
@@ -3081,6 +3099,9 @@
         <languageToolchainVersion>1.30</languageToolchainVersion>
         <platform>4</platform>
       </toolsSet>
+      <packs>
+        <pack name="PIC24F-DA-GB_DFP" vendor="Microchip" version="1.0.6"/>
+      </packs>
       <compileType>
         <linkerTool>
           <linkerLibItems>
@@ -3615,6 +3636,9 @@
         <languageToolchainVersion>3_31</languageToolchainVersion>
         <platform>4</platform>
       </toolsSet>
+      <packs>
+        <pack name="PIC24F-DA-GB_DFP" vendor="Microchip" version="1.0.6"/>
+      </packs>
       <compileType>
         <linkerTool>
           <linkerLibItems>
@@ -4051,6 +4075,9 @@
         <languageToolchainVersion>1.30</languageToolchainVersion>
         <platform>4</platform>
       </toolsSet>
+      <packs>
+        <pack name="dsPIC33E-GM-GP-MC-GU-MU_DFP" vendor="Microchip" version="1.0.19"/>
+      </packs>
       <compileType>
         <linkerTool>
           <linkerLibItems>
@@ -4585,6 +4612,9 @@
         <languageToolchainVersion>3_31</languageToolchainVersion>
         <platform>4</platform>
       </toolsSet>
+      <packs>
+        <pack name="dsPIC33E-GM-GP-MC-GU-MU_DFP" vendor="Microchip" version="1.0.19"/>
+      </packs>
       <compileType>
         <linkerTool>
           <linkerLibItems>
@@ -5073,6 +5103,9 @@
         <languageToolchainVersion>1.30</languageToolchainVersion>
         <platform>4</platform>
       </toolsSet>
+      <packs>
+        <pack name="dsPIC33F-GP-MC_DFP" vendor="Microchip" version="1.0.5"/>
+      </packs>
       <compileType>
         <linkerTool>
           <linkerLibItems>
@@ -5607,6 +5640,9 @@
         <languageToolchainVersion>3_31</languageToolchainVersion>
         <platform>4</platform>
       </toolsSet>
+      <packs>
+        <pack name="dsPIC33F-GP-MC_DFP" vendor="Microchip" version="1.0.5"/>
+      </packs>
       <compileType>
         <linkerTool>
           <linkerLibItems>
@@ -6044,6 +6080,9 @@
         <languageToolchainVersion>1.30</languageToolchainVersion>
         <platform>4</platform>
       </toolsSet>
+      <packs>
+        <pack name="dsPIC33E-GM-GP-MC-GU-MU_DFP" vendor="Microchip" version="1.0.19"/>
+      </packs>
       <compileType>
         <linkerTool>
           <linkerLibItems>
@@ -6578,6 +6617,9 @@
         <languageToolchainVersion>3_31</languageToolchainVersion>
         <platform>4</platform>
       </toolsSet>
+      <packs>
+        <pack name="dsPIC33E-GM-GP-MC-GU-MU_DFP" vendor="Microchip" version="1.0.19"/>
+      </packs>
       <compileType>
         <linkerTool>
           <linkerLibItems>

@@ -329,10 +329,10 @@ void SendData(uint8_t *queue, int queueLength, TransmissionUnit unit) {
     
     isSending = true;
     
-//    while (queueLength > 0) {
-    int packets;
+    int packets = 0;
     const int maxPackets = 4;
-    for (packets = 0; packets < maxPackets; packets++) {
+    while (queueLength > 0 && packets++ < maxPackets) {
+//    for (packets = 0; packets < maxPackets; packets++) {
         // System Header Parser
         uint8_t sysID = queue[transmitQueueStartIndex];
         uint8_t timeH = queue[(transmitQueueStartIndex + 1)%QUEUE_SIZE];

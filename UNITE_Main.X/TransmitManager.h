@@ -29,6 +29,9 @@ extern "C" {
 // Number of times the Duplex has restarted before launch
 #define DUPLEX_EPOCH_OFFSET     0
 
+// Tracks how long the data queue is
+extern int transmitQueueLength;
+
 // Boolean for whether UNITE is sending packets to a TransmissionUnit
 extern bool isSending;
 
