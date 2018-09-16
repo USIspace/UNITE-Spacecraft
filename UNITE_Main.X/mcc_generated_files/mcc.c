@@ -55,8 +55,8 @@
 #pragma config POSCMOD = NONE           // Primary Oscillator Select (HS oscillator mode selected)
 #pragma config IOL1WAY = ON    // IOLOCK One-Way Set Enable bit->Write RP Registers Once
 #pragma config OSCIOFNC = ON    // Primary Oscillator Output Function->OSCO functions as CLKO (FOSC/2)
-#pragma config FCKSM = CSDCMD    // Clock Switching and Monitor->Both Clock Switching and Fail-safe Clock Monitor are disabled
-#pragma config FNOSC = FRCPLL //FRCPLL              // Oscillator Select (Primary oscillator (XT, HS, EC))
+#pragma config FCKSM = CSECMD    // Clock Switching and Monitor->Both Clock Switching and Fail-safe Clock Monitor are disabled
+#pragma config FNOSC = FRC //FRCPLL              // Oscillator Select (Primary oscillator (XT, HS, EC))
 #pragma config IESO = ON    // Internal External Switch Over Mode->IESO mode (Two-speed start-up) enabled
 
 // CONFIG1
@@ -111,18 +111,18 @@ void SYSTEM_Initialize(void)
 void OSCILLATOR_Initialize(void)
 {
     
-    CLKDIV = 0x3100;
+    CLKDIV = 0x3000; //0x3100;
     // TUN Center frequency; 
     OSCTUN = 0x0000;
     // WDTO disabled; TRAPR disabled; SWDTEN disabled; EXTR disabled; POR disabled; SLEEP disabled; BOR disabled; IDLE disabled; IOPUWR disabled; VREGS disabled; CM disabled; SWR disabled; 
     REFOCON = 0x0000;
       
     // NOSC FRCPLL; SOSCEN disabled; OSWEN Switch is Complete;
-//    __builtin_write_OSCCONH((uint8_t) ((0x0302 >> _OSCCON_NOSC_POSITION) & 0x00FF));
-//    __builtin_write_OSCCONL((uint8_t) ((0x0302 | _OSCCON_OSWEN_MASK) & 0xFF)); // turn on secondary oscillator for RTCC Module
+    __builtin_write_OSCCONH((uint8_t) ((0x0102 >> _OSCCON_NOSC_POSITION) & 0x00FF));
+    __builtin_write_OSCCONL((uint8_t) ((0x0102 | _OSCCON_OSWEN_MASK) & 0xFF)); // turn on secondary oscillator for RTCC Module
 
-//    while (OSCCONbits.OSWEN != 0);
-    __builtin_write_OSCCONL((uint8_t) (0x0200 & 0x00FF)); //0x0100
+    while (OSCCONbits.OSWEN != 0);
+//    __builtin_write_OSCCONL((uint8_t) (0x0102 & 0x00FF)); //0x0100
     
 }
 

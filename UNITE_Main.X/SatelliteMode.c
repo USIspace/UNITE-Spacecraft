@@ -334,7 +334,7 @@ void LogState() {
     
     //Time 
     char timeString[50];
-    sprintf(timeString, "Total runtime: %lu h %2d min\nTime of day: %d:%2d UTC", (unsigned long)(totalTime), (int)(totalTime / 60) % 60, (int)(timeInMin / 60),(int)timeInMin % 60);
+    sprintf(timeString, "Total runtime: %u h %2d min\nTime of day: %d:%2d UTC", (unsigned int)(totalTime / 3600), ((int)(totalTime / 60) % 60), (int)(timeInMin / 60),(int)timeInMin % 60);
     strcat(log, timeString);
     
     strcat(log, newLine);
