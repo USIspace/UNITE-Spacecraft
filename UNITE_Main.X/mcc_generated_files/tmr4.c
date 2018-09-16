@@ -49,6 +49,7 @@
 */
 
 #include <xc.h>
+#include <time.h>
 #include "tmr4.h"
 #include "../CommandParser.h"
 #include "../SystemConfiguration.h"

@@ -21,6 +21,8 @@ extern "C" {
 
 #endif	/* SATELLITEMODE_H */
 
+#include <time.h>
+
 // Defines the operational modes
 typedef enum {
     firstWeek,
@@ -43,7 +45,7 @@ typedef struct {
 // Global variable for current operational mode
 extern UNITEMode currentMode;
 // Global variable for total mission time in seconds
-extern unsigned long totalTime;
+extern time_t totalTime;
 // Global variable for time in minutes since 00:00 UTC
 extern double timeInMin;
 // Global variable to track the last GPS altitude reading

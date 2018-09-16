@@ -21,7 +21,6 @@ extern "C" {
 
 #endif	/* SYSTEMCONFIGURATION_H */
 
-
 // Set to true if debugging software without Simplex or Duplex connected
 #define IS_DEBUG false
 

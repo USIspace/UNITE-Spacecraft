@@ -15,6 +15,7 @@
 #include "mcc_generated_files/uart3.h"
 #include "mcc_generated_files/tmr1.h"
 #include "mcc_generated_files/tmr5.h"
+#include "mcc_generated_files/rtcc.h"
 
 /*******************
   Global Variables
@@ -25,7 +26,8 @@
 UNITEMode currentMode = safe;
 bool shouldChangeMode = false;
 double lastAltitude = 400.0; // 400 km
-unsigned long totalTime = 0; // Keeps track of overall mission clock
+time_t previousTime;
+time_t totalTime = 0; // Keeps track of overall mission clock
 double timeInMin = 0.0;      // Time in Min since 00:00
 
 int currentLogWait = 0;
@@ -91,7 +93,10 @@ void SatelliteProperties_Initialize() {
    _LATG7 = 1;   
    
    //Set Satellite Time
-//   SetDuplexPower(1);
+//   RTCC_TimeGet(&previousTime);
+   previousTime = time(NULL);
+   
+   SetDuplexPower(1);
    SetTotalTime();
    SetDuplexPower(0);
 }
@@ -225,7 +230,7 @@ UNITEMode UpdateMode() {
  *******************/
 
 void MainLoop() {
-    
+        
     // Langmuir Probe
     TrySampleLangmuirProbe();
     
@@ -247,9 +252,12 @@ void MainLoop() {
     // Transmission
     TransmitQueue();
  
-    // Update Time    
-    totalTime += MAIN_LOOP_TIMER_INTERVAL;
-    timeInMin += (double)MAIN_LOOP_TIMER_INTERVAL / 60.0;
+    // Update Time 
+    
+//    time_t timeDelta = RTCC_TimeElapsedInSec(&previousTime);
+    totalTime += (time(NULL) - previousTime) / 1000000; //timeDelta; //MAIN_LOOP_TIMER_INTERVAL;
+    timeInMin += (time(NULL) - previousTime) / 60000000; //timeDelta / 60.0;
+//    RTCC_TimeGet(&previousTime); //(double)MAIN_LOOP_TIMER_INTERVAL / 60.0;
     if (timeInMin > 1440) timeInMin -= 1440;
     
     // Update SatelliteMode
@@ -326,7 +334,7 @@ void LogState() {
     
     //Time 
     char timeString[50];
-    sprintf(timeString, "Total runtime: %u h %2d min\nTime of day: %d:%2d UTC", (unsigned int)(totalTime / 3600), (int)(totalTime / 60) % 60, (int)(timeInMin / 60),(int)timeInMin % 60);
+    sprintf(timeString, "Total runtime: %lu h %2d min\nTime of day: %d:%2d UTC", (unsigned long)(totalTime), (int)(totalTime / 60) % 60, (int)(timeInMin / 60),(int)timeInMin % 60);
     strcat(log, timeString);
     
     strcat(log, newLine);

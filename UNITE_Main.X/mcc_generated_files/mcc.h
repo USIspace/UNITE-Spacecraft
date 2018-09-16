@@ -46,6 +46,7 @@
 #ifndef MCC_H
 #define	MCC_H
 #include <xc.h>
+#include <time.h>
 #include "pin_manager.h"
 #include <stdint.h>
 #include <stdbool.h>
@@ -64,6 +65,7 @@
 #include "spi1.h"
 #include "spi2.h"
 #include "crc16.h"
+#include "rtcc.h"
 
 #define _XTAL_FREQ  32000000UL
 

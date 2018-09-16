@@ -49,6 +49,7 @@
 */
 
 #include <xc.h>
+#include <time.h>
 #include "tmr5.h"
 #include "pin_manager.h"
 #include "../CommandParser.h"

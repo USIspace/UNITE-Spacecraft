@@ -625,8 +625,8 @@ void SetTotalTime() {
         int i;
         int responseLength = 13;
 
-        unsigned long epoch[4];
-        unsigned long totalEpoch;
+        char epoch[4] = {NULL};
+        time_t totalEpoch;
 
         for (i = 0; i < responseLength; i++) {
             switch (i) {
@@ -643,8 +643,9 @@ void SetTotalTime() {
             }
             
 
-            totalEpoch = epoch[3] << 24 | epoch[2] << 16 | epoch[1] << 8 | epoch[0];
-            totalTime = (time_t)((double)(totalEpoch - DUPLEX_EPOCH_OFFSET) / 3.0 * 3600 * 24);
+//            totalEpoch = (epoch[0] << 24) | (epoch[1] << 16) | (epoch[2] << 8) | (epoch[3]);
+            totalEpoch = (epoch[0] * 100 + epoch[1] * 10 + epoch[2] * 1 + epoch[3]);
+            totalTime = (time_t)((double)(totalEpoch - DUPLEX_EPOCH_OFFSET) / 3.0 * 24 * 60);
         }
     }
 }

@@ -49,6 +49,7 @@
 */
 
 #include <xc.h>
+#include <time.h>
 #include "tmr3.h"
 #include "uart3.h"
 #include "../CommandParser.h"
