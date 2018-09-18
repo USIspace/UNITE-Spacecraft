@@ -48,7 +48,7 @@ typedef struct {
 } ADCSampleConfig;
 
 // Holds the raw data array sizes based on the instrument's sampling configs
-extern uint16_t LP_BUFFER_SIZE;
+//extern uint16_t LP_BUFFER_SIZE;
 extern uint16_t MAG_BUFFER_SIZE;
 
 /* State Variables */
@@ -81,7 +81,7 @@ extern volatile bool isGPSReadReady;
 extern uint16_t langmuirProbeDiagData[5];
 extern uint16_t magnetometerDiagData[3];
 extern uint16_t temperatureDiagData[8];
-extern double gpsPosition[3];
+extern long double gpsPosition[3];
 extern float gpsVelocity[3];
 extern int gpsError;
 extern uint8_t gpsDatum;

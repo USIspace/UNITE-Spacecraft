@@ -27,7 +27,7 @@ extern "C" {
 #define GPS_RES_TIMEOUT         4000000
 
 // Number of times the Duplex has restarted before launch
-#define DUPLEX_EPOCH_OFFSET     27 //4779030
+#define DUPLEX_EPOCH_OFFSET     41 //4779030
 
 // Tracks how long the data queue is
 extern int transmitQueueLength;

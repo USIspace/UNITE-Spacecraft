@@ -156,11 +156,11 @@ int CopyIntToByteArray(int *source, uint8_t *destination, int sourceStart, int d
     
     int i;
     for (i = 0; i < numberOfItems; i++) {
-        destination[2*i + destStart] = (uint8_t)(source[i + sourceStart] >> 8);
-        destination[2*i + 1 + destStart] = (uint8_t)(source[i + sourceStart] & 0xFF);
+        destination[2*i + destStart] = (uint8_t)((source[i + sourceStart] >> 8) | 0x00FF);
+        destination[2*i + 1 + destStart] = (uint8_t)(source[i + sourceStart] & 0x00FF);
     }
     
-    return i*2;
+    return numberOfItems*2;
 }
 
 int CopyBytes(uint8_t *source, uint8_t *destination, int sourceStart, int destStart, int numberOfItems) {

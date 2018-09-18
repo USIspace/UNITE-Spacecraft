@@ -37,7 +37,7 @@ extern "C" {
 #define IS_GPS_TIMEOUT_ENABLED true
 
 // Constant for the duration of an orbit in minutes
-#define ORBIT_DUR_MIN 1 //93
+#define ORBIT_DUR_MIN 93
 
 // Set Main Loop Timer Interval
 #define MAIN_LOOP_TIMER_INTERVAL 60

@@ -152,7 +152,6 @@ void SaveData(uint8_t *package, uint16_t packageSize) {
 
 uint16_t PackageData(System system, uint16_t time, uint8_t *buffer, uint16_t bufferSize) {
 
-    int i;
     int packages = bufferSize / DATA_SIZE;
     
     // Setup temporary package structure
@@ -167,7 +166,8 @@ uint16_t PackageData(System system, uint16_t time, uint8_t *buffer, uint16_t buf
     
     
     // If more than one packet is included
-    for (i = 0; i < packages; i++) {
+    int i = 0;
+    while (i < packages) {
         
         int j;
         for (j = 0; j < DATA_SIZE; j++) {
@@ -175,6 +175,9 @@ uint16_t PackageData(System system, uint16_t time, uint8_t *buffer, uint16_t buf
         }
 
         SaveData(package, packageSize);
+        
+        // Increment counter
+        i++;
     }
     
     // Reduced size for last packet
@@ -339,7 +342,7 @@ void SendData(uint8_t *queue, int queueLength, TransmissionUnit unit) {
         uint8_t timeL = queue[(transmitQueueStartIndex + 2)%QUEUE_SIZE];
         uint16_t dataLength = (queue[(transmitQueueStartIndex + 3)%QUEUE_SIZE]); // << 8) | queue[(transmitQueueStartIndex + 4)%QUEUE_SIZE];
         
-        if (dataLength > QUEUE_SIZE) {
+        if (dataLength > DATA_SIZE) {
             
             // Error : Reset Queue
             isError = true;
@@ -602,7 +605,7 @@ uint16_t GetWaitingFilesCount() {
         return (highByte << 8) | lowByte;
     }
     
-    return -1;
+    return 0;
 }
 
 void SetTotalTime() {

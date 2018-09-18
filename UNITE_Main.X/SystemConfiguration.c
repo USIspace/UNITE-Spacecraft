@@ -51,12 +51,12 @@ Instrument Magnetometer = { //5 /59
 };
 
 Instrument GPS = { //5 //51
-    { 93, 0, 0 },        // First Week Mode: Sample every 1 minute
-    { 720, 0, 0 },        // Interim Mode: Sample every 4 minutes
-    { 720, 0, 0 },        // Stabilize Mode: Sample every 6 minutes
-    { 12, 0, 0 },        // Science Mode: Sample every 6 minutes
-    { 12, 0, 0 },        // Reentry Mode: Sample every 3 minutes
-    { 720, 0, 0 }         // Fallback Mode: Sample every __ minutes
+    { 93, 0, 0 },        // First Week Mode: Sample every 93 minute
+    { 720, 0, 0 },        // Interim Mode: Sample every 720 minutes
+    { 720, 0, 0 },        // Stabilize Mode: Sample every 720 minutes
+    { 12, 0, 0 },        // Science Mode: Sample every 12 minutes
+    { 12, 0, 0 },        // Reentry Mode: Sample every 12 minutes
+    { 720, 0, 0 }         // Fallback Mode: Sample every 720 minutes
 };
 
 Instrument Housekeeping = {

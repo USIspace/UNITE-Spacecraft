@@ -27,7 +27,7 @@ UNITEMode currentMode = safe;
 bool shouldChangeMode = false;
 double lastAltitude = 400.0; // 400 km
 time_t previousTime;
-time_t totalTime = 0; // Keeps track of overall mission clock
+time_t totalTime = 0; // Keeps track of overall mission clock in seconds
 double timeInMin = 0.0;      // Time in Min since 00:00
 
 int currentLogWait = 0;
@@ -134,19 +134,19 @@ bool ShouldUpdateMode(unsigned long time, unsigned long altitude) {
     switch (currentMode) {
         case safe: return true;
         case firstWeek: 
-            if (time > FirstWeekMode.stopTime) return true;
+            if (time / 24 > FirstWeekMode.stopTime) return true;
             else if ((altitude) <= FirstWeekMode.endAltitudeInKm) return true;
         case interim:
-            if (time > InterimMode.stopTime) return true;
+            if (time / 24 > InterimMode.stopTime) return true;
             else if ((altitude) <= InterimMode.endAltitudeInKm) return true;
         case stabilize: 
-            if (time > StabilizeMode.stopTime) return true;
+            if (time / 24 > StabilizeMode.stopTime) return true;
             else if ((altitude) <= StabilizeMode.endAltitudeInKm) return true;
         case science:
-            if (time > ScienceMode.stopTime) return true;
+            if (time / 24 > ScienceMode.stopTime) return true;
             else if ((altitude) <= ScienceMode.endAltitudeInKm) return true;
         case reentry: break;
-            if (time > ReEntryMode.stopTime) return true;
+            if (time / 24> ReEntryMode.stopTime) return true;
             else if ((altitude) <= ReEntryMode.endAltitudeInKm) return true;
         case fallback: //break;
             if (gpsLockAttempts < GPS_LOCK_FAILURE) return true;
@@ -254,9 +254,9 @@ void MainLoop() {
  
     // Update Time 
     
-//    time_t timeDelta = RTCC_TimeElapsedInSec(&previousTime);
-    totalTime += (time(NULL) - previousTime) / 1000000; //timeDelta; //MAIN_LOOP_TIMER_INTERVAL;
-    timeInMin += (time(NULL) - previousTime) / 60000000; //timeDelta / 60.0;
+    time_t timeDelta = (time(NULL) - previousTime) / 14000000; //14,000,000 est. minute
+    totalTime += timeDelta; //MAIN_LOOP_TIMER_INTERVAL;
+    timeInMin += timeDelta / 60.0;
 //    RTCC_TimeGet(&previousTime); //(double)MAIN_LOOP_TIMER_INTERVAL / 60.0;
     if (timeInMin > 1440) timeInMin -= 1440;
     
@@ -272,7 +272,7 @@ void MainLoop() {
             LogState();
             currentLogWait = 0;
             
-            SetAltitude(0.0);
+//            SetAltitude(0.0);
         }
     }    
     
@@ -291,8 +291,8 @@ void SetTime(double formattedTime) {
 
 void SetAltitude(double alt) {
     
-     lastAltitude -= 0.25;
-//    lastAltitude = alt;
+//     lastAltitude -= 0.25;
+    lastAltitude = alt;
 }
 
 time_t logCount = 1;
@@ -300,7 +300,7 @@ time_t logCount = 1;
 // Logging Method for Diagnostic Mode
 void LogState() {
     
-    char log[1000] = "UNITE Log #";
+    char log[1100] = "UNITE Log #";
     char newLine[] = "\n\n";
     char endLine[] = "EOF\n";
     
@@ -333,8 +333,8 @@ void LogState() {
     strcat(log, newLine);
     
     //Time 
-    char timeString[50];
-    sprintf(timeString, "Total runtime: %u h %2d min\nTime of day: %d:%2d UTC", (unsigned int)(totalTime / 3600), ((int)(totalTime / 60) % 60), (int)(timeInMin / 60),(int)timeInMin % 60);
+    char timeString[60];
+    sprintf(timeString, "Total runtime: %u h %2d min\nTime of day: %d:%2d UTC", (unsigned int)(totalTime / 3600), ((int)(totalTime / 60) % 60), (int)(timeInMin / 60.0),(int)timeInMin % 60);
     strcat(log, timeString);
     
     strcat(log, newLine);
@@ -395,7 +395,7 @@ void LogState() {
     //Housekeeping
     char diagData[900];
     sprintf(diagData,
-            "Battery 1 Charge: %u \nBattery 2 Charge: %u \nBattery 1 Voltage: %u \nBattery 2 Voltage: %u \nBattery 1 Current: %u \nBattery 2 Current: %u \nBuss+ Voltage: %u \nSolar Panel 1 Voltage: %u \nSolar Panel 2 Voltage: %u \nSolar Panel 3 Voltage: %u \nSolar Panel 4 Voltage: %u \nSimplex Temp: %u \nDuplex Temp: %u \nEPS Temp: %u \n\nLP Temp: %u \nLP Cal: %u, %u, %u, %u \nMagnetometer x: %.2f nT (%u), y: %.2f nT (%u), z: %.2f nT (%u)\nTemperature: MAG: %.2f C (%u), -Z: %.2f C (%u), -Y: %.2f C (%u), -X: %.2f C (%u),\n\t+Z: %.2f C (%u), +Y: %.2f C (%u), +X: %.2f C (%u), CMD: %.2f C (%u)\nGPS Position x: %.2f, y: %.2f, z: %.2f\nGPS Velocity x: %.3f, y: %.3f, z: %.3f\nGPS error code: %d, datum: %u\nGPS altitude: %.2f\nGPS Lock Attempts: %u",
+            "Battery 1 Charge: %u \nBattery 2 Charge: %u \nBattery 1 Voltage: %u \nBattery 2 Voltage: %u \nBattery 1 Current: %u \nBattery 2 Current: %u \nBuss+ Voltage: %u \nSolar Panel 1 Voltage: %u \nSolar Panel 2 Voltage: %u \nSolar Panel 3 Voltage: %u \nSolar Panel 4 Voltage: %u \nSimplex Temp: %u \nDuplex Temp: %u \nEPS Temp: %u \n\nLP Temp: %u \nLP Cal: %u, %u, %u, %u \nMagnetometer x: %.2f nT (%u), y: %.2f nT (%u), z: %.2f nT (%u)\nTemperature: MAG: %.2f C (%u), -Z: %.2f C (%u), -Y: %.2f C (%u), -X: %.2f C (%u),\n\t+Z: %.2f C (%u), +Y: %.2f C (%u), +X: %.2f C (%u), CMD: %.2f C (%u)\nGPS error code: %d, datum: %u\nGPS altitude: %.2f\nGPS Lock Attempts: %u", //GPS Position x: %.2f, y: %.2f, z: %.2f\nGPS Velocity x: %.3f, y: %.3f, z: %.3f
             (unsigned int)b1Charge,
             (unsigned int)b2Charge,
             (unsigned int)b1Voltage,
@@ -437,12 +437,12 @@ void LogState() {
             (unsigned int)temperatureDiagData[6],
             (double)convertedTempDiagData[7],
             (unsigned int)temperatureDiagData[7],
-            (double)gpsPosition[0],
+            /*(double)gpsPosition[0],
             (double)gpsPosition[1],
             (double)gpsPosition[2],
             (double)gpsVelocity[0],
             (double)gpsVelocity[1],
-            (double)gpsVelocity[2],
+            (double)gpsVelocity[2],*/
             (int)gpsError,
             (unsigned int)gpsDatum,
             (double)gpsAltitude,

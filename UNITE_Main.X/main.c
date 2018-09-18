@@ -40,7 +40,7 @@ int16_t main(void) {
     SYSTEM_Initialize();
     
     // Wait for EPS startup to complete
-    while(IsLineBusy(SimplexUnit));
+    while(IsLineBusy(SimplexUnit)) ClrWdt();
     
     // Initialize Satellite configurations and main loop Timer
     Satellite_Initialize();
