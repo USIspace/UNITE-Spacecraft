@@ -59,6 +59,7 @@ extern unsigned long currentLangmuirProbeCalWait;
 extern unsigned long currentMagnetometerWait;
 extern unsigned long currentTemperatureWait;
 extern unsigned long currentGPSWait;
+extern unsigned long currentHousekeepingWait;
 
 // Used by sweeping timer
 extern int langmuirProbeCallbackCount;

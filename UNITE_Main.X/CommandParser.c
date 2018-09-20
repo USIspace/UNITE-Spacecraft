@@ -16,7 +16,7 @@ Mode mode;
 Property property;
 Unit unit;
 bool isOverride = false;
-bool isReset = false;
+bool isCalibration = false;
 
 // Command Sequence #
 uint8_t seqByte1 = 0;
@@ -41,8 +41,9 @@ void ParseByte(uint8_t, CommandByteIndex);
 bool IsNextCommand(uint8_t *sequenceNumber, int seqLength);
 void addValueByte(uint8_t);
 uint16_t convertHexToDecimal(uint8_t *);
+UNITEMode modeForValue(uint16_t value);
 unsigned long convertTime(Unit, Unit);
-void RunCommand(System, Mode, Property, Unit, unsigned long);
+void RunCommand(System, Mode, Property, Unit, uint16_t);
 
 /************************
   Main Command Functions
@@ -110,7 +111,7 @@ void ParseByte(uint8_t byte, CommandByteIndex index) {
             isOverride = byte > 0;
             break;
         case ResetFlag:
-            isReset = byte > 0;
+            isCalibration = byte > 0;
             break;
         default:
             addValueByte(byte);
@@ -118,19 +119,25 @@ void ParseByte(uint8_t byte, CommandByteIndex index) {
     }
 }
 
-void RunCommand(System system, Mode mode, Property property, Unit unit, unsigned long value) {
+void RunCommand(System system, Mode mode, Property property, Unit unit, uint16_t value) {
 
     bool isInstrument = false;
     Instrument *instrument;
     Properties *modeProperties;
     Properties *modeProperties1;
     Properties *modeProperties2;
+    Properties *modeProperties3;
+    Properties *modeProperties4;
+    Properties *modeProperties5;
 
     bool isTransmission = false;
     TransmissionMode *transMode;
     TransmissionUnit *unitForMode;
     TransmissionUnit *unitForMode1;
     TransmissionUnit *unitForMode2;
+    TransmissionUnit *unitForMode3;
+    TransmissionUnit *unitForMode4;
+    TransmissionUnit *unitForMode5;
 
 
     // Choose System
@@ -148,7 +155,9 @@ void RunCommand(System system, Mode mode, Property property, Unit unit, unsigned
             isInstrument = true;
             break;
         case CDHSubSys: break;
-        case EPSSubSys: break;
+        case EPSSubSys: instrument = &Housekeeping;
+            isInstrument = true;
+            break;
         case GPSSubSys: instrument = &GPS;
             isInstrument = true;
             break;
@@ -193,16 +202,27 @@ void RunCommand(System system, Mode mode, Property property, Unit unit, unsigned
         case Global:
 
             if (isInstrument) {
-                modeProperties = &instrument->Interim;
-                modeProperties1 = &instrument->Science;
-                modeProperties2 = &instrument-> ReEntry;
+                modeProperties = &instrument->FirstWeek;
+                modeProperties1 = &instrument->Interim;
+                modeProperties2 = &instrument-> Stabilize;
+                modeProperties3 = &instrument->Science;
+                modeProperties4 = &instrument->ReEntry;
+                modeProperties5 = &instrument->Fallback;
             }
             else if (isTransmission) {
-                unitForMode = &transMode->interim;
-                unitForMode1 = &transMode->science;
-                unitForMode2 = &transMode->reentry;
+                unitForMode = &transMode->firstWeek;
+                unitForMode1 = &transMode->interim;
+                unitForMode2 = &transMode->stabilize;
+                unitForMode3 = &transMode->science;
+                unitForMode4 = &transMode->reentry;
+                unitForMode5 = &transMode->fallback;
             }
             break;
+        case Current: 
+            
+            currentMode = modeForValue(value);
+            
+            break; 
         default: break;
     }
 
@@ -213,19 +233,23 @@ void RunCommand(System system, Mode mode, Property property, Unit unit, unsigned
 
             if (isOverride) {
                 if (unit == Sample) {
-                    if (system == LPSubSys && isReset) lpSamplesPerCalibration = value;
+                    if (system == LPSubSys && isCalibration) lpSamplesPerCalibration = value;
                 } else {
                     modeProperties->sampleRate = value * convertTime(unit, Min);
                     modeProperties1->sampleRate = value * convertTime(unit, Min);
                     modeProperties2->sampleRate = value * convertTime(unit, Min);
+                    modeProperties3->sampleRate = value * convertTime(unit, Min);
+                    modeProperties4->sampleRate = value * convertTime(unit, Min);
+                    modeProperties5->sampleRate = value * convertTime(unit, Min);
                 }
             } else {
                 
                 // Update wait timers so that the new wait time occurs only once
                 int changeInWait = unit == Sample ? value : modeProperties->sampleRate - (value * convertTime(unit, Min));
+//                if (changeInWait < 0) changeInWait = 0;
                 switch (system) {
                     case LPSubSys: 
-                        if (isReset) currentLangmuirProbeCalWait += changeInWait;
+                        if (isCalibration) currentLangmuirProbeCalWait += changeInWait;
                         else currentLangmuirProbeWait += changeInWait;
                         break;
                     case MAGSubSys: currentMagnetometerWait += changeInWait;
@@ -234,6 +258,7 @@ void RunCommand(System system, Mode mode, Property property, Unit unit, unsigned
                         break;
                     case GPSSubSys: currentGPSWait += changeInWait;
                         break;
+                    case EPSSubSys: currentHousekeepingWait += changeInWait;
                     default: break;
                 }
             }
@@ -253,13 +278,17 @@ void RunCommand(System system, Mode mode, Property property, Unit unit, unsigned
                 modeProperties->sweepRate = value * unitConversion;
                 modeProperties1->sweepRate = value * unitConversion;
                 modeProperties2->sweepRate = value * unitConversion;
+                modeProperties3->sweepRate = value * unitConversion;
+                modeProperties4->sweepRate = value * unitConversion;
+                modeProperties5->sweepRate = value * unitConversion;
             } else {
                 
                 int changeInRate = modeProperties->sweepRate - (value * unitConversion);
+                if (changeInRate < 0) changeInRate = 0;
                 switch (system) {
-                    case LPSubSys: langmuirProbeCallbackCount = langmuirProbeCallbackCount + changeInRate;
+                    case LPSubSys: langmuirProbeCallbackCount += changeInRate;
                         break;
-                    case MAGSubSys: magnetometerCallbackCount = magnetometerCallbackCount + changeInRate;
+                    case MAGSubSys: magnetometerCallbackCount += changeInRate;
                         break;
                     default: break;
                 }
@@ -272,13 +301,17 @@ void RunCommand(System system, Mode mode, Property property, Unit unit, unsigned
                 modeProperties->sweepDuration = value * convertTime(unit, Sec);
                 modeProperties1->sweepDuration = value * convertTime(unit, Sec);
                 modeProperties2->sweepDuration = value * convertTime(unit, Sec);
+                modeProperties3->sweepDuration = value * convertTime(unit, Sec);
+                modeProperties4->sweepDuration = value * convertTime(unit, Sec);
+                modeProperties5->sweepDuration = value * convertTime(unit, Sec);
             } else {
                 
                 int changeInDuration = modeProperties->sweepDuration - (value * convertTime(unit, Sec));
+                if (changeInDuration < 0) changeInDuration = 0;
                 switch (system) {
-                    case LPSubSys: currentLangmuirProbeSampleProgress = currentLangmuirProbeSampleProgress + changeInDuration;
+                    case LPSubSys: currentLangmuirProbeSampleProgress += changeInDuration;
                         break;
-                    case MAGSubSys: currentMagnetometerSweepProgress = currentMagnetometerSweepProgress + changeInDuration;
+                    case MAGSubSys: currentMagnetometerSweepProgress += changeInDuration;
                         break;
                     default: break;
                 }
@@ -288,18 +321,27 @@ void RunCommand(System system, Mode mode, Property property, Unit unit, unsigned
             *unitForMode = SimplexUnit;
             *unitForMode1 = SimplexUnit;
             *unitForMode2 = SimplexUnit;
+            *unitForMode3 = SimplexUnit;
+            *unitForMode4 = SimplexUnit;
+            *unitForMode5 = SimplexUnit;
 
             break;
         case Duplex:
             *unitForMode = DuplexUnit;
             *unitForMode1 = DuplexUnit;
             *unitForMode2 = DuplexUnit;
+            *unitForMode3 = DuplexUnit;
+            *unitForMode4 = DuplexUnit;
+            *unitForMode5 = DuplexUnit;
 
             break;
         case Simplex_Duplex:
             *unitForMode = SimplexOrDuplex;
             *unitForMode1 = SimplexOrDuplex;
             *unitForMode2 = SimplexOrDuplex;
+            *unitForMode3 = SimplexOrDuplex;
+            *unitForMode4 = SimplexOrDuplex;
+            *unitForMode5 = SimplexOrDuplex;
 
             break;
         default:
@@ -352,6 +394,18 @@ void addValueByte(uint8_t byte) {
     value[nextValueIndex++] = byte;
     if (nextValueIndex >= VALUE_ARRAY_SIZE) EndMessage();
 }
+
+UNITEMode modeForValue(uint16_t value) {
+    switch (value) {
+        case 1: return firstWeek;
+        case 2: return interim;
+        case 3: return stabilize;
+        case 4: return science;
+        case 5: return reentry;
+        case 6: return fallback;
+        default: return currentMode;
+    }
+} 
 
 uint16_t convertHexToDecimal(uint8_t *bits) {
 

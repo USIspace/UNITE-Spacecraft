@@ -24,39 +24,39 @@ TransmissionMode TransmissionUnitForMode = {
 unsigned long lpSamplesPerCalibration = 1;
 
 Instrument LangmuirProbe = { //7 //53
-    { 144, 2, 12 },  // First Week Mode: Sample every 2 minutes, sample a sweep every 2 * 5 ms, sample for 12 sec 
-    { 36000, 2, 12 },  // Interim Mode: Sample every 60 minutes, sample a sweep every 2 * 5 ms, sample for 12 sec
-    { 10080, 2, 12 },  // Stabilize Mode: Sample every 30 minutes, sample a sweep every 2 * 5 ms, sample for 12 sec
-    { 30, 2, 12 },  // Science Mode: Sample every 30 minutes, sample a sweep every 2 * 5 ms, sample for 12 sec
-    { 15, 2, 12 },  // Reentry Mode: Sample every 15 minutes, sample a sweep every 2 * 5 ms, sample for 12 sec
-    { 360, 2, 12 }   // Fallback Mode: Sample every __ minutes, sample a sweep every 2 * 5 ms, sample for 12 sec
+    { 144, 2, 12 },         // First Week Mode: Sample every 144 minutes, sample a sweep every 2 * 5 ms, sample for 12 sec 
+    { 36000, 2, 12 },       // Interim Mode: Sample every 36,000 minutes, sample a sweep every 2 * 5 ms, sample for 12 sec
+    { 10080, 2, 12 },       // Stabilize Mode: Sample every 10,080 minutes, sample a sweep every 2 * 5 ms, sample for 12 sec
+    { 30, 2, 12 },          // Science Mode: Sample every 30 minutes, sample a sweep every 2 * 5 ms, sample for 12 sec
+    { 15, 2, 12 },          // Reentry Mode: Sample every 15 minutes, sample a sweep every 2 * 5 ms, sample for 12 sec
+    { 360, 2, 12 }          // Fallback Mode: Sample every 360 minutes, sample a sweep every 2 * 5 ms, sample for 12 sec
 };
 
 Instrument TemperatureSensors = { //2 //29
-    { 30, 0, 0 },    // First Week Mode: Sample every 1 minute //30
-    { 480, 0, 0 },    // Interim Mode: Sample every 4 minutes
-    { 480, 0, 0 },    // Stabilize Mode: Sample every 2 minutes
-    { 480, 0, 0 },    // Science Mode: Sample every 2 minutes  
-    { 30, 0, 0 },    // Reentry Mode: Sample every 1 minute
-    { 60, 0, 0 }     // Fallback Mode: Sample every __ minutes
+    { 30, 0, 0 },       // First Week Mode: Sample every 30 minutes
+    { 480, 0, 0 },      // Interim Mode: Sample every 480 minutes
+    { 480, 0, 0 },      // Stabilize Mode: Sample every 480 minutes
+    { 480, 0, 0 },      // Science Mode: Sample every 480 minutes  
+    { 30, 0, 0 },       // Reentry Mode: Sample every 30 minute
+    { 60, 0, 0 }        // Fallback Mode: Sample every 60 minutes
 };
 
 Instrument Magnetometer = { //5 /59
-    { 288, 10, 60 * ORBIT_DUR_MIN },    // First Week Mode: Sample every 1 minute, sample every 10 s, sample for 93 min
-    { 36000, 10, 60 * ORBIT_DUR_MIN },    // Interim Mode: Sample every 60 minutes, sample every 10 s, sample for 93 min
-    { 5040, 10, 60 * ORBIT_DUR_MIN },    // Stabilize Mode: Sample every 30 minutes, sample every 10 s, sample for 93 min
-    { 2880, 10, 60 * ORBIT_DUR_MIN },    // Science Mode: Sample every 30 minutes, sample every 10 s, sample for 93 min
-    { 1440, 10, 60 * ORBIT_DUR_MIN },    // Reentry Mode: Sample every 15 minutes, sample every 10 s, sample for 93 min
-    { 5760, 10, 60 * ORBIT_DUR_MIN }     // Fallback Mode: Sample every __ minutes, sample every 10 s, sample for 93 min
+    { 288, 10, 60 * ORBIT_DUR_MIN },        // First Week Mode: Sample every 288 minutes, sample every 10 s, sample for 93 min
+    { 36000, 10, 60 * ORBIT_DUR_MIN },      // Interim Mode: Sample every 36000 minutes, sample every 10 s, sample for 93 min
+    { 5040, 10, 60 * ORBIT_DUR_MIN },       // Stabilize Mode: Sample every 5040 minutes, sample every 10 s, sample for 93 min
+    { 2880, 10, 60 * ORBIT_DUR_MIN },       // Science Mode: Sample every 2880 minutes, sample every 10 s, sample for 93 min
+    { 1440, 10, 60 * ORBIT_DUR_MIN },       // Reentry Mode: Sample every 1440 minutes, sample every 10 s, sample for 93 min
+    { 5760, 10, 60 * ORBIT_DUR_MIN }        // Fallback Mode: Sample every 5760 minutes, sample every 10 s, sample for 93 min
 };
 
 Instrument GPS = { //5 //51
-    { 93, 0, 0 },        // First Week Mode: Sample every 93 minute
-    { 720, 0, 0 },        // Interim Mode: Sample every 720 minutes
-    { 720, 0, 0 },        // Stabilize Mode: Sample every 720 minutes
-    { 12, 0, 0 },        // Science Mode: Sample every 12 minutes
-    { 12, 0, 0 },        // Reentry Mode: Sample every 12 minutes
-    { 720, 0, 0 }         // Fallback Mode: Sample every 720 minutes
+    { 93, 0, 0 },       // First Week Mode: Sample every 93 minute
+    { 720, 0, 0 },      // Interim Mode: Sample every 720 minutes
+    { 720, 0, 0 },      // Stabilize Mode: Sample every 720 minutes
+    { 12, 0, 0 },       // Science Mode: Sample every 12 minutes
+    { 12, 0, 0 },       // Reentry Mode: Sample every 12 minutes
+    { 240, 0, 0 }       // Fallback Mode: Sample every 240 minutes
 };
 
 Instrument Housekeeping = {
@@ -125,6 +125,7 @@ uint8_t GetSystemHeaderID(System system) {
         case GPSSubSys: return 0x40;
         case EPSSubSys: return 0x50;
         case LPCal: return 0x60;
+        case CDHSubSys: return 0x70;
         default: return 0;
     }
 }

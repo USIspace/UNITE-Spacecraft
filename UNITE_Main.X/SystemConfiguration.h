@@ -51,6 +51,9 @@ extern "C" {
 // Set Maximum file buffer for Duplex
 #define MAX_DUP_FILES_WAITING 5
 
+// Set Maximum tries to turn on Duplex
+#define MAX_DUP_POWER_ON_ATTEMPTS 10
+
 // Struct for instrument sampling properties
 typedef struct {
     unsigned long sampleRate;       // Minutes between each sample

@@ -215,7 +215,7 @@ uint16_t PackageData(System system, uint16_t time, uint8_t *buffer, uint16_t buf
  *********************/
 
 void TransmitQueue() {
-    if (!isSending && transmitQueueLength > 0) {
+    if (!isSending && transmitQueueLength > 0 && (IsLineBusy() == false)) {
         
         TransmissionUnit unit = GetTransmissionUnitForMode();
         waitingFilesCount = GetWaitingFilesCount();
@@ -415,12 +415,14 @@ void TransmitInstrumentDataToSimplex(uint8_t *queue, uint8_t headerByte1, uint8_
 
         }
 
-        if (ReadACKForUnit(SimplexUnit)) {
-            ClearQueue(transmitQueue, min(packageLength, dataLength - i), transmitQueueStartIndex);
-            transmitQueueStartIndex = (transmitQueueStartIndex + min(j, dataLength - i)) % QUEUE_SIZE;
-            transmitQueueLength = max_s(transmitQueueLength - j, 0);
-            i = i + j;
-        }
+//        while(IsLineBusy()) { // Read Simplex Line
+            if (ReadACKForUnit(SimplexUnit)) {
+                ClearQueue(transmitQueue, min(packageLength, dataLength - i), transmitQueueStartIndex);
+                transmitQueueStartIndex = (transmitQueueStartIndex + min(j, dataLength - i)) % QUEUE_SIZE;
+                transmitQueueLength = max_s(transmitQueueLength - j, 0);
+                i = i + j;
+            }
+//        }
 
     }
 }
@@ -507,8 +509,8 @@ bool ReadACKForUnit(TransmissionUnit unit) {
         switch (unit) {
             case SimplexUnit:
                 
-                while (Read(unit) != 0xAA ) { if (simplexTimeoutFlag) return true; }
-                while (Read(unit) != 0x05) { if (simplexTimeoutFlag) return true; }
+                while (Read(unit) != 0xAA ) { if (simplexTimeoutFlag) return false; }//true; }
+                while (Read(unit) != 0x05) { if (simplexTimeoutFlag) return false; } //true; }
                 
                 isACK = (Read(unit) == 0);
                 break;
@@ -648,7 +650,7 @@ void SetTotalTime() {
 
 //            totalEpoch = (epoch[0] << 24) | (epoch[1] << 16) | (epoch[2] << 8) | (epoch[3]);
             totalEpoch = (epoch[0] * 100 + epoch[1] * 10 + epoch[2] * 1 + epoch[3]);
-            totalTime = (time_t)((double)(totalEpoch - DUPLEX_EPOCH_OFFSET) / 3.0 * 24 * 60);
+            totalTime = (time_t)((double)(totalEpoch - DUPLEX_EPOCH_OFFSET) / 3.0 * 24 * 3600);
         }
     }
 }
@@ -759,17 +761,15 @@ void TogglePowerSwitches() {
         ReadPowerSwitches();
         
         
-    } else {
-        
     }
 }
 
 void ReadPowerSwitches() {
          
-    while(Read(SimplexUnit) != 'P') { if (simplexTimeoutFlag) return; }
-    while(Read(SimplexUnit) != 'P') { if (simplexTimeoutFlag) return; }
-    while(Read(SimplexUnit) != 'P') { if (simplexTimeoutFlag) return; }
-    while(Read(SimplexUnit) != 11) { if (simplexTimeoutFlag) return; }
+    while(Read(SimplexUnit) != 'P') { if (simplexTimeoutFlag) temperaturePowerSwitch = langmuirMagPowerSwitch = gpsPowerSwitch = duplexPowerSwitch = 0; return; }
+    while(Read(SimplexUnit) != 'P') { if (simplexTimeoutFlag) temperaturePowerSwitch = langmuirMagPowerSwitch = gpsPowerSwitch = duplexPowerSwitch = 0; return; }
+    while(Read(SimplexUnit) != 'P') { if (simplexTimeoutFlag) temperaturePowerSwitch = langmuirMagPowerSwitch = gpsPowerSwitch = duplexPowerSwitch = 0; return; }
+    while(Read(SimplexUnit) != 11) { if (simplexTimeoutFlag) temperaturePowerSwitch = langmuirMagPowerSwitch = gpsPowerSwitch = duplexPowerSwitch = 0; return; }
     
 //    if (!IsLineBusy(SimplexUnit)) {
         int i;
@@ -835,8 +835,16 @@ void SetGPSPower(bool on) {
 }
 
 void SetDuplexPower(bool on) {
-    if (on) duplexPowerSwitch = 0xFF;
-    else duplexPowerSwitch = 0x00;
     
-    TogglePowerSwitches();
+    int i;
+    for (i = 0; i < MAX_DUP_POWER_ON_ATTEMPTS; i++) { // Max number of tries to turn duplex on
+        
+        if (on) duplexPowerSwitch = 0xFF;
+        else duplexPowerSwitch = 0x00;
+
+        TogglePowerSwitches();
+        
+        if ((on && duplexPowerSwitch > 0) || !on) i = MAX_DUP_POWER_ON_ATTEMPTS;
+    }
+    
 }

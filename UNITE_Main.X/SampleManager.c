@@ -70,7 +70,7 @@ int currentHousekeepingBufferIndex = 0;
 //uint16_t LP_BUFFER_SIZE = 300; Unused
 uint16_t MAG_BUFFER_SIZE = 30;
 uint16_t TMP_BUFFER_SIZE = 32;
-uint16_t GPS_BUFFER_SIZE = 48;
+uint16_t GPS_BUFFER_SIZE = 66;
 uint16_t HOUSE_BUFFER_SIZE = 28;
 
 /******************************
@@ -348,8 +348,8 @@ void EndGPSSampling() {
     if (unparsedGGAGPSBuffer[1] != 0) ParseGPSSample((uint8_t *)unparsedGGAGPSBuffer);
 
     //Only package and send if GPS is locked
-    if (currentGPSBufferIndex > 0 && ((unparsedSBFGPSBuffer[32] != 1) || ((gpsLockAttempts + 1) % 3 == 0))) {
-        PackageData(GPSSubSys, (int)timeInMin, gpsBuffer, GPS_BUFFER_SIZE);
+    if (currentGPSBufferIndex > 0 && ((gpsBuffer[32] != 1) || ((gpsLockAttempts + 1) % 3 == 0))) {
+        PackageData(GPSSubSys, (int)timeInMin, gpsBuffer, sizeof(gpsBuffer));
         gpsLockAttempts = 0;
     } else gpsLockAttempts++;
 

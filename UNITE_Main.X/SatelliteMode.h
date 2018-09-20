@@ -39,6 +39,7 @@ typedef struct {
     int startAltitudeInKm;  // Altitude to begin sampling in this mode 
     int endAltitudeInKm;    // Altitude to end sampling and switch to new mode
     unsigned long stopTime; // In case GPS fails, uses this value to switch modes
+    char name[20];
 } SatelliteMode;
 
 

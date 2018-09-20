@@ -39,37 +39,43 @@ int currentLogWait = 0;
 SatelliteMode FirstWeekMode = {
     400,    // Altitude to begin sampling in this mode
     390,    // Altitude to end sampling and switch to new mode
-    5       // Days until needs to switch mode
+    5,       // Days until needs to switch mode
+    "First Week"
 };
 
 SatelliteMode InterimMode = {
     390,  
     325, 
     300, 
+    "Interim"
 };
 
 SatelliteMode StabilizeMode = {
     325,
     300,
-    380
+    380,
+    "Stabilize"
 };
 
 SatelliteMode ScienceMode = {
     300,
     225,
-    400
+    400,
+    "Science"
 };
 
 SatelliteMode ReEntryMode = {
     225,
     0,
-    1000000
+    1000000,
+    "Reentry"
 };
 
 SatelliteMode SafeMode = {
     0,
     0,
-    0
+    0,
+    "Safe"
 };
 
 /******************************
@@ -93,8 +99,8 @@ void SatelliteProperties_Initialize() {
    _LATG7 = 1;   
    
    //Set Satellite Time
-//   RTCC_TimeGet(&previousTime);
    previousTime = time(NULL);
+   
    
    SetDuplexPower(1);
    SetTotalTime();
@@ -169,6 +175,10 @@ UNITEMode UpdateMode() {
             _LATE3 = LED_OFF;
             _LATE4 = LED_ON;
             
+            char fallbackName[] = "Fallback";
+            
+            PackageData(CDHSubSys, (int)timeInMin, (uint8_t *)fallbackName, sizeof(fallbackName));
+            
             return fallback;
         }
         
@@ -179,36 +189,43 @@ UNITEMode UpdateMode() {
                 _LATE3 = LED_OFF;
                 _LATE4 = LED_OFF;
                 
+                PackageData(CDHSubSys, (int)timeInMin, (uint8_t *)InterimMode.name, strlen(InterimMode.name));
+                
                 return interim;
             case interim:
                 
                 _LATE2 = LED_ON;
                 _LATE3 = LED_ON;
                 _LATE4 = LED_OFF;
+                
+                PackageData(CDHSubSys, (int)timeInMin, (uint8_t *)StabilizeMode.name, strlen(StabilizeMode.name));
 
                 return stabilize;
-                
             case stabilize:
                 
                 _LATE2 = LED_OFF;
                 _LATE3 = LED_ON;
                 _LATE4 = LED_OFF;
                 
-                return science;
+                PackageData(CDHSubSys, (int)timeInMin, (uint8_t *)ScienceMode.name, strlen(ScienceMode.name));
                 
+                return science;
             case science:
                 
                 _LATE2 = LED_OFF;
                 _LATE3 = LED_OFF;
                 _LATE4 = LED_ON;
 
-                return reentry;
+                PackageData(CDHSubSys, (int)timeInMin, (uint8_t *)ReEntryMode.name, strlen(ReEntryMode.name));
                 
+                return reentry;
             case reentry:
                 
                 return currentMode; // Never leave reentry mode
 
             case fallback:
+                
+                PackageData(CDHSubSys, (int)timeInMin, (uint8_t *)InterimMode.name, strlen(InterimMode.name));
                 
                 return interim;
                 
@@ -217,6 +234,8 @@ UNITEMode UpdateMode() {
                 _LATE2 = LED_OFF;
                 _LATE3 = LED_OFF;
                 _LATE4 = LED_OFF;
+                
+                PackageData(CDHSubSys, (int)timeInMin, (uint8_t *)FirstWeekMode.name, strlen(FirstWeekMode.name));
                 
                 return firstWeek;
         }
@@ -254,7 +273,7 @@ void MainLoop() {
  
     // Update Time 
     
-    time_t timeDelta = (time(NULL) - previousTime) / 14000000; //14,000,000 est. minute
+    time_t timeDelta = (time(NULL) - previousTime) / 13900000; //14,000,000 est. minute
     totalTime += timeDelta; //MAIN_LOOP_TIMER_INTERVAL;
     timeInMin += timeDelta / 60.0;
 //    RTCC_TimeGet(&previousTime); //(double)MAIN_LOOP_TIMER_INTERVAL / 60.0;
