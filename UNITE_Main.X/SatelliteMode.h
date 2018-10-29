@@ -45,6 +45,8 @@ typedef struct {
 
 // Global variable for current operational mode
 extern UNITEMode currentMode;
+// Duplex Epoch number used to reset UNITE
+extern uint16_t duplexEpoch;
 // Global variable for total mission time in seconds
 extern time_t totalTime;
 // Global variable for time in minutes since 00:00 UTC

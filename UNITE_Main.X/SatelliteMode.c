@@ -26,6 +26,7 @@
 UNITEMode currentMode = safe;
 bool shouldChangeMode = false;
 double lastAltitude = 400.0; // 400 km
+uint16_t duplexEpoch = 0;
 time_t previousTime;
 time_t totalTime = 0; // Keeps track of overall mission clock in seconds
 double timeInMin = 0.0;      // Time in Min since 00:00
@@ -105,6 +106,12 @@ void SatelliteProperties_Initialize() {
    SetDuplexPower(1);
    SetTotalTime();
    SetDuplexPower(0);
+   
+   // Wait times
+//   currentLangmuirProbeWait = totalTime / 60;
+//   currentMagnetometerWait = totalTime / 60;
+//   currentTemperatureWait = totalTime / 60;
+//   currentGPSWait = totalTime / 60;
 }
 
  
@@ -169,11 +176,11 @@ UNITEMode UpdateMode() {
 
     if (ShouldUpdateMode(totalTime / 3600, (int)lastAltitude)) {
         
-        if ((gpsLockAttempts > GPS_LOCK_FAILURE || waitingFilesCount >= MAX_DUP_FILES_WAITING) && !IS_DIAG) {
+        if ((gpsLockAttempts > GPS_LOCK_FAILURE && waitingFilesCount >= MAX_DUP_FILES_WAITING) && !IS_DIAG) {
             
-            _LATE2 = LED_ON;
-            _LATE3 = LED_OFF;
-            _LATE4 = LED_ON;
+//            _LATE2 = LED_ON;
+//            _LATE3 = LED_OFF;
+//            _LATE4 = LED_ON;
             
             char fallbackName[] = "Fallback";
             
@@ -185,36 +192,36 @@ UNITEMode UpdateMode() {
         switch (currentMode) {
             case firstWeek: 
                 
-                _LATE2 = LED_ON;
-                _LATE3 = LED_OFF;
-                _LATE4 = LED_OFF;
+//                _LATE2 = LED_ON;
+//                _LATE3 = LED_OFF;
+//                _LATE4 = LED_OFF;
                 
                 PackageData(CDHSubSys, (int)timeInMin, (uint8_t *)InterimMode.name, strlen(InterimMode.name));
                 
                 return interim;
             case interim:
                 
-                _LATE2 = LED_ON;
-                _LATE3 = LED_ON;
-                _LATE4 = LED_OFF;
+//                _LATE2 = LED_ON;
+//                _LATE3 = LED_ON;
+//                _LATE4 = LED_OFF;
                 
                 PackageData(CDHSubSys, (int)timeInMin, (uint8_t *)StabilizeMode.name, strlen(StabilizeMode.name));
 
                 return stabilize;
             case stabilize:
                 
-                _LATE2 = LED_OFF;
-                _LATE3 = LED_ON;
-                _LATE4 = LED_OFF;
+//                _LATE2 = LED_OFF;
+//                _LATE3 = LED_ON;
+//                _LATE4 = LED_OFF;
                 
                 PackageData(CDHSubSys, (int)timeInMin, (uint8_t *)ScienceMode.name, strlen(ScienceMode.name));
                 
                 return science;
             case science:
                 
-                _LATE2 = LED_OFF;
-                _LATE3 = LED_OFF;
-                _LATE4 = LED_ON;
+//                _LATE2 = LED_OFF;
+//                _LATE3 = LED_OFF;
+//                _LATE4 = LED_ON;
 
                 PackageData(CDHSubSys, (int)timeInMin, (uint8_t *)ReEntryMode.name, strlen(ReEntryMode.name));
                 
@@ -231,9 +238,9 @@ UNITEMode UpdateMode() {
                 
             case safe:
 
-                _LATE2 = LED_OFF;
-                _LATE3 = LED_OFF;
-                _LATE4 = LED_OFF;
+//                _LATE2 = LED_OFF;
+//                _LATE3 = LED_OFF;
+//                _LATE4 = LED_OFF;
                 
                 PackageData(CDHSubSys, (int)timeInMin, (uint8_t *)FirstWeekMode.name, strlen(FirstWeekMode.name));
                 
@@ -265,15 +272,15 @@ void MainLoop() {
     // Housekeeping
     TrySampleHousekeeping();
     
-    // Send Power Switch Packet
-    TogglePowerSwitches();
-        
     // Transmission
     TransmitQueue();
+    
+    // Send Power Switch Packet
+    TogglePowerSwitches();
  
     // Update Time 
     
-    time_t timeDelta = (time(NULL) - previousTime) / 13900000; //14,000,000 est. minute
+    time_t timeDelta = (time(NULL) - previousTime) / 12670000; //14,000,000 est. minute
     totalTime += timeDelta; //MAIN_LOOP_TIMER_INTERVAL;
     timeInMin += timeDelta / 60.0;
 //    RTCC_TimeGet(&previousTime); //(double)MAIN_LOOP_TIMER_INTERVAL / 60.0;
@@ -352,8 +359,8 @@ void LogState() {
     strcat(log, newLine);
     
     //Time 
-    char timeString[60];
-    sprintf(timeString, "Total runtime: %u h %2d min\nTime of day: %d:%2d UTC", (unsigned int)(totalTime / 3600), ((int)(totalTime / 60) % 60), (int)(timeInMin / 60.0),(int)timeInMin % 60);
+    char timeString[65];
+    sprintf(timeString, "Total runtime: %u h %2d min\nTime of day: %d:%2d UTC\nEpoch: %u", (unsigned int)(totalTime / 3600), ((int)(totalTime / 60) % 60), (int)(timeInMin / 60.0),(int)timeInMin % 60,(unsigned int)duplexEpoch);
     strcat(log, timeString);
     
     strcat(log, newLine);
@@ -383,28 +390,28 @@ void LogState() {
 
         switch (i) {
             case 0: // MAG
-                convertedTemp = (0.178813745211130 * unconvertedTemp) - 51.4007; //0.80691 * (unconvertedTemp + 270.1) - 272.67;
+                convertedTemp = 0.24771 * (unconvertedTemp) - 79.82089; //(0.178813745211130 * unconvertedTemp) - 51.4007; //0.80691 * (unconvertedTemp + 270.1) - 272.67;
                 break;
             case 1: // -Z
-                convertedTemp = 0.80405 * (unconvertedTemp / 4.0 + 271.6) - 273.19;
+                convertedTemp = 0.24771 * (unconvertedTemp) - 79.82089; //0.80405 * (unconvertedTemp / 4.0 + 271.6) - 273.19;
                 break;
             case 2: // -Y
-                convertedTemp = 0.80528 * (unconvertedTemp / 4.0 + 270.88) - 273.18;
+                convertedTemp = 0.24771 * (unconvertedTemp) - 79.82089; //0.80528 * (unconvertedTemp / 4.0 + 270.88) - 273.18;
                 break;
             case 3: // -X
-                convertedTemp = 0.80697 * (unconvertedTemp / 4.0 + 270.3) - 273.63;
+                convertedTemp = 0.24771 * (unconvertedTemp) - 79.82089; //0.80697 * (unconvertedTemp / 4.0 + 270.3) - 273.63;
                 break;
             case 4: // +Z
-                convertedTemp = 0.81446 * (unconvertedTemp / 4.0 + 267.89) - 273.51;
+                convertedTemp = 0.24771 * (unconvertedTemp) - 79.82089; //0.81446 * (unconvertedTemp / 4.0 + 267.89) - 273.51;
                 break;
             case 5: // +Y
-                convertedTemp = 0.80379 * (unconvertedTemp / 4.0 + 271.37) - 273.71;
+                convertedTemp = 0.24771 * (unconvertedTemp) - 79.82089; //0.80379 * (unconvertedTemp / 4.0 + 271.37) - 273.71;
                 break;
             case 6: // +X
-                convertedTemp = 0.80103 * (unconvertedTemp / 4.0 + 272.5) - 273.7;
+                convertedTemp = 0.24771 * (unconvertedTemp) - 79.82089; //0.80103 * (unconvertedTemp / 4.0 + 272.5) - 273.7;
                 break;
             case 7: // CMD
-                convertedTemp = 0.80887 * (unconvertedTemp / 4.0 + 268.74) - 274.05;
+                convertedTemp = 0.24771 * (unconvertedTemp) - 79.82089; //0.80887 * (unconvertedTemp / 4.0 + 268.74) - 274.05;
                 break;
         }
 

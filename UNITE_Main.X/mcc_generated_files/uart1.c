@@ -281,9 +281,9 @@ uint8_t UART1_Read( void)
         
         time_t endWait = time(NULL) + GPS_RES_TIMEOUT;
 
-        while (!(U1STAbits.URXDA == 1) && !simplexTimeoutFlag) {
+        while (!(U1STAbits.URXDA == 1) && !gpsTimeoutFlag) {
             // Simplex read timeout
-            if (time(NULL) >= endWait && IS_GPS_TIMEOUT_ENABLED) gpsTimeoutFlag = 1;
+            if (time(NULL) >= endWait && IS_GPS_TIMEOUT_ENABLED) gpsTimeoutFlag = true;
         }
 
         if ((U1STAbits.OERR == 1)) {

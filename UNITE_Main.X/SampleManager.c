@@ -44,7 +44,7 @@ double gpsAltitude;
 
 
 uint8_t langmuirProbeBuffer[300] = {NULL};
-uint8_t magnetometerBuffer[30] = {NULL};
+uint8_t magnetometerBuffer[33] = {NULL};
 uint8_t temperatureBuffer[32] = {NULL};
 uint8_t gpsBuffer[66] = {NULL};
 uint8_t housekeepingBuffer[28] = {NULL};
@@ -68,7 +68,7 @@ int currentGPSBufferIndex = 0;
 int currentHousekeepingBufferIndex = 0;
 
 //uint16_t LP_BUFFER_SIZE = 300; Unused
-uint16_t MAG_BUFFER_SIZE = 30;
+uint16_t MAG_BUFFER_SIZE = 33;
 uint16_t TMP_BUFFER_SIZE = 32;
 uint16_t GPS_BUFFER_SIZE = 66;
 uint16_t HOUSE_BUFFER_SIZE = 28;
@@ -348,16 +348,18 @@ void EndGPSSampling() {
     if (unparsedGGAGPSBuffer[1] != 0) ParseGPSSample((uint8_t *)unparsedGGAGPSBuffer);
 
     //Only package and send if GPS is locked
-    if (currentGPSBufferIndex > 0 && ((gpsBuffer[32] != 1) || ((gpsLockAttempts + 1) % 3 == 0))) {
+    if ((currentGPSBufferIndex > 0) && (gpsBuffer[32] != 1)) {
         PackageData(GPSSubSys, (int)timeInMin, gpsBuffer, sizeof(gpsBuffer));
         gpsLockAttempts = 0;
-    } else gpsLockAttempts++;
+    } else if ((gpsLockAttempts++) % 3 == 0) {
+        PackageData(GPSSubSys, (int)timeInMin, gpsBuffer, sizeof(gpsBuffer));
+    }
 
     // Reset buffer variables
     memset(unparsedSBFGPSBuffer, 0, sizeof(unparsedSBFGPSBuffer));
     memset(unparsedGGAGPSBuffer, 0, sizeof(unparsedGGAGPSBuffer));
     memset(gpsBuffer, 0, sizeof(gpsBuffer));
-    if (gpsLockAttempts == 0) currentGPSWait = 0;
+    if (gpsLockAttempts % 3 == 0) currentGPSWait = 0;
     currentGPSBufferIndex = 0;
     gpsIndex = 0;
     isGGASampled = false;
@@ -562,17 +564,17 @@ void TakeMagnetometerSample() {
     CopyIntToDoubleByte(magnetometerResults, magnetometerDiagData, 0, 0, sizeof(magnetometerDiagData));
     
     // Uncomment to scale results down to a byte
-//    int i;
-//    for (i = 0; i < RESULTS_SIZE; i++) {
-//        magnetometerResults[i] = (magnetometerResults[i] - 520) / 2;
-//    }
-
-//    int magnetometerResultSize = 3;
-//    CopyIntToByte(magnetometerResults, magnetometerBuffer, 0, currentMagnetometerBufferIndex, magnetometerResultSize);
-//    currentMagnetometerBufferIndex += magnetometerResultSize;
+    int i;
+    for (i = 0; i < RESULTS_SIZE; i++) {
+        magnetometerResults[i] = (magnetometerResults[i]) / 4;//(magnetometerResults[i] - 520) / 2;
+    }
 
     int magnetometerResultSize = 3;
-    currentMagnetometerBufferIndex += CopyIntToByteArray(magnetometerResults, magnetometerBuffer, 0, currentMagnetometerBufferIndex, magnetometerResultSize);
+    CopyIntToByte(magnetometerResults, magnetometerBuffer, 0, currentMagnetometerBufferIndex, magnetometerResultSize);
+    currentMagnetometerBufferIndex += magnetometerResultSize;
+
+//    int magnetometerResultSize = 3;
+//    currentMagnetometerBufferIndex += CopyIntToByteArray(magnetometerResults, magnetometerBuffer, 0, currentMagnetometerBufferIndex, magnetometerResultSize);
     
     if (currentMagnetometerBufferIndex >= MAG_BUFFER_SIZE) {
         EndMagnetometerSampling();
@@ -1102,6 +1104,7 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
      int error;
      uint8_t time[6] = {NULL};
      uint8_t datum;
+     uint8_t satellites;
      uint8_t bases;
     
      long double xPos;
@@ -1124,9 +1127,11 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
                  time[2] = unparsedSentence[i + 1];
                  time[1] = unparsedSentence[i + 2];
                  time[0] = unparsedSentence[i + 3];
+                 break;
              case 12: // Time WNc
                  time[5] = unparsedSentence[i];
                  time[4] = unparsedSentence[i + 1];
+                 break;
              case 15: // error code
                  error = unparsedSentence[i];
                  break;
@@ -1148,17 +1153,23 @@ void AppendIntToGPSBuffer(char *ascii, int value, int length) {
                  break;
              case 52: // z velocity
                  zVel = GetFloatFromByteArray(unparsedSentence, i);
+                 break;
              case 73: // Datum
                  datum = unparsedSentence[i];
+                 break;
+             case 74:
+                 satellites = unparsedSentence[i];
+                 break;
              case 85:
                  bases = unparsedSentence[i];
+                 break;
                  
             // ADD NUMBER OF CONNECTED SATELLITES
              default: break;
          }
      }
      
-    uint8_t gpsComponents[3] = { datum, bases, (uint8_t)error }; 
+    uint8_t gpsComponents[3] = { datum, satellites, (uint8_t)error }; 
 //    uint8_t gpsFiller[5] = { NULL };
     
      // Diagnostic Data

@@ -70,9 +70,9 @@ bool isDuplexConnected = false;
 uint16_t waitingFilesCount = 0;
 
 // Timeout
-bool simplexTimeoutFlag = 0;
-bool duplexTimeoutFlag = 0;
-bool gpsTimeoutFlag = 0;
+bool simplexTimeoutFlag = false;
+bool duplexTimeoutFlag = false;
+bool gpsTimeoutFlag = false;
 
 const int DUP_RES_LENGTH = 11;
 
@@ -120,7 +120,7 @@ uint16_t epsTemp;
 // Private Source Methods
 bool IsLineBusy();
 void SendData(uint8_t *queue, int queueLength, TransmissionUnit);
-void TransmitInstrumentDataToSimplex(uint8_t *queue, uint8_t headerByte1, uint8_t headerByte2, uint16_t dataLength);
+uint16_t TransmitInstrumentDataToSimplex(uint8_t *queue, uint8_t headerByte1, uint8_t headerByte2, uint16_t dataLength);
 bool TransmitInstrumentDataToDuplex(uint8_t *queue, uint8_t headerByte1, uint8_t headerByte2, uint16_t dataLength);
 void PollDuplex(const char *pollCode, uint16_t taggedDataLength);
 bool ReadACKForUnit(TransmissionUnit unit);
@@ -334,7 +334,7 @@ void SendData(uint8_t *queue, int queueLength, TransmissionUnit unit) {
     
     int packets = 0;
     const int maxPackets = 4;
-    while (queueLength > 0 && packets++ < maxPackets) {
+    while (packets < maxPackets && queueLength > 0) {
 //    for (packets = 0; packets < maxPackets; packets++) {
         // System Header Parser
         uint8_t sysID = queue[transmitQueueStartIndex];
@@ -353,6 +353,7 @@ void SendData(uint8_t *queue, int queueLength, TransmissionUnit unit) {
             transmitQueueLength = 0;
             queueLength = 0;
             dataLength = 0;
+            packets = 4;
         }
         
         uint8_t headerByte1 = sysID + timeH;
@@ -361,139 +362,152 @@ void SendData(uint8_t *queue, int queueLength, TransmissionUnit unit) {
         if (!isError) {
             
             switch (unit) {
-                case SimplexUnit: TransmitInstrumentDataToSimplex(queue, headerByte1, headerByte2, dataLength);
+                case SimplexUnit: queueLength -= TransmitInstrumentDataToSimplex(queue, headerByte1, headerByte2, dataLength);
                     break;
-                case DuplexUnit: TransmitInstrumentDataToDuplex(queue, headerByte1, headerByte2, dataLength);
+                case DuplexUnit: queueLength -= TransmitInstrumentDataToDuplex(queue, headerByte1, headerByte2, dataLength);
                     break;
                 case SimplexOrDuplex:
-                    if (!TransmitInstrumentDataToDuplex(queue, headerByte1, headerByte2, dataLength)) {
-                        TransmitInstrumentDataToSimplex(queue, headerByte1, headerByte2, dataLength); }
+                    if (waitingFilesCount < MAX_DUP_FILES_WAITING) queueLength -= TransmitInstrumentDataToDuplex(queue, headerByte1, headerByte2, dataLength);
+                    else queueLength -= TransmitInstrumentDataToSimplex(queue, headerByte1, headerByte2, dataLength); 
                     break;
                 default:
                     break;
             }
 
-            queueLength = max_s(queueLength - HEADER_SIZE - dataLength, 0);
+            queueLength = max_s(queueLength, 0);
+            packets++;
         }
     }   
     
     isSending = false;
 }
 
-void TransmitInstrumentDataToSimplex(uint8_t *queue, uint8_t headerByte1, uint8_t headerByte2, uint16_t dataLength) {
-    
-    // Update Queue position properties
-    ClearQueue(transmitQueue, HEADER_SIZE, transmitQueueStartIndex);
-    transmitQueueStartIndex = (transmitQueueStartIndex + HEADER_SIZE) % QUEUE_SIZE;
-    transmitQueueLength = max_s(transmitQueueLength - HEADER_SIZE, 0);
+uint16_t TransmitInstrumentDataToSimplex(uint8_t *queue, uint8_t headerByte1, uint8_t headerByte2, uint16_t dataLength) {
 
-    // Send data in packages
-    int i = 0;
-    while (i < dataLength) {
+    if (IsLineBusy() == false) {
 
-        while (IsLineBusy());
+        // Update Queue position properties
+        ClearQueue(transmitQueue, HEADER_SIZE, transmitQueueStartIndex);
+        transmitQueueStartIndex = (transmitQueueStartIndex + HEADER_SIZE) % QUEUE_SIZE;
+        transmitQueueLength = max_s(transmitQueueLength - HEADER_SIZE, 0);
 
-        // One package transmission
-        int j;
-        uint16_t packageLength;
+        // Send data in packages
+        int i = 0;
+        while (i < dataLength) {
 
-        TransmitPreamble(simplexPackagePreamble);
+            //        while (IsLineBusy());
 
-        Send(headerByte1, SimplexUnit);
-        Send(headerByte2, SimplexUnit);
-        
-        // Package is shortened to make room for header
-        packageLength = GetTransmissionPackageLength(SimplexUnit) - 2;
+            // One package transmission
+            int j;
+            uint16_t packageLength;
 
-        // Sends enough data for a package
-        for (j = 0; j < packageLength; j++) {
+            TransmitPreamble(simplexPackagePreamble);
 
-            // If package space exceeds instrument's data, fill with 0
-            if (j >= dataLength - i) Send(0, SimplexUnit);
-                // Send next data byte 
-            else Send(queue[(transmitQueueStartIndex + j) % QUEUE_SIZE], SimplexUnit);
+            Send(headerByte1, SimplexUnit);
+            Send(headerByte2, SimplexUnit);
 
-        }
+            // Package is shortened to make room for header
+            packageLength = GetTransmissionPackageLength(SimplexUnit) - 2;
 
-//        while(IsLineBusy()) { // Read Simplex Line
+            // Sends enough data for a package
+            for (j = 0; j < packageLength; j++) {
+
+                // If package space exceeds instrument's data, fill with 0
+                if (j >= dataLength - i) Send(0, SimplexUnit);
+                    // Send next data byte 
+                else Send(queue[(transmitQueueStartIndex + j) % QUEUE_SIZE], SimplexUnit);
+
+            }
+
+            // Read Simplex Line
             if (ReadACKForUnit(SimplexUnit)) {
                 ClearQueue(transmitQueue, min(packageLength, dataLength - i), transmitQueueStartIndex);
                 transmitQueueStartIndex = (transmitQueueStartIndex + min(j, dataLength - i)) % QUEUE_SIZE;
                 transmitQueueLength = max_s(transmitQueueLength - j, 0);
                 i = i + j;
             }
-//        }
-
+            
+            while(IsLineBusy()) ClrWdt(); // Could cause problems later... Keeps WDT from resetting when waiting for Duplex to Power On
+        }
+        
+        return HEADER_SIZE + dataLength;
     }
+    
+    return 0;
 }
 
 bool TransmitInstrumentDataToDuplex(uint8_t *queue, uint8_t headerByte1, uint8_t headerByte2, uint16_t dataLength) {
 
-    int i;
+    char duplex[] = "Duplex Transmission";
+    PackageData(CDHSubSys, (int)timeInMin, duplex, sizeof(duplex));
+    
+    if (IsLineBusy() == false) {
 
-    while (IsLineBusy());
+        PollDuplex(duplexDownlinkFilePoll, 0);
 
-    PollDuplex(duplexDownlinkFilePoll, 0);
-
-    if (ReadACKForUnit(DuplexUnit)) {
-
-        // One package transmission
-        uint8_t duplexFormattedSendString[1000] = { NULL };
-        char duplexFileHeader[50] = { NULL };
-        int duplexFileSize = dataLength + 5;
-        
-        uint16_t duplexFileLength = 4 + // 4 byte uint
-                               strlen(duplexDownlinkFileReady) + // duplex poll code
-                               CreateFileHeader(duplexFileHeader,headerByte1 & 0xF0, duplexFileSize) + // file header
-                               duplexFileSize + // file size
-                               2; // crc-16 word
-        if (duplexFileLength % 2 != 0) duplexFileLength += 1;
-        
-        int formatIndex = 0;
-        // 4-byte File Length
-        duplexFormattedSendString[formatIndex++] = 0;                           
-        duplexFormattedSendString[formatIndex++] = 0;
-        duplexFormattedSendString[formatIndex++] = duplexFileLength >> 8;
-        duplexFormattedSendString[formatIndex++] = duplexFileLength & 0xFF;
-        
-        // Duplex Poll Code
-        formatIndex += CopyBytes(duplexDownlinkFileReady, duplexFormattedSendString, 0, formatIndex, 5);
-        
-        // Duplex ESN, File name length, File size, File name
-        formatIndex += CopyBytes(duplexFileHeader, duplexFormattedSendString, 0, formatIndex, strlen(duplexFileHeader));
-        
-        // File Data
-        formatIndex += CopyBytes(queue, duplexFormattedSendString, transmitQueueStartIndex, formatIndex, duplexFileSize);
-        
-        // Make file an even number of bytes
-        if (formatIndex % 2 != 0) duplexFormattedSendString[formatIndex++] = 0;
-        
-        // Get the CRC-16 code for the sent string
-        uint16_t crc16Code = CRC16SendBytes(duplexFormattedSendString, formatIndex, 0);
-        
-        // Send the two sync bytes
-        Send(duplexSyncBytes[0], DuplexUnit);
-        Send(duplexSyncBytes[1], DuplexUnit);
-        
-        // Sends enough data for a package
-        for (i = 0; i < formatIndex; i++) {
-
-            // Send next data byte
-            Send(duplexFormattedSendString[i], DuplexUnit);
-        }
-        
-        // Send the trailing CRC-16 Code
-        Send((crc16Code >> 8), DuplexUnit);
-        Send(crc16Code & 0x00FF, DuplexUnit);
-                
         if (ReadACKForUnit(DuplexUnit)) {
-            ClearQueue(transmitQueue, duplexFileSize, transmitQueueStartIndex);
-            transmitQueueStartIndex = (transmitQueueStartIndex + duplexFileSize) % QUEUE_SIZE;
-            transmitQueueLength = max(transmitQueueLength - duplexFileSize, 0);
+
+            // One package transmission
+            uint8_t duplexFormattedSendString[1000] = {NULL};
+            char duplexFileHeader[50] = {NULL};
+            int duplexFileSize = dataLength + 5;
+
+            uint16_t duplexFileLength = 4 + // 4 byte uint
+                    strlen(duplexDownlinkFileReady) + // duplex poll code
+                    CreateFileHeader(duplexFileHeader, headerByte1 & 0xF0, duplexFileSize) + // file header
+                    duplexFileSize + // file size
+                    2; // crc-16 word
+            if (duplexFileLength % 2 != 0) duplexFileLength += 1;
+
+            int formatIndex = 0;
+            // 4-byte File Length
+            duplexFormattedSendString[formatIndex++] = 0;
+            duplexFormattedSendString[formatIndex++] = 0;
+            duplexFormattedSendString[formatIndex++] = duplexFileLength >> 8;
+            duplexFormattedSendString[formatIndex++] = duplexFileLength & 0xFF;
+
+            // Duplex Poll Code
+            formatIndex += CopyBytes(duplexDownlinkFileReady, duplexFormattedSendString, 0, formatIndex, 5);
+
+            // Duplex ESN, File name length, File size, File name
+            formatIndex += CopyBytes(duplexFileHeader, duplexFormattedSendString, 0, formatIndex, strlen(duplexFileHeader));
+
+            // File Data
+            formatIndex += CopyBytes(queue, duplexFormattedSendString, transmitQueueStartIndex, formatIndex, duplexFileSize);
+
+            // Make file an even number of bytes
+            if (formatIndex % 2 != 0) duplexFormattedSendString[formatIndex++] = 0;
+
+            // Get the CRC-16 code for the sent string
+            uint16_t crc16Code = CRC16SendBytes(duplexFormattedSendString, formatIndex, 0);
+
+            // Send the two sync bytes
+            Send(duplexSyncBytes[0], DuplexUnit);
+            Send(duplexSyncBytes[1], DuplexUnit);
+
+            // Sends enough data for a package
+            int i;
+            for (i = 0; i < formatIndex; i++) {
+
+                // Send next data byte
+                Send(duplexFormattedSendString[i], DuplexUnit);
+            }
+
+            // Send the trailing CRC-16 Code
+            Send((crc16Code >> 8), DuplexUnit);
+            Send(crc16Code & 0x00FF, DuplexUnit);
+
+            if (ReadACKForUnit(DuplexUnit)) {
+                ClearQueue(transmitQueue, duplexFileSize, transmitQueueStartIndex);
+                transmitQueueStartIndex = (transmitQueueStartIndex + duplexFileSize) % QUEUE_SIZE;
+                transmitQueueLength = max(transmitQueueLength - duplexFileSize, 0);
+            }
         }
+        
+        return HEADER_SIZE + dataLength;
     }
 
-    return true;
+    return 0;
 }
 
 /***************************************
@@ -558,21 +572,21 @@ size_t CreateFileHeader(char *formattedString, uint8_t instrument, uint16_t data
     // Parse filename from instrument byte
     switch (instrument) {
         case 0x10:             
-            sprintf(fileName,"%s%i.dat",langmuirProbeFileName,langmuirProbeFileCount++);
+            sprintf(fileName,"%s%i.txt",langmuirProbeFileName,langmuirProbeFileCount++);
             break;
         case 0x20:             
-            sprintf(fileName,"%s%i.dat",magnetometerFileName,magnetometerFileCount++);
+            sprintf(fileName,"%s%i.txt",magnetometerFileName,magnetometerFileCount++);
             break;
         case 0x30:             
-            sprintf(fileName,"%s%i.dat",temperatureFileName,temperatureFileCount++);
+            sprintf(fileName,"%s%i.txt",temperatureFileName,temperatureFileCount++);
             break;
         case 0x40:            
-            sprintf(fileName,"%s%i.dat",gpsFileName,gpsFileCount++);
+            sprintf(fileName,"%s%i.txt",gpsFileName,gpsFileCount++);
             break;
         case 0x50:
-            sprintf(fileName,"%s%i.dat",housekeepingFileName,housekeepingFileCount++);
+            sprintf(fileName,"%s%i.txt",housekeepingFileName,housekeepingFileCount++);
         default:
-            strcpy(fileName, "Data0000.dat");
+            strcpy(fileName, "Data0000.txt");
             break;     
     }
     
@@ -631,7 +645,6 @@ void SetTotalTime() {
         int responseLength = 13;
 
         char epoch[4] = {NULL};
-        time_t totalEpoch;
 
         for (i = 0; i < responseLength; i++) {
             switch (i) {
@@ -649,8 +662,8 @@ void SetTotalTime() {
             
 
 //            totalEpoch = (epoch[0] << 24) | (epoch[1] << 16) | (epoch[2] << 8) | (epoch[3]);
-            totalEpoch = (epoch[0] * 100 + epoch[1] * 10 + epoch[2] * 1 + epoch[3]);
-            totalTime = (time_t)((double)(totalEpoch - DUPLEX_EPOCH_OFFSET) / 3.0 * 24 * 3600);
+            duplexEpoch = (epoch[0] * 100 + epoch[1] * 10 + epoch[2] * 1 + epoch[3]);
+            totalTime = (time_t)((double)(duplexEpoch - DUPLEX_EPOCH_OFFSET) / 3.0 * 24 * 3600);
         }
     }
 }
@@ -674,11 +687,11 @@ void HandleCommand() {
 //            return;
             
             // Read Duplex Sync Bytes & Header
-            while (Read(DuplexUnit) != 0x47) if (duplexTimeoutFlag) { return; }
-            while (Read(DuplexUnit) != 0x55) if (duplexTimeoutFlag) { return; }
-            while (Read(DuplexUnit) != 0x00) if (duplexTimeoutFlag) { return; }
-            while (Read(DuplexUnit) != 0x00) if (duplexTimeoutFlag) { return; }
-            while (Read(DuplexUnit) != 0x00) if (duplexTimeoutFlag) { return; }
+            while (Read(DuplexUnit) != 0x47) { if (duplexTimeoutFlag) return; }
+            while (Read(DuplexUnit) != 0x55) { if (duplexTimeoutFlag) return; }
+            while (Read(DuplexUnit) != 0x00) { if (duplexTimeoutFlag) return; }
+            while (Read(DuplexUnit) != 0x00) { if (duplexTimeoutFlag) return; }
+            while (Read(DuplexUnit) != 0x00) { if (duplexTimeoutFlag) return; }
 
             // Calculate SMS message length
             // 4: 4 byte message length
@@ -692,19 +705,19 @@ void HandleCommand() {
             messageLength = Read(DuplexUnit) - 4 - 5 - 8 - 9 - 3 - 14 - 5;
             
             // Read Duplex Poll Code
-            while (Read(DuplexUnit) != duplexUplinkSMSReady[0]) if (duplexTimeoutFlag) { return; }
-            while (Read(DuplexUnit) != duplexUplinkSMSReady[1]) if (duplexTimeoutFlag) { return; }
-            while (Read(DuplexUnit) != duplexUplinkSMSReady[2]) if (duplexTimeoutFlag) { return; }
-            while (Read(DuplexUnit) != duplexUplinkSMSReady[3]) if (duplexTimeoutFlag) { return; }
-            while (Read(DuplexUnit) != duplexUplinkSMSReady[4]) if (duplexTimeoutFlag) { return; }
+            while (Read(DuplexUnit) != duplexUplinkSMSReady[0]) { if (duplexTimeoutFlag) return; }
+            while (Read(DuplexUnit) != duplexUplinkSMSReady[1]) { if (duplexTimeoutFlag) return; }
+            while (Read(DuplexUnit) != duplexUplinkSMSReady[2]) { if (duplexTimeoutFlag) return; }
+            while (Read(DuplexUnit) != duplexUplinkSMSReady[3]) { if (duplexTimeoutFlag) return; }
+            while (Read(DuplexUnit) != duplexUplinkSMSReady[4]) { if (duplexTimeoutFlag) return; }
             
             // ESN & COMM Header
             for (i = 0; i < 17; i++) Read(DuplexUnit);
             
             // Read SMS Header
-            while (Read(DuplexUnit) != smsHeader[0]) if (duplexTimeoutFlag) { return; }
-            while (Read(DuplexUnit) != smsHeader[1]) if (duplexTimeoutFlag) { return; } 
-            while (Read(DuplexUnit) != smsHeader[2]) if (duplexTimeoutFlag) { return; }
+            while (Read(DuplexUnit) != smsHeader[0]) { if (duplexTimeoutFlag) return; }
+            while (Read(DuplexUnit) != smsHeader[1]) { if (duplexTimeoutFlag) return; } 
+            while (Read(DuplexUnit) != smsHeader[2]) { if (duplexTimeoutFlag) return; }
             
             // Read SMS Header Message Length
             for (i = 0; i < 14; i++) Read(DuplexUnit);
@@ -741,8 +754,8 @@ void HandleCommand() {
 
 void TogglePowerSwitches() {
            
-    while(IsLineBusy());
-    if (!isSending && !IS_DEBUG) {
+//    while(IsLineBusy());
+    if (!isSending && !IS_DEBUG && !IsLineBusy()) {
         
         TransmitPreamble(powerPackagePreamble);
                 
@@ -758,9 +771,7 @@ void TogglePowerSwitches() {
             else Send(0, SimplexUnit); 
         }
         
-        ReadPowerSwitches();
-        
-        
+        ReadPowerSwitches();  
     }
 }
 
@@ -808,7 +819,7 @@ void ReadPowerSwitches() {
                 case 35: duplexTemp += Read(SimplexUnit); break;                // Duplex Temp Low
                 case 36: epsTemp = Read(SimplexUnit); epsTemp <<= 8; break;           // EPS Temp High
                 case 37: epsTemp += Read(SimplexUnit); break;                   // EPS Temp Low
-                case 38: isDuplexConnected = Read(SimplexUnit) > 0; break;
+                case 38: isDuplexConnected = Read(SimplexUnit); break;
                 default: Read(SimplexUnit); break;
             }
         }

@@ -25,7 +25,7 @@ extern "C" {
 #define IS_DEBUG false
 
 // Set to true if using diagnostic mode
-#define IS_DIAG true
+#define IS_DIAG false
 
 // Set to true if Duplex should timeout when waiting for input
 #define IS_DUP_TIMEOUT_ENABLED true
