@@ -21,21 +21,87 @@ extern "C" {
 
 #endif	/* TRANSMITMANAGER_H */
 
+// Timeout values in seconds - Subject to change
+#define SIMPLEX_RES_TIMEOUT     4000000 // 4 sec -> 4*10^6 ns
+#define DUPLEX_RES_TIMEOUT      4000000
+#define GPS_RES_TIMEOUT         4000000
 
+// Number of times the Duplex has restarted before launch
+#define DUPLEX_EPOCH_OFFSET     125 //4779030
+
+// Tracks how long the data queue is
+extern int transmitQueueLength;
+
+// Boolean for whether UNITE is sending packets to a TransmissionUnit
 extern bool isSending;
+
+// Global variable to track when Duplex is connected
+//extern bool isDuplexConnected;
+
+// Timeout flags
+extern bool simplexTimeoutFlag;
+extern bool duplexTimeoutFlag;
+extern bool gpsTimeoutFlag;
+extern uint16_t waitingFilesCount;
+
+extern uint16_t b1Charge;
+extern uint16_t b2Charge;
+extern uint16_t b1Voltage;
+extern uint16_t b2Voltage;
+extern uint16_t b1Current;
+extern uint16_t b2Current;
+
+extern uint16_t bussPlusVoltage;
+
+extern uint16_t solar1Voltage;
+extern uint16_t solar2Voltage;
+extern uint16_t solar3Voltage;
+extern uint16_t solar4Voltage;
+
+extern uint16_t simplexTemp;
+extern uint16_t duplexTemp;
+extern uint16_t epsTemp;
 
 /**********************
   Transmission Methods
  **********************/
 
+// Transmits any data found in the sending queue
 void TransmitQueue();
+// Reads a byte from a TransmissionUnit
+uint8_t Read(TransmissionUnit unit);
+// Sends a byte to a TransmissionUnit
+void Send(uint8_t byte, TransmissionUnit unit);
+// Packages a system's data
+uint16_t PackageData(System system, uint16_t time, uint8_t *buffer, uint16_t bufferSize);
+// Returns true if EPS/Simplex busy line is high
+bool IsLineBusy();
 
-uint16_t PackageData(System, uint16_t, uint8_t *, uint16_t);
+// Reads SMS commands from Duplex
+void HandleCommand();
+
+// Sets the total time counter from Duplex Epoch
+void SetTotalTime();
 
 /****************
   Power Methods
  ****************/
 
-bool TogglePowerSwitches();
-bool PowerOnDuplex();
-bool PowerOffDuplex();
+// Sends power switch values to EPS
+void TogglePowerSwitches();
+// Reads the echo packet back from EPS
+void ReadPowerSwitches();
+
+// Power switch setters
+void SetLangmuirProbePower(bool);
+void SetMagnetometerPower(bool);
+void SetTemperaturePower(bool);
+void SetGPSPower(bool);
+void SetDuplexPower(bool);
+
+// Power switch getters
+bool isLangmuirProbeOn(void);
+bool isMagnetometerOn(void);
+bool isTemperatureOn(void);
+bool isGPSOn(void);
+bool isDuplexOn(void);

@@ -11,6 +11,11 @@
 
 #define LED_ON 0
 #define LED_OFF 1
+
+#define max_s(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a > _b ? _a : _b; })
 /******************************************************************************/
 /* System Function Prototypes                                                 */
 /******************************************************************************/
@@ -22,10 +27,13 @@ go here. */
 void ConfigureOscillator(void); /* Handles clock switching/osc initialization */
 void wait_sec(unsigned long);
 void wait_for(unsigned long);
-uint16_t Pow(int, int);
+unsigned long Pow(int, int);
 void ClearQueue(uint8_t *,int,int);
-void Clear(int *,int,int);
-void Copy(int *source, uint8_t *destination, int, int, int);
+void Clear(void *,int,int);
+int CopyIntToByte(int *source, uint8_t *destination, int sourceStart, int destStart, int numberOfItems);
+int CopyIntToDoubleByte(int *source, uint16_t *destination, int sourceStart, int destStart, int numberOfItems);
+int CopyIntToByteArray(int *source, uint8_t *destination, int sourceStart, int destStart, int numberOfItems);
+int CopyBytes(uint8_t *source, uint8_t *destination, int sourceStart, int destStart, int numberOfItems);
 int add_sec(unsigned long *);
 
 //void wait_ms(unsigned long);

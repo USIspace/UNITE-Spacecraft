@@ -51,8 +51,8 @@
 #include <xc.h>
 #include <stdint.h>        /* Includes uint16_t definition                    */
 #include <stdbool.h>       /* Includes true/false definition                  */
+#include <time.h>
 #include "tmr2.h"
-#include "time.h"
 #include "../CommandParser.h"
 #include "../SystemConfiguration.h"
 #include "../SampleManager.h"
@@ -119,14 +119,11 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _T2Interrupt (  )
     //***User Area Begin
     
     // callback function - called every 3th pass
-    if (++currentLangmuirProbeSweepProgress >= GetSweepRate(&LangmuirProbe))
-    {
+//    if (++currentLangmuirProbeSweepProgress >= GetSweepRate(&LangmuirProbe))
+//    {
         // ticker function call
-        TMR2_CallBack();
-
-        // reset ticker counter
-        currentLangmuirProbeSweepProgress = 0;
-    }
+    TMR2_CallBack();
+//    }
 
     //***User Area End
 
@@ -165,7 +162,7 @@ uint16_t TMR2_Counter16BitGet( void )
 
 void __attribute__ ((weak)) TMR2_CallBack(void)
 {
-    TakeProbeSample();
+    TakeProbeSample(false);
 }
 
 void TMR2_Start( void )

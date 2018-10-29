@@ -18,6 +18,8 @@ mcc_generated_files/tmr3.h  \
 mcc_generated_files/tmr5.h  \
  mcc_generated_files/spi1.h  \
 mcc_generated_files/spi2.h  \
+ mcc_generated_files/crc16.h  \
+mcc_generated_files/rtcc.h  \
 CommandParser.h  \
  SystemConfiguration.h  \
 SampleManager.h  \

@@ -17,8 +17,10 @@
 
 #include <stdint.h>        /* Includes uint16_t definition                    */
 #include <stdbool.h>       /* Includes true/false definition                  */
+#include <xc.h>
 #include "system.h"        /* System funct/params, like osc/peripheral config */
-#include "user.h"          /* User funct/params, such as InitApp              */
+#include <libpic30.h>
+#include "user.h"          
 #include "mcc_generated_files/mcc.h"
 #include "CommandParser.h"
 #include "SystemConfiguration.h"
@@ -27,48 +29,24 @@
 #include "TransmitManager.h"
 
 /******************************************************************************/
-/* Global Variable Declaration                                                */
-/******************************************************************************/
-
-/******************************************************************************/
-/* FUNCTIONS                                               */
-
-/******************************************************************************/
-
-
-void StartWaitTimer() {
-    
-    // Begins wait timer
-    TMR1_Initialize();
-    TMR1_Start();
-    
-    // Initialize Debug light to on
-   _LATE1 = LED_ON;
-   
-   _LATE2 = LED_OFF;
-   _LATE3 = LED_OFF;
-   _LATE4 = LED_OFF;
-   
-   _RG9 = 1;                   //Slave select 1
-}
-
-/******************************************************************************/
 /* Main Program                                                               */
-
 /******************************************************************************/
 int16_t main(void) {
+    
+    __delay_ms(1000);
+    
     /* Configure the oscillator for the device */
-    SYSTEM_Initialize();
     /* Initialize IO ports and peripherals */
-    InitApp();
+    SYSTEM_Initialize();
     
-//    ConfigureOscillator();
-
-    TogglePowerSwitches();
+    // Wait for EPS startup to complete
+    while(IsLineBusy(SimplexUnit)) ClrWdt();
     
-    StartWaitTimer();
-
-    while (1);
+    // Initialize Satellite configurations and main loop Timer
+    Satellite_Initialize();
+     
+    // Endless loop to prevent main() from returning and ending the program
+    while (1) ClrWdt();
 }
 
 

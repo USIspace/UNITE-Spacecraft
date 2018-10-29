@@ -21,45 +21,106 @@ extern "C" {
 
 #endif	/* SAMPLEMANAGER_H */
 
+
+#define LP_VOLTAGE_CHL 1
+#define LP_TEMP_CHL 2
+
+// Defines types of GPS sentence data
+typedef enum {
+    Header,
+    Time,
+    Latitude,
+    LatDirection,
+    Longitude,
+    LongDirection,
+    Fix,
+    Satellites,
+    Elevation,
+    Altitude,
+    AltUnit,
+    Done
+} GPSDataIndex;
+
+// Struct to store ADC sampling properties
 typedef struct {
     uint16_t channelSelect;
     int channelCount;
 } ADCSampleConfig;
 
-extern uint16_t LP_BUFFER_SIZE;
+// Holds the raw data array sizes based on the instrument's sampling configs
+//extern uint16_t LP_BUFFER_SIZE;
 extern uint16_t MAG_BUFFER_SIZE;
 
-// State Variables
-extern int currentLangmuirProbeWait;
-extern int currentMagnetometerWait;
-extern int currentTemperatureWait;
-extern int currentGPSWait;
+/* State Variables */
 
+// Sampling wait timers for each instrument
+extern unsigned long currentLangmuirProbeWait;
+extern unsigned long currentLangmuirProbeCalWait;
+extern unsigned long currentMagnetometerWait;
+extern unsigned long currentTemperatureWait;
+extern unsigned long currentGPSWait;
+extern unsigned long currentHousekeepingWait;
+
+// Used by sweeping timer
 extern int langmuirProbeCallbackCount;
 extern int magnetometerCallbackCount;
 
-extern int currentLangmuirProbeSweepProgress;
-extern int currentMagnetometerSweepProgress;
+// Sampling progress
+extern unsigned long currentLangmuirProbeSampleProgress;
+extern unsigned long currentMagnetometerSweepProgress;
 
-extern bool isLangmuirProbeSweeping;
+// Sampling state
+extern bool isLangmuirProbeSampling;
 extern bool isMagnetometerSweeping;
+extern bool shouldMagnetometerSample;
 
-// Sampling Functions
-void BeginTemperatureSampling();
-void BeginGPSSampling();
-void BeginMagnetometerSampling();
-void BeginLangmuirProbeSampling();
+// Did GPS obtain lock for last sample
+extern uint8_t gpsLockAttempts;
+extern volatile bool isGPSReadReady;
 
+/* Diagnostic Data */
+extern uint16_t langmuirProbeDiagData[5];
+extern uint16_t magnetometerDiagData[3];
+extern uint16_t temperatureDiagData[8];
+extern long double gpsPosition[3];
+extern float gpsVelocity[3];
+extern int gpsError;
+extern uint8_t gpsDatum;
+extern double gpsTime;
+extern double gpsAltitude;
+
+/* Sampling Functions */
+
+// Start sampling instruments
+void TrySampleLangmuirProbe();
+void TrySampleMagnetometer();
+void TrySampleTemperature();
+void TrySampleGPS();
+void TrySampleHousekeeping();
+
+// Stop sampling instruments
 void EndLangmuirProbeSampling();
 void EndMagnetometerSampling();
 void EndTemperatureSensorSampling();
 void EndGPSSampling();
+void EndHousekeepingSampling();
 
+// Manages the Sweeping progress of an instrument (called by Timer 1)
 void ManageSweepingProgress();
 
-void TakeTemperatureSample();
-void TakeGPSSample();
+// Takes an individual sample of each instrument
+void TakeProbeSample(bool isTemp);
+void CalLangmuirProbe();
 void TakeMagnetometerSample();
-void TakeProbeSample();
+void TakeTemperatureSample();
+void TakeHousekeepingSample();
+void TakeGPSPollSample();
+int TakeGPSSample(int);
 
+// Parses a GPS sentence
+void ParseGPSSample();
+void ParseSBFGPSSample(uint8_t *);
+
+// Testing/Debugging Functions
+void TestADC();
 void TestDACSPI();

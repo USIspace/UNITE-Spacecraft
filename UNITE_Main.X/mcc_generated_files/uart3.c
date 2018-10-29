@@ -46,7 +46,13 @@
 /**
   Section: Included Files
 */
+#include <time.h>
 #include "uart3.h"
+#include "../CommandParser.h"
+#include "../SystemConfiguration.h"
+#include "../SampleManager.h"
+#include "../SatelliteMode.h"
+#include "../TransmitManager.h"
 
 /**
   Section: UART3 APIs
@@ -62,8 +68,8 @@ void UART3_Initialize(void)
     U3MODE = (0x8008 & ~(1<<15));  // disabling UARTEN bit   
     // UTXISEL0 TX_ONE_CHAR; UTXINV disabled; OERR NO_ERROR_cleared; URXISEL RX_ONE_CHAR; UTXBRK COMPLETED; UTXEN disabled; ADDEN disabled; 
     U3STA = 0x0000;
-    // BaudRate = 9600; Frequency = 16000000 Hz; BRG 416; 
-    U3BRG = 0x01A0;
+    // BaudRate = 38400; Frequency = 16000000 Hz; BRG 416; 
+    U3BRG = 0x0067; //0x01A0;
     
     U3MODEbits.UARTEN = 1;  // enabling UARTEN bit
     U3STAbits.UTXEN = 1; 
@@ -73,9 +79,12 @@ void UART3_Initialize(void)
 
 uint8_t UART3_Read(void)
 {
-    while(!(U3STAbits.URXDA == 1))
+    time_t endWait = time(NULL) + SIMPLEX_RES_TIMEOUT;
+    
+    while(!(U3STAbits.URXDA == 1) && !simplexTimeoutFlag)
     {
-        
+        // Simplex read timeout
+        if (time(NULL) >= endWait && IS_SIM_TIMEOUT_ENABLED) simplexTimeoutFlag = true;
     }
 
     if ((U3STAbits.OERR == 1))

@@ -8,3 +8,5 @@
 
 *.mk
 
+UNITE_Main.X.debug.elf
+UNITE_Main.X.debug.map

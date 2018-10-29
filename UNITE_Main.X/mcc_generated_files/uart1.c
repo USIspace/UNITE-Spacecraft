@@ -48,6 +48,13 @@
 */
 
 #include "uart1.h"
+#include <time.h>
+#include "../CommandParser.h"
+#include "../SystemConfiguration.h"
+#include "../SampleManager.h"
+#include "../SatelliteMode.h"
+#include "../TransmitManager.h"
+
 
 /**
   Section: Data Type Definitions
@@ -131,14 +138,18 @@ void UART1_Initialize (void)
    U1MODE = (0x8008 & ~(1<<15));  // disabling UARTEN bit   
    // UTXISEL0 TX_ONE_CHAR; UTXINV disabled; OERR NO_ERROR_cleared; URXISEL RX_ONE_CHAR; UTXBRK COMPLETED; UTXEN disabled; ADDEN disabled; 
    U1STA = 0x0000;
-   // BaudRate = 9600; Frequency = 16000000 Hz; BRG 416; 
-   U1BRG = 0x01A0;
+//   // Generate an interrupt when buffer is full
+//   U1STAbits.URXISEL1 = 0b1;
+//   U1STAbits.UTXISEL0 = 0b1;
+   // BaudRate = 38400; Frequency = 16000000 Hz; BRG 416; 
+   U1BRG = 0x0067; //0x0022;
 
-   IEC0bits.U1RXIE = 1;
+
+   IEC0bits.U1RXIE = 0;
 
     //Make sure to set LAT bit corresponding to TxPin as high before UART initialization
    U1MODEbits.UARTEN = 1;  // enabling UART ON bit
-   U1STAbits.UTXEN = 1;
+   U1STAbits.UTXEN = 0;
    
    
 
@@ -190,6 +201,8 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U1TXInterrupt ( void )
     }
 }
 
+int GPSDataPos = 0;
+
 void __attribute__ ( ( interrupt, no_auto_psv ) ) _U1RXInterrupt( void )
 {
 
@@ -216,7 +229,12 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U1RXInterrupt( void )
         }
         
     }
-
+    
+    if (U1STAbits.OERR == 1) U1STAbits.OERR = 0;
+    else if (IS_GPS_INTERRUPT_ENABLED) GPSDataPos = TakeGPSSample(GPSDataPos);
+    
+    if (!IS_GPS_INTERRUPT_ENABLED) isGPSReadReady = true;
+    
     IFS0bits.U1RXIF = false;
    
 }
@@ -228,7 +246,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U1ErrInterrupt ( void )
     {
         U1STAbits.OERR = 0;
     }
-
+    
     IFS4bits.U1ERIF = false;
 }
 
@@ -238,25 +256,42 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U1ErrInterrupt ( void )
 
 uint8_t UART1_Read( void)
 {
-    uint8_t data = 0;
+    
+    if (IS_GPS_INTERRUPT_ENABLED) {
+        
+        uint8_t data = 0;
 
-    data = *uart1_obj.rxHead;
+        data = *uart1_obj.rxHead;
 
-    uart1_obj.rxHead++;
+        uart1_obj.rxHead++;
 
-    if (uart1_obj.rxHead == (uart1_rxByteQ + UART1_CONFIG_RX_BYTEQ_LENGTH))
-    {
-        uart1_obj.rxHead = uart1_rxByteQ;
+        if (uart1_obj.rxHead == (uart1_rxByteQ + UART1_CONFIG_RX_BYTEQ_LENGTH)) {
+            uart1_obj.rxHead = uart1_rxByteQ;
+        }
+
+        if (uart1_obj.rxHead == uart1_obj.rxTail) {
+            uart1_obj.rxStatus.s.empty = true;
+        }
+
+        uart1_obj.rxStatus.s.full = false;
+
+        return data;
+        
+    } else {
+        
+        time_t endWait = time(NULL) + GPS_RES_TIMEOUT;
+
+        while (!(U1STAbits.URXDA == 1) && !gpsTimeoutFlag) {
+            // Simplex read timeout
+            if (time(NULL) >= endWait && IS_GPS_TIMEOUT_ENABLED) gpsTimeoutFlag = true;
+        }
+
+        if ((U1STAbits.OERR == 1)) {
+            U1STAbits.OERR = 0;
+        }
+
+        return U1RXREG;
     }
-
-    if (uart1_obj.rxHead == uart1_obj.rxTail)
-    {
-        uart1_obj.rxStatus.s.empty = true;
-    }
-
-    uart1_obj.rxStatus.s.full = false;
-
-    return data;
 }
 
 

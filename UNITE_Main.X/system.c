@@ -17,7 +17,7 @@
 
 #include <stdint.h>          /* For uint32_t definition */
 #include <stdbool.h>         /* For true/false definition */
-
+#include <string.h>
 #include "system.h"          /* variables/params used by system.c */
 #include "time.h"
 
@@ -101,8 +101,8 @@ void wait_for(unsigned long something) {
     for (i = 0; i < wait; i++);
 }
 
-uint16_t Pow(int base, int exponent) {
-  uint16_t returnValue = 1;
+unsigned long Pow(int base, int exponent) {
+  unsigned long returnValue = 1;
   int i;
   for (i = 0; i < exponent; i++) {
       returnValue = returnValue * base;
@@ -114,21 +114,63 @@ uint16_t Pow(int base, int exponent) {
 void ClearQueue(uint8_t *buffer, int size, int startIndex) {
     int i;
     for (i = 0; i < size; i++) {
-        buffer[i + startIndex] = 0;
+        buffer[(i + startIndex) % sizeof(buffer)] = 0;
     }
 }
 
-void Clear(int *buffer, int size, int startIndex) {
-    int i;
-    for (i = 0; i < size; i++) {
-        buffer[i + startIndex] = 0;
-    }
-}
-
-void Copy(int *source, uint8_t *destination, int sourceStart, int destStart, int numberOfItems) {
+void Clear(void *buffer, int size, int startIndex) {
     
     int i;
-    for (i = sourceStart; i < numberOfItems; i++) {
-        destination[i + destStart] = source[i];
+    uint8_t **clearBuffer = (uint8_t **)buffer;
+    
+    for (i = 0; i < size; i++) {
+        clearBuffer[i + startIndex] = NULL;
     }
+}
+
+int CopyIntToByte(int *source, uint8_t *destination, int sourceStart, int destStart, int numberOfItems) {
+    
+    int i;
+//    uint16_t **castedSource = (uint16_t **)source;
+    
+    for (i = 0; i < numberOfItems; i++) {
+        destination[i + destStart] = (source[i + sourceStart]);
+    }
+    
+    return numberOfItems;
+}
+
+int CopyIntToDoubleByte(int *source, uint16_t *destination, int sourceStart, int destStart, int numberOfItems) {
+    
+    int i;
+//    uint16_t **castedSource = (uint16_t **)source;
+    
+    for (i = 0; i < numberOfItems; i++) {
+        destination[i + destStart] = (source[i + sourceStart]);
+    }
+    
+    return numberOfItems;
+}
+
+int CopyIntToByteArray(int *source, uint8_t *destination, int sourceStart, int destStart, int numberOfItems) {
+    
+    int i;
+    for (i = 0; i < numberOfItems; i++) {
+        destination[2*i + destStart] = (uint8_t)((source[i + sourceStart] >> 8) | 0x00FF);
+        destination[2*i + 1 + destStart] = (uint8_t)(source[i + sourceStart] & 0x00FF);
+    }
+    
+    return numberOfItems*2;
+}
+
+int CopyBytes(uint8_t *source, uint8_t *destination, int sourceStart, int destStart, int numberOfItems) {
+    
+    int i;
+//    uint16_t **castedSource = (uint16_t **)source;
+    
+    for (i = 0; i < numberOfItems; i++) {
+        destination[i + destStart] = source[(i + sourceStart) % 2000];
+    }
+    
+    return numberOfItems;
 }

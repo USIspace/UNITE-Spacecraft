@@ -46,8 +46,13 @@
 /**
   Section: Included Files
 */
+#include <time.h>
 #include "uart2.h"
-
+#include "../CommandParser.h"
+#include "../SystemConfiguration.h"
+#include "../SampleManager.h"
+#include "../SatelliteMode.h"
+#include "../TransmitManager.h"
 /**
   Section: UART2 APIs
 */
@@ -62,8 +67,8 @@ void UART2_Initialize(void)
     U2MODE = (0x8008 & ~(1<<15));  // disabling UARTEN bit   
     // UTXISEL0 TX_ONE_CHAR; UTXINV disabled; OERR NO_ERROR_cleared; URXISEL RX_ONE_CHAR; UTXBRK COMPLETED; UTXEN disabled; ADDEN disabled; 
     U2STA = 0x0000;
-    // BaudRate = 9600; Frequency = 16000000 Hz; BRG 416; 
-    U2BRG = 0x01A0;
+    // BaudRate = 38400; Frequency = 16000000 Hz; BRG 416; 
+    U2BRG = 0x0067;
     
     U2MODEbits.UARTEN = 1;  // enabling UARTEN bit
     U2STAbits.UTXEN = 1; 
@@ -73,17 +78,20 @@ void UART2_Initialize(void)
 
 uint8_t UART2_Read(void)
 {
-    while(!(U2STAbits.URXDA == 1))
+//    time_t current = time(NULL);
+    time_t endWait = time(NULL) + DUPLEX_RES_TIMEOUT;
+    
+    while(!(U2STAbits.URXDA == 1) && !duplexTimeoutFlag)
     {
-        
+        // Duplex read timeout
+//        current = time(NULL);
+        if (time(NULL) >= endWait && IS_DUP_TIMEOUT_ENABLED) duplexTimeoutFlag = true;
     }
 
     if ((U2STAbits.OERR == 1))
     {
         U2STAbits.OERR = 0;
     }
-
-    
 
     return U2RXREG;
 }
